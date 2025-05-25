@@ -95,3 +95,33 @@ Die App unterstützt einen geschlossenen Freundeskreis bei der monatlichen Organ
 - KI-gestützte Vorschläge
 - Sprachausgabe & Screenreader
 - Community-Übersetzungen
+
+---
+
+## 📌 Umsetzungsstand (Release v1.0.0)
+
+Die folgenden Funktionen wurden bis einschließlich Version 1.0.0 vollständig umgesetzt:
+
+- ✅ Gruppenverwaltung mit Avatar und Rollen
+- ✅ Registrierung & Mehrfachgruppenfähigkeit
+- ✅ Stammtisch-Terminlogik (1. Dienstag im Monat)
+- ✅ Teilnahmeabstimmung & Mindestanzahlprüfung
+- ✅ Kalenderansicht mit Monatsübersicht
+- ✅ Erinnerungsfunktion (1 Tag, 1h, 30 Min)
+- ✅ Restaurantvorschläge mit Dummy-Daten und Voting
+- ✅ Chatansicht (Dummy)
+- ✅ Tab-basierte Gruppenseitenstruktur (Chat, Event, Kalender, Vorschläge, Erinnerung)
+- ✅ Lokale Datenspeicherung (`shared_preferences`)
+- ✅ Mehrsprachigkeit (DE/EN vorbereitet)
+- ✅ Dark Mode & UI nach modernen Standards
+- ✅ Anforderungs- und Projektdokumentation (`README.md` + `requirements.md`)
+
+🔒 Noch nicht umgesetzt (aber technisch vorbereitet):
+- Punktevergabe
+- Reservierungssystem
+- Externe Chat-Anbindung
+- Cloud-Datenhaltung
+
+Version: **1.0.0**  
+Letzte Aktualisierung: **Mai 2025**  
+Status: **Stable MVP**
