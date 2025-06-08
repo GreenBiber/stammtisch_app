@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../models/group.dart';
 import '../providers/event_provider.dart';
+import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'event_screen.dart';
 import 'calendar_screen.dart';
 import 'reminder_settings_screen.dart';
@@ -30,87 +32,440 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.group.name),
+    final l10n = context.l10n; // Lokalisierung
+
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final currentUserId = authProvider.currentUserId;
+        final isAdmin = widget.group.admins.contains(currentUserId);
+        final user = authProvider.currentUser;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.group.name),
+            actions: [
+              if (isAdmin)
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'settings':
+                        _showGroupSettings();
+                        break;
+                      case 'members':
+                        _showMemberManagement();
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'members',
+                      child: ListTile(
+                        leading: const Icon(Icons.people),
+                        title: Text(l10n.locale.languageCode == 'de' 
+                            ? 'Mitglieder verwalten' 
+                            : 'Manage Members'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'settings',
+                      child: ListTile(
+                        leading: const Icon(Icons.settings),
+                        title: Text(l10n.groupSettings), // LOKALISIERT
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Group Info Card
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.teal,
+                          radius: 32,
+                          backgroundImage: widget.group.avatarUrl.isNotEmpty
+                              ? NetworkImage(widget.group.avatarUrl) as ImageProvider
+                              : null,
+                          child: widget.group.avatarUrl.isEmpty
+                              ? Text(
+                                  widget.group.name.substring(0, 2).toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 20, 
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.group.name,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                l10n.memberCount(widget.group.members.length), // LOKALISIERT
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    isAdmin ? Icons.admin_panel_settings : Icons.person,
+                                    size: 16,
+                                    color: isAdmin ? Colors.orange : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    isAdmin ? l10n.admin : l10n.member, // LOKALISIERT
+                                    style: TextStyle(
+                                      color: isAdmin ? Colors.orange : Colors.grey,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Quick Actions
+                Text(
+                  l10n.locale.languageCode == 'de' ? 'Aktionen' : 'Actions',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Action Buttons Grid
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.5,
+                  children: [
+                    _ActionCard(
+                      icon: Icons.event,
+                      title: l10n.locale.languageCode == 'de' ? "Stammtisch" : "Event",
+                      subtitle: l10n.nextEvent, // LOKALISIERT
+                      color: Colors.teal,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const EventScreen()),
+                        );
+                      },
+                    ),
+                    _ActionCard(
+                      icon: Icons.calendar_month,
+                      title: l10n.calendar, // LOKALISIERT
+                      subtitle: l10n.locale.languageCode == 'de' ? "Terminübersicht" : "Schedule Overview",
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                        );
+                      },
+                    ),
+                    _ActionCard(
+                      icon: Icons.chat_bubble_outline,
+                      title: l10n.chat, // LOKALISIERT
+                      subtitle: l10n.locale.languageCode == 'de' ? "Gruppenchat" : "Group Chat",
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ChatScreen()),
+                        );
+                      },
+                    ),
+                    _ActionCard(
+                      icon: Icons.restaurant,
+                      title: l10n.restaurants, // LOKALISIERT
+                      subtitle: l10n.suggestions, // LOKALISIERT
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RestaurantSuggestionsScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Additional Options
+                Text(
+                  l10n.settings, // LOKALISIERT
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Card(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.notifications_active),
+                        title: Text(l10n.reminders), // LOKALISIERT
+                        subtitle: Text(l10n.locale.languageCode == 'de' 
+                            ? "Push-Benachrichtigungen verwalten" 
+                            : "Manage push notifications"),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ReminderSettingsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      if (isAdmin) ...[
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.people),
+                          title: Text(l10n.locale.languageCode == 'de' 
+                              ? "Mitglieder verwalten" 
+                              : "Manage Members"),
+                          subtitle: Text(l10n.memberCount(widget.group.members.length)), // LOKALISIERT
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: _showMemberManagement,
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.settings),
+                          title: Text(l10n.groupSettings), // LOKALISIERT
+                          subtitle: Text(l10n.locale.languageCode == 'de' 
+                              ? "Name, Bild und mehr" 
+                              : "Name, image and more"),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: _showGroupSettings,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // User Info Card
+                if (user != null)
+                  Card(
+                    color: Colors.grey.withOpacity(0.1),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.teal,
+                            backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+                                ? NetworkImage(user.avatarUrl!) as ImageProvider
+                                : null,
+                            child: user.avatarUrl == null || user.avatarUrl!.isEmpty
+                                ? Text(
+                                    user.initials,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            l10n.locale.languageCode == 'de'
+                                ? 'Angemeldet als: ${user.displayName}'
+                                : 'Logged in as: ${user.displayName}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showGroupSettings() {
+    final l10n = context.l10n;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.groupSettings), // LOKALISIERT
+        content: Text(l10n.locale.languageCode == 'de'
+            ? 'Gruppeneinstellungen werden in einer späteren Version verfügbar sein.'
+            : 'Group settings will be available in a future version.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.ok), // LOKALISIERT
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.teal,
-              radius: 32,
-              child: Text(
-                widget.group.name.substring(0, 2).toUpperCase(),
-                style: const TextStyle(fontSize: 20, color: Colors.white),
+    );
+  }
+
+  void _showMemberManagement() {
+    final l10n = context.l10n;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.locale.languageCode == 'de' 
+            ? 'Mitglieder - ${widget.group.name}'
+            : 'Members - ${widget.group.name}'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.memberCount(widget.group.members.length)), // LOKALISIERT
+              const SizedBox(height: 12),
+              ...widget.group.members.map((memberId) {
+                final isAdmin = widget.group.admins.contains(memberId);
+                return ListTile(
+                  dense: true,
+                  leading: CircleAvatar(
+                    radius: 16,
+                    backgroundColor: Colors.teal,
+                    child: Text(
+                      memberId == Provider.of<AuthProvider>(context, listen: false).currentUserId
+                          ? (l10n.locale.languageCode == 'de' ? 'Du' : 'You')
+                          : memberId.substring(0, 2).toUpperCase(),
+                      style: const TextStyle(fontSize: 10, color: Colors.white),
+                    ),
+                  ),
+                  title: Text(
+                    memberId == Provider.of<AuthProvider>(context, listen: false).currentUserId
+                        ? (l10n.locale.languageCode == 'de' 
+                            ? 'Du (${Provider.of<AuthProvider>(context, listen: false).currentUser?.displayName})'
+                            : 'You (${Provider.of<AuthProvider>(context, listen: false).currentUser?.displayName})')
+                        : memberId,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  trailing: isAdmin
+                      ? Chip(
+                          label: Text(l10n.admin, style: const TextStyle(fontSize: 10)), // LOKALISIERT
+                          backgroundColor: Colors.orange,
+                        )
+                      : null,
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.close), // LOKALISIERT
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.locale.languageCode == 'de'
+                      ? 'Einladungsfunktion kommt in einer späteren Version'
+                      : 'Invitation feature coming in a future version'),
+                ),
+              );
+            },
+            child: Text(l10n.locale.languageCode == 'de' 
+                ? 'Mitglied einladen' 
+                : 'Invite Member'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 32,
+                color: color,
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.event),
-              label: const Text("Stammtisch anzeigen"),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const EventScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.calendar_month),
-              label: const Text("Kalender anzeigen"),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CalendarScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.notifications_active),
-              label: const Text("Erinnerungen"),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ReminderSettingsScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.restaurant),
-              label: const Text("Restaurantvorschläge"),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RestaurantSuggestionsScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.chat_bubble_outline),
-              label: const Text("Chat öffnen"),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChatScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            const Text("Weitere Gruppenfunktionen folgen hier..."),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey.shade600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
