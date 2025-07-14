@@ -12,9 +12,14 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   provider: ^6.1.0
-  uuid: ^4.3.1  # ➕ Hinzugefügt für Gruppenerstellung
+  uuid: ^4.3.1
   shared_preferences: ^2.2.2
   table_calendar: ^3.0.8
+  # Google Places API Integration
+  http: ^1.1.0
+  geolocator: ^10.1.0
+  # Environment Variables
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +29,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    - .env

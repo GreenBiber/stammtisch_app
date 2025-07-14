@@ -4,7 +4,6 @@ import '../providers/points_provider.dart';
 import '../providers/group_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/points.dart';
-import '../widgets/user_profile_card.dart';
 import '../l10n/app_localizations.dart';
 
 class LeaderboardScreen extends StatefulWidget {

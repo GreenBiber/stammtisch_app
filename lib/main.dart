@@ -1,28 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'l10n/app_localizations.dart';
 import 'providers/auth_provider.dart';
 import 'providers/group_provider.dart';
 import 'providers/event_provider.dart';
 import 'providers/points_provider.dart';
-import 'providers/locale_provider.dart'; // NEU
+import 'providers/locale_provider.dart';
+import 'providers/restaurant_provider.dart';
 import 'screens/auth/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
 
   // Initialize providers
   final authProvider = AuthProvider();
   final groupProvider = GroupProvider();
   final eventProvider = EventProvider();
   final pointsProvider = PointsProvider();
-  final localeProvider = LocaleProvider(); // NEU
+  final localeProvider = LocaleProvider();
+  final restaurantProvider = RestaurantProvider();
 
   // Initialize providers
   await authProvider.initialize();
-  await localeProvider.initialize(); // NEU
+  await localeProvider.initialize();
   
   // Load other data
   await groupProvider.loadGroups();
@@ -36,7 +42,8 @@ void main() async {
         ChangeNotifierProvider<GroupProvider>.value(value: groupProvider),
         ChangeNotifierProvider<EventProvider>.value(value: eventProvider),
         ChangeNotifierProvider<PointsProvider>.value(value: pointsProvider),
-        ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider), // NEU
+        ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
+        ChangeNotifierProvider<RestaurantProvider>.value(value: restaurantProvider),
       ],
       child: const StammtischApp(),
     ),
@@ -48,21 +55,21 @@ class StammtischApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LocaleProvider>( // NEU: Locale Provider verwenden
+    return Consumer<LocaleProvider>(
       builder: (context, localeProvider, child) {
         return MaterialApp(
           title: 'Stammtisch App',
           debugShowCheckedModeBanner: false,
           
           // Lokalisierung - jetzt dynamisch
-          locale: localeProvider.locale, // NEU: Dynamische Locale
+          locale: localeProvider.locale,
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: LocaleProvider.supportedLocales, // NEU
+          supportedLocales: LocaleProvider.supportedLocales,
           
           theme: ThemeData(
             brightness: Brightness.dark,

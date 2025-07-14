@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../providers/group_provider.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../models/group.dart';
 import '../widgets/language_switcher.dart';
 import '../l10n/app_localizations.dart';
