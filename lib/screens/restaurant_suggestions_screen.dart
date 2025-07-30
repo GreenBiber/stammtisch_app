@@ -116,10 +116,35 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                     heroTagSuffix: 'restaurant-header',
                   ),
 
+                // Weather Info Card
+                if (restaurantProvider.weatherRecommendation != null)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.wb_sunny, color: Colors.blue),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            restaurantProvider.weatherRecommendation!,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 // API Status Info
                 Container(
                   width: double.infinity,
-                  margin: const EdgeInsets.all(16),
+                  margin: EdgeInsets.fromLTRB(16, restaurantProvider.weatherRecommendation != null ? 8 : 16, 16, 16),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: restaurantProvider.hasValidApiKey && restaurantProvider.hasApiQuota 

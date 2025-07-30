@@ -10,6 +10,8 @@ import 'calendar_screen.dart';
 import 'reminder_settings_screen.dart';
 import 'restaurant_suggestions_screen.dart';
 import 'chat_screen.dart';
+import 'admin_points_screen.dart';
+import 'group_invite_screen.dart';
 
 class GroupDetailScreen extends StatefulWidget {
   final Group group;
@@ -218,6 +220,21 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                         );
                       },
                     ),
+                    if (isAdmin)
+                      _ActionCard(
+                        icon: Icons.star,
+                        title: l10n.locale.languageCode == 'de' ? 'Punkte' : 'Points',
+                        subtitle: l10n.locale.languageCode == 'de' ? 'Punkte vergeben' : 'Award Points',
+                        color: Colors.purple,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminPointsScreen(),
+                            ),
+                          );
+                        },
+                      ),
                   ],
                 ),
 
@@ -261,6 +278,25 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                           subtitle: Text(l10n.memberCount(widget.group.members.length)), // LOKALISIERT
                           trailing: const Icon(Icons.chevron_right),
                           onTap: _showMemberManagement,
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.qr_code),
+                          title: Text(l10n.locale.languageCode == 'de' 
+                              ? "QR-Code Einladung" 
+                              : "QR Code Invite"),
+                          subtitle: Text(l10n.locale.languageCode == 'de' 
+                              ? "Mitglieder mit QR-Code einladen" 
+                              : "Invite members with QR code"),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GroupInviteScreen(group: widget.group),
+                              ),
+                            );
+                          },
                         ),
                         const Divider(height: 1),
                         ListTile(
@@ -398,17 +434,16 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.locale.languageCode == 'de'
-                      ? 'Einladungsfunktion kommt in einer späteren Version'
-                      : 'Invitation feature coming in a future version'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GroupInviteScreen(group: widget.group),
                 ),
               );
             },
             child: Text(l10n.locale.languageCode == 'de' 
-                ? 'Mitglied einladen' 
-                : 'Invite Member'),
+                ? 'QR-Code Einladung' 
+                : 'QR Code Invite'),
           ),
         ],
       ),

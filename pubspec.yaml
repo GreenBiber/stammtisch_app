@@ -20,6 +20,16 @@ dependencies:
   geolocator: ^10.1.0
   # Environment Variables
   flutter_dotenv: ^5.1.0
+  # QR Code functionality
+  qr_flutter: ^4.1.0
+  qr_code_scanner: ^1.0.1
+  # Push Notifications
+  flutter_local_notifications: ^17.0.0
+  # Cloud Backend (Firebase)
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  cloud_firestore: ^4.13.6
+  firebase_storage: ^11.5.6
 
 dev_dependencies:
   flutter_test:

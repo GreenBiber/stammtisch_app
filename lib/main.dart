@@ -10,6 +10,7 @@ import 'providers/event_provider.dart';
 import 'providers/points_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/restaurant_provider.dart';
+import 'providers/chat_provider.dart';
 import 'screens/auth/auth_wrapper.dart';
 
 void main() async {
@@ -25,6 +26,7 @@ void main() async {
   final pointsProvider = PointsProvider();
   final localeProvider = LocaleProvider();
   final restaurantProvider = RestaurantProvider();
+  final chatProvider = ChatProvider();
 
   // Initialize providers
   await authProvider.initialize();
@@ -34,6 +36,7 @@ void main() async {
   await groupProvider.loadGroups();
   await eventProvider.loadEvents();
   await pointsProvider.loadPoints();
+  await chatProvider.loadMessages();
 
   runApp(
     MultiProvider(
@@ -44,6 +47,7 @@ void main() async {
         ChangeNotifierProvider<PointsProvider>.value(value: pointsProvider),
         ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
         ChangeNotifierProvider<RestaurantProvider>.value(value: restaurantProvider),
+        ChangeNotifierProvider<ChatProvider>.value(value: chatProvider),
       ],
       child: const StammtischApp(),
     ),

@@ -129,6 +129,22 @@ class PointsProvider with ChangeNotifier {
     );
   }
 
+  // Direkte XP-Vergabe für Admin-Interface
+  Future<List<String>> awardCustomXP(
+    String userId,
+    String groupId,
+    int xpAmount, {
+    String? reason,
+  }) async {
+    return await awardXP(
+      userId,
+      groupId,
+      XPAction.adminBonus,
+      customXP: xpAmount,
+      customDescription: reason ?? 'Admin-Bonus',
+    );
+  }
+
   // Streak zurücksetzen (bei verpasstem Event)
   Future<void> resetStreak(String userId, String groupId) async {
     final key = '${userId}_$groupId';

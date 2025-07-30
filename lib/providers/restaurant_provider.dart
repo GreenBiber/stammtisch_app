@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import '../services/places_service.dart';
+import '../services/weather_service.dart';
 
 class RestaurantProvider with ChangeNotifier {
   final PlacesService _placesService = PlacesService();
+  final WeatherService _weatherService = WeatherService();
   
   List<Restaurant> _suggestions = [];
   bool _isLoading = false;
   String? _error;
   bool _hasApiQuota = true;
   int _remainingQuota = 1000;
+  WeatherData? _currentWeather;
+  String? _weatherRecommendation;
   
   // Fallback restaurants when API limit reached
   static const List<Map<String, dynamic>> _fallbackRestaurants = [
@@ -50,6 +54,8 @@ class RestaurantProvider with ChangeNotifier {
   bool get hasApiQuota => _hasApiQuota;
   int get remainingQuota => _remainingQuota;
   bool get hasValidApiKey => _placesService.hasValidApiKey;
+  WeatherData? get currentWeather => _currentWeather;
+  String? get weatherRecommendation => _weatherRecommendation;
 
   Future<void> loadRestaurantSuggestions({
     double? latitude,
@@ -62,15 +68,34 @@ class RestaurantProvider with ChangeNotifier {
       // Update Quota Status
       await _updateQuotaStatus();
       
+      // Load weather data first
+      if (latitude != null && longitude != null) {
+        try {
+          _currentWeather = await _weatherService.getCurrentWeather(
+            latitude: latitude,
+            longitude: longitude,
+          );
+          _weatherRecommendation = _weatherService.getWeatherBasedRecommendation(_currentWeather);
+          print('🌤️ Weather loaded: ${_weatherRecommendation}');
+        } catch (weatherError) {
+          print('⚠️ Weather API Error: $weatherError');
+        }
+      }
+      
       if (hasValidApiKey && _hasApiQuota && latitude != null && longitude != null) {
         try {
-          // Use Google Places API
+          // Use Google Places API with weather-based search
           print('🔍 Loading restaurants from Google Places API...');
           print('📍 Location: $latitude, $longitude');
+          
+          // Get weather-based restaurant types
+          final restaurantTypes = _weatherService.getWeatherBasedRestaurantTypes(_currentWeather);
+          print('🌤️ Weather-based search types: $restaurantTypes');
           
           _suggestions = await _placesService.searchRestaurants(
             latitude: latitude,
             longitude: longitude,
+            type: restaurantTypes.first, // Use primary type for API call
           );
           
           print('✅ Loaded ${_suggestions.length} restaurants from API');

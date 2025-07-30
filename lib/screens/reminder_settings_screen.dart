@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
+import '../services/notification_service.dart';
 
 class ReminderSettingsScreen extends StatefulWidget {
   const ReminderSettingsScreen({super.key});
@@ -14,28 +15,37 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
   bool remind1Hour = false;
   bool remind30Min = false;
   bool isLoading = true;
+  bool _permissionsGranted = false;
+  final NotificationService _notificationService = NotificationService();
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    _initializeNotifications();
+  }
+
+  Future<void> _initializeNotifications() async {
+    await _notificationService.initialize();
+    _permissionsGranted = await _notificationService.requestPermissions();
+    await _loadSettings();
   }
 
   Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
+    final settings = await _notificationService.getNotificationSettings();
     setState(() {
-      remind1Day = prefs.getBool('remind1Day') ?? false;
-      remind1Hour = prefs.getBool('remind1Hour') ?? false;
-      remind30Min = prefs.getBool('remind30Min') ?? false;
+      remind1Day = settings['1_day'] ?? true;
+      remind1Hour = settings['1_hour'] ?? true;
+      remind30Min = settings['30_min'] ?? false;
       isLoading = false;
     });
   }
 
   Future<void> _saveSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('remind1Day', remind1Day);
-    await prefs.setBool('remind1Hour', remind1Hour);
-    await prefs.setBool('remind30Min', remind30Min);
+    await _notificationService.updateNotificationSettings(
+      oneDayBefore: remind1Day,
+      oneHourBefore: remind1Hour,
+      thirtyMinBefore: remind30Min,
+    );
     
     final l10n = context.l10n;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -312,15 +322,27 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.locale.languageCode == 'de'
-                                  ? '🔔 Test-Benachrichtigung: Stammtisch morgen um 19:00!'
-                                  : '🔔 Test notification: Event tomorrow at 7:00 PM!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                        onPressed: () async {
+                          if (_permissionsGranted) {
+                            await _notificationService.sendTestNotification();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.locale.languageCode == 'de'
+                                    ? '🔔 Test-Benachrichtigung gesendet!'
+                                    : '🔔 Test notification sent!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.locale.languageCode == 'de'
+                                    ? '❌ Benachrichtigungsberechtigungen wurden nicht erteilt'
+                                    : '❌ Notification permissions not granted'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         },
                         icon: const Icon(Icons.send),
                         label: Text(l10n.locale.languageCode == 'de'
@@ -356,19 +378,36 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
 
             const SizedBox(height: 16),
 
-            // Info Text
+            // Permission Status
             Card(
-              color: Colors.grey.withOpacity(0.1),
+              color: _permissionsGranted 
+                  ? Colors.green.withOpacity(0.1) 
+                  : Colors.orange.withOpacity(0.1),
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: Text(
-                  l10n.locale.languageCode == 'de'
-                      ? 'ℹ️ Hinweis: Push-Benachrichtigungen werden in einer späteren Version vollständig implementiert. Aktuell werden nur die Einstellungen gespeichert.'
-                      : 'ℹ️ Note: Push notifications will be fully implemented in a future version. Currently only settings are saved.',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                  ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _permissionsGranted ? Icons.check_circle : Icons.warning,
+                      color: _permissionsGranted ? Colors.green : Colors.orange,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.locale.languageCode == 'de'
+                            ? _permissionsGranted 
+                                ? 'ℹ️ Benachrichtigungen sind aktiviert und funktionsfähig.'
+                                : 'ℹ️ Benachrichtigungsberechtigungen sind erforderlich.'
+                            : _permissionsGranted
+                                ? 'ℹ️ Notifications are enabled and functional.'
+                                : 'ℹ️ Notification permissions are required.',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
