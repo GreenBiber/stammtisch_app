@@ -4,39 +4,29 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.27.0"
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  provider: ^6.1.0
-  uuid: ^4.3.1
-  shared_preferences: ^2.2.2
-  table_calendar: ^3.0.8
-  # Google Places API Integration
-  http: ^1.1.0
-  geolocator: ^10.1.0
-  # Environment Variables
-  flutter_dotenv: ^5.1.0
-  # QR Code functionality
-  qr_flutter: ^4.1.0
-  qr_code_scanner: ^1.0.1
-  # Push Notifications
-  flutter_local_notifications: ^17.0.0
-  # Cloud Backend (Firebase)
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
-  cloud_firestore: ^4.13.6
-  firebase_storage: ^11.5.6
+  provider: ^6.1.2
+  uuid: ^4.5.1
+  shared_preferences: ^2.3.4
+  table_calendar: ^3.1.2
+  http: ^1.4.0
+  geolocator: ^14.0.2
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/
-    - .env
+  generate: true

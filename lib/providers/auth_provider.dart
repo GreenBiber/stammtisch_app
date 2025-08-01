@@ -8,7 +8,7 @@ enum AuthStatus { initial, loading, authenticated, unauthenticated }
 
 class AuthProvider with ChangeNotifier {
   final Uuid _uuid = const Uuid();
-  
+
   AuthStatus _status = AuthStatus.initial;
   User? _currentUser;
   String? _errorMessage;
@@ -17,7 +17,8 @@ class AuthProvider with ChangeNotifier {
   AuthStatus get status => _status;
   User? get currentUser => _currentUser;
   String? get errorMessage => _errorMessage;
-  bool get isAuthenticated => _status == AuthStatus.authenticated && _currentUser != null;
+  bool get isAuthenticated =>
+      _status == AuthStatus.authenticated && _currentUser != null;
   String get currentUserId => _currentUser?.id ?? 'anonymous';
 
   /// Initialisierung - prüfe ob User bereits eingeloggt
@@ -85,7 +86,7 @@ class AuthProvider with ChangeNotifier {
       await _saveUser(user, password);
       _currentUser = user;
       _setStatus(AuthStatus.authenticated);
-      
+
       return true;
     } catch (e) {
       _setError('Registrierung fehlgeschlagen: $e');
@@ -145,7 +146,7 @@ class AuthProvider with ChangeNotifier {
 
       _currentUser = user;
       _setStatus(AuthStatus.authenticated);
-      
+
       return true;
     } catch (e) {
       _setError('Anmeldung fehlgeschlagen: $e');
@@ -185,7 +186,7 @@ class AuthProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final usersJson = prefs.getString('users') ?? '{}';
       final users = Map<String, dynamic>.from(json.decode(usersJson));
-      
+
       if (users.containsKey(_currentUser!.email)) {
         users[_currentUser!.email]['user'] = updatedUser.toJson();
         await prefs.setString('users', json.encode(users));
@@ -193,7 +194,7 @@ class AuthProvider with ChangeNotifier {
 
       // Speichere als aktueller User
       await prefs.setString('currentUser', json.encode(updatedUser.toJson()));
-      
+
       _currentUser = updatedUser;
       notifyListeners();
       return true;
@@ -235,17 +236,17 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _saveUser(User user, String password) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Lade existierende Users
     final usersJson = prefs.getString('users') ?? '{}';
     final users = Map<String, dynamic>.from(json.decode(usersJson));
-    
+
     // Füge neuen User hinzu
     users[user.email] = {
       'user': user.toJson(),
       'password': password, // In Production: gehashed!
     };
-    
+
     // Speichere Users-Map und aktuellen User
     await prefs.setString('users', json.encode(users));
     await prefs.setString('currentUser', json.encode(user.toJson()));
@@ -254,7 +255,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> _loadStoredUser() async {
     final prefs = await SharedPreferences.getInstance();
     final userJson = prefs.getString('currentUser');
-    
+
     if (userJson != null) {
       _currentUser = User.fromJson(json.decode(userJson));
     }

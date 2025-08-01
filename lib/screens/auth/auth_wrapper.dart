@@ -26,10 +26,10 @@ class AuthWrapper extends StatelessWidget {
                 ),
               ),
             );
-          
+
           case AuthStatus.authenticated:
             return const GroupScreen();
-          
+
           case AuthStatus.unauthenticated:
             return const LoginScreen();
         }

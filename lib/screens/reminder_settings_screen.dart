@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../services/notification_service.dart';
 
@@ -46,11 +45,11 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
       oneHourBefore: remind1Hour,
       thirtyMinBefore: remind30Min,
     );
-    
-    final l10n = context.l10n;
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.locale.languageCode == 'de'
+        content: Text(Localizations.localeOf(context).languageCode == 'de'
             ? 'Erinnerungseinstellungen gespeichert!'
             : 'Reminder settings saved!'),
         backgroundColor: Colors.green,
@@ -60,7 +59,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n; // Lokalisierung
+    final l10n = AppLocalizations.of(context)!; // Lokalisierung
 
     if (isLoading) {
       return Scaffold(
@@ -87,7 +86,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
           children: [
             // Info Card
             Card(
-              color: Colors.blue.withOpacity(0.1),
+              color: Colors.blue.withValues(alpha: 0.1),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -95,10 +94,11 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.notifications_active, color: Colors.blue),
+                        const Icon(Icons.notifications_active,
+                            color: Colors.blue),
                         const SizedBox(width: 8),
                         Text(
-                          l10n.locale.languageCode == 'de'
+                          Localizations.localeOf(context).languageCode == 'de'
                               ? 'Push-Benachrichtigungen'
                               : 'Push Notifications',
                           style: const TextStyle(
@@ -110,7 +110,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      l10n.locale.languageCode == 'de'
+                      Localizations.localeOf(context).languageCode == 'de'
                           ? 'Lege fest, wann du an bevorstehende Stammtisch-Events erinnert werden möchtest.'
                           : 'Set when you want to be reminded of upcoming events.',
                       style: const TextStyle(fontSize: 14),
@@ -124,12 +124,12 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
 
             // Reminder Settings
             Text(
-              l10n.locale.languageCode == 'de'
+              Localizations.localeOf(context).languageCode == 'de'
                   ? 'Erinnerungszeiten'
                   : 'Reminder Times',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 12),
 
@@ -137,11 +137,12 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.calendar_today, color: Colors.orange),
-                    title: Text(l10n.locale.languageCode == 'de'
+                    leading:
+                        const Icon(Icons.calendar_today, color: Colors.orange),
+                    title: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? '1 Tag vorher erinnern'
                         : 'Remind 1 day before'),
-                    subtitle: Text(l10n.locale.languageCode == 'de'
+                    subtitle: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Erhalte eine Benachrichtigung 24 Stunden vor dem Event'
                         : 'Receive a notification 24 hours before the event'),
                     trailing: Switch(
@@ -154,10 +155,10 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.access_time, color: Colors.blue),
-                    title: Text(l10n.locale.languageCode == 'de'
+                    title: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? '1 Stunde vorher erinnern'
                         : 'Remind 1 hour before'),
-                    subtitle: Text(l10n.locale.languageCode == 'de'
+                    subtitle: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Erhalte eine Benachrichtigung 1 Stunde vor dem Event'
                         : 'Receive a notification 1 hour before the event'),
                     trailing: Switch(
@@ -170,10 +171,10 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.alarm, color: Colors.red),
-                    title: Text(l10n.locale.languageCode == 'de'
+                    title: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? '30 Minuten vorher erinnern'
                         : 'Remind 30 minutes before'),
-                    subtitle: Text(l10n.locale.languageCode == 'de'
+                    subtitle: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Erhalte eine Benachrichtigung 30 Minuten vor dem Event'
                         : 'Receive a notification 30 minutes before the event'),
                     trailing: Switch(
@@ -191,12 +192,12 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
 
             // Additional Settings
             Text(
-              l10n.locale.languageCode == 'de'
+              Localizations.localeOf(context).languageCode == 'de'
                   ? 'Weitere Einstellungen'
                   : 'Additional Settings',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 12),
 
@@ -205,10 +206,10 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.notifications_paused),
-                    title: Text(l10n.locale.languageCode == 'de'
+                    title: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Stummschalten'
                         : 'Mute Notifications'),
-                    subtitle: Text(l10n.locale.languageCode == 'de'
+                    subtitle: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Alle Benachrichtigungen temporär deaktivieren'
                         : 'Temporarily disable all notifications'),
                     trailing: Switch(
@@ -216,7 +217,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                       onChanged: (value) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(l10n.locale.languageCode == 'de'
+                            content: Text(Localizations.localeOf(context).languageCode == 'de'
                                 ? 'Stummschaltung kommt in einer späteren Version'
                                 : 'Mute feature coming in a future version'),
                           ),
@@ -227,10 +228,10 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.vibration),
-                    title: Text(l10n.locale.languageCode == 'de'
+                    title: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Vibration'
                         : 'Vibration'),
-                    subtitle: Text(l10n.locale.languageCode == 'de'
+                    subtitle: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Vibrieren bei Benachrichtigungen'
                         : 'Vibrate on notifications'),
                     trailing: Switch(
@@ -238,7 +239,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                       onChanged: (value) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(l10n.locale.languageCode == 'de'
+                            content: Text(Localizations.localeOf(context).languageCode == 'de'
                                 ? 'Vibrationseinstellung kommt in einer späteren Version'
                                 : 'Vibration setting coming in a future version'),
                           ),
@@ -249,17 +250,17 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.volume_up),
-                    title: Text(l10n.locale.languageCode == 'de'
+                    title: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Benachrichtigungston'
                         : 'Notification Sound'),
-                    subtitle: Text(l10n.locale.languageCode == 'de'
+                    subtitle: Text(Localizations.localeOf(context).languageCode == 'de'
                         ? 'Standard'
                         : 'Default'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(l10n.locale.languageCode == 'de'
+                          content: Text(Localizations.localeOf(context).languageCode == 'de'
                               ? 'Tonauswahl kommt in einer späteren Version'
                               : 'Sound selection coming in a future version'),
                         ),
@@ -274,7 +275,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
 
             // Preview Card
             Card(
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -285,7 +286,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                         const Icon(Icons.preview, color: Colors.green),
                         const SizedBox(width: 8),
                         Text(
-                          l10n.locale.languageCode == 'de'
+                          Localizations.localeOf(context).languageCode == 'de'
                               ? 'Benachrichtigungsvorschau'
                               : 'Notification Preview',
                           style: const TextStyle(
@@ -297,27 +298,29 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      l10n.locale.languageCode == 'de'
+                      Localizations.localeOf(context).languageCode == 'de'
                           ? 'Aktive Erinnerungen:'
                           : 'Active reminders:',
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 4),
                     if (remind1Day || remind1Hour || remind30Min) ...[
-                      if (remind1Day) 
-                        Text('• ${l10n.locale.languageCode == 'de' ? '1 Tag vorher' : '1 day before'}'),
-                      if (remind1Hour) 
-                        Text('• ${l10n.locale.languageCode == 'de' ? '1 Stunde vorher' : '1 hour before'}'),
-                      if (remind30Min) 
-                        Text('• ${l10n.locale.languageCode == 'de' ? '30 Minuten vorher' : '30 minutes before'}'),
+                      if (remind1Day)
+                        Text(
+                            '• ${Localizations.localeOf(context).languageCode == 'de' ? '1 Tag vorher' : '1 day before'}'),
+                      if (remind1Hour)
+                        Text(
+                            '• ${Localizations.localeOf(context).languageCode == 'de' ? '1 Stunde vorher' : '1 hour before'}'),
+                      if (remind30Min)
+                        Text(
+                            '• ${Localizations.localeOf(context).languageCode == 'de' ? '30 Minuten vorher' : '30 minutes before'}'),
                     ] else
                       Text(
-                        l10n.locale.languageCode == 'de'
+                        Localizations.localeOf(context).languageCode == 'de'
                             ? 'Keine Erinnerungen aktiviert'
                             : 'No reminders enabled',
                         style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
-                    
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
@@ -325,18 +328,22 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                         onPressed: () async {
                           if (_permissionsGranted) {
                             await _notificationService.sendTestNotification();
+                            if (!mounted) return;
+                            final currentLocale = Localizations.localeOf(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(l10n.locale.languageCode == 'de'
+                                content: Text(currentLocale.languageCode == 'de'
                                     ? '🔔 Test-Benachrichtigung gesendet!'
                                     : '🔔 Test notification sent!'),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           } else {
+                            if (!mounted) return;
+                            final currentLocale = Localizations.localeOf(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(l10n.locale.languageCode == 'de'
+                                content: Text(currentLocale.languageCode == 'de'
                                     ? '❌ Benachrichtigungsberechtigungen wurden nicht erteilt'
                                     : '❌ Notification permissions not granted'),
                                 backgroundColor: Colors.red,
@@ -345,12 +352,14 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                           }
                         },
                         icon: const Icon(Icons.send),
-                        label: Text(l10n.locale.languageCode == 'de'
+                        label: Text(Localizations.localeOf(context).languageCode == 'de'
                             ? 'Test-Benachrichtigung senden'
                             : 'Send Test Notification'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.green,
-                          side: const BorderSide(color: Colors.green),
+                        style: ButtonStyle(
+                          foregroundColor:
+                              WidgetStateProperty.all(Colors.green),
+                          side: WidgetStateProperty.all(
+                              const BorderSide(color: Colors.green)),
                         ),
                       ),
                     ),
@@ -368,10 +377,11 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                 onPressed: _saveSettings,
                 icon: const Icon(Icons.save),
                 label: Text(l10n.save), // LOKALISIERT
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.teal),
+                  foregroundColor: WidgetStateProperty.all(Colors.white),
+                  padding: WidgetStateProperty.all(
+                      const EdgeInsets.symmetric(vertical: 16)),
                 ),
               ),
             ),
@@ -380,9 +390,9 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
 
             // Permission Status
             Card(
-              color: _permissionsGranted 
-                  ? Colors.green.withOpacity(0.1) 
-                  : Colors.orange.withOpacity(0.1),
+              color: _permissionsGranted
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.orange.withValues(alpha: 0.1),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
@@ -394,8 +404,8 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        l10n.locale.languageCode == 'de'
-                            ? _permissionsGranted 
+                        Localizations.localeOf(context).languageCode == 'de'
+                            ? _permissionsGranted
                                 ? 'ℹ️ Benachrichtigungen sind aktiviert und funktionsfähig.'
                                 : 'ℹ️ Benachrichtigungsberechtigungen sind erforderlich.'
                             : _permissionsGranted

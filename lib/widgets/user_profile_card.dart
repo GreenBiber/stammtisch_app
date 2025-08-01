@@ -44,7 +44,7 @@ class UserProfileCard extends StatelessWidget {
                 gradient: userPoints != null
                     ? LinearGradient(
                         colors: [
-                          _getLevelColor(userPoints.currentLevel).withOpacity(0.1),
+                          _getLevelColor(userPoints.currentLevel).withValues(alpha: 0.1),
                           Colors.transparent,
                         ],
                         begin: Alignment.topLeft,
@@ -110,7 +110,7 @@ class UserProfileCard extends StatelessWidget {
                       border: Border.all(color: Colors.white, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: _getLevelColor(userPoints.currentLevel).withOpacity(0.3),
+                          color: _getLevelColor(userPoints.currentLevel).withValues(alpha: 0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -174,7 +174,7 @@ class UserProfileCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.2),
+                    color: Colors.amber.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -198,7 +198,7 @@ class UserProfileCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.2),
+                      color: Colors.red.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -255,7 +255,7 @@ class UserProfileCard extends StatelessWidget {
                   Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
+                      color: Colors.grey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -460,9 +460,9 @@ class UserProfileCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.purple.withOpacity(0.2),
+        color: Colors.purple.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purple.withOpacity(0.5)),
+        border: Border.all(color: Colors.purple.withValues(alpha: 0.5)),
       ),
       child: Text(
         '${achievement.icon} ${achievement.name}',

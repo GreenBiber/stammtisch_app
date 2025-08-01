@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/group_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
 import '../models/group.dart';
 import '../widgets/language_switcher.dart';
 import '../l10n/app_localizations.dart';
@@ -15,10 +16,10 @@ class GroupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n; // Lokalisierung
+    final l10n = AppLocalizations.of(context)!; // Lokalisierung
 
-    return Consumer2<GroupProvider, AuthProvider>(
-      builder: (context, groupProvider, authProvider, child) {
+    return Consumer3<GroupProvider, AuthProvider, LocaleProvider>(
+      builder: (context, groupProvider, authProvider, localeProvider, child) {
         final currentUserId = authProvider.currentUserId;
         final groups = groupProvider.getUserGroups(context);
 
@@ -34,7 +35,8 @@ class GroupScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const profile.ProfileScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const profile.ProfileScreen()),
                   );
                 },
                 icon: const Icon(Icons.account_circle),
@@ -67,11 +69,12 @@ class GroupScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const GroupFormScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => const GroupFormScreen()),
                           );
                         },
                         icon: const Icon(Icons.add),
-                        label: Text(l10n.locale.languageCode == 'de'
+                        label: Text(localeProvider.isGerman
                             ? 'Erste Gruppe erstellen'
                             : 'Create first group'), // LOKALISIERT
                       ),
@@ -82,10 +85,12 @@ class GroupScreen extends StatelessWidget {
                   itemCount: groups.length,
                   itemBuilder: (context, index) {
                     final group = groups[index];
-                    final isAdmin = groupProvider.isCurrentUserAdmin(group, currentUserId);
-                    
+                    final isAdmin =
+                        groupProvider.isCurrentUserAdmin(group, currentUserId);
+
                     return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       child: ListTile(
                         title: Text(
                           group.name,
@@ -94,9 +99,12 @@ class GroupScreen extends StatelessWidget {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(isAdmin ? l10n.admin : l10n.member), // LOKALISIERT
+                            Text(isAdmin
+                                ? l10n.admin
+                                : l10n.member), // LOKALISIERT
                             Text(
-                              l10n.memberCount(group.members.length), // LOKALISIERT
+                              l10n.memberCount(
+                                  group.members.length), // LOKALISIERT
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -110,8 +118,11 @@ class GroupScreen extends StatelessWidget {
                                     width: 40,
                                     height: 40,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        Text(group.name.substring(0, 1).toUpperCase()),
+                                    errorBuilder:
+                                        (context, error, stackTrace) => Text(
+                                            group.name
+                                                .substring(0, 1)
+                                                .toUpperCase()),
                                   ),
                                 )
                               : Text(
@@ -138,9 +149,10 @@ class GroupScreen extends StatelessWidget {
                               case 'settings':
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(l10n.locale.languageCode == 'de'
-                                        ? 'Gruppeneinstellungen kommen bald'
-                                        : 'Group settings coming soon'),
+                                    content: Text(
+                                        localeProvider.isGerman
+                                            ? 'Gruppeneinstellungen kommen bald'
+                                            : 'Group settings coming soon'),
                                   ),
                                 );
                                 break;
@@ -164,7 +176,9 @@ class GroupScreen extends StatelessWidget {
                                   color: Colors.red,
                                 ),
                                 title: Text(
-                                  isAdmin ? l10n.deleteGroup : l10n.leaveGroup, // LOKALISIERT
+                                  isAdmin
+                                      ? l10n.deleteGroup
+                                      : l10n.leaveGroup, // LOKALISIERT
                                   style: const TextStyle(color: Colors.red),
                                 ),
                                 contentPadding: EdgeInsets.zero,
@@ -189,7 +203,8 @@ class GroupScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const GroupFormScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const GroupFormScreen()),
               );
             },
             child: const Icon(Icons.add),
@@ -210,15 +225,18 @@ class GroupScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isAdmin ? l10n.deleteGroup : l10n.leaveGroup), // LOKALISIERT
-        content: Text(
-          isAdmin
-              ? (l10n.locale.languageCode == 'de'
-                  ? 'Du bist Admin dieser Gruppe. Möchtest du sie komplett löschen? Alle Daten gehen verloren.'
-                  : 'You are admin of this group. Do you want to delete it completely? All data will be lost.')
-              : (l10n.locale.languageCode == 'de'
-                  ? 'Möchtest du die Gruppe "${group.name}" wirklich verlassen?'
-                  : 'Do you really want to leave the group "${group.name}"?'),
+        title:
+            Text(isAdmin ? l10n.deleteGroup : l10n.leaveGroup), // LOKALISIERT
+        content: Consumer<LocaleProvider>(
+          builder: (context, localeProvider, child) => Text(
+            isAdmin
+                ? (localeProvider.isGerman
+                    ? 'Du bist Admin dieser Gruppe. Möchtest du sie komplett löschen? Alle Daten gehen verloren.'
+                    : 'You are admin of this group. Do you want to delete it completely? All data will be lost.')
+                : (localeProvider.isGerman
+                    ? 'Möchtest du die Gruppe "${group.name}" wirklich verlassen?'
+                    : 'Do you really want to leave the group "${group.name}"?'),
+          ),
         ),
         actions: [
           TextButton(
@@ -231,9 +249,13 @@ class GroupScreen extends StatelessWidget {
                 groupProvider.deleteGroup(group.id, currentUserId);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(l10n.locale.languageCode == 'de'
-                        ? 'Gruppe "${group.name}" wurde gelöscht'
-                        : 'Group "${group.name}" was deleted'),
+                    content: Consumer<LocaleProvider>(
+                      builder: (context, localeProvider, child) => Text(
+                        localeProvider.isGerman
+                            ? 'Gruppe "${group.name}" wurde gelöscht'
+                            : 'Group "${group.name}" was deleted'
+                      ),
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -241,16 +263,31 @@ class GroupScreen extends StatelessWidget {
                 groupProvider.leaveGroup(group.id, currentUserId);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(l10n.locale.languageCode == 'de'
-                        ? 'Du hast die Gruppe "${group.name}" verlassen'
-                        : 'You left the group "${group.name}"'),
+                    content: Consumer<LocaleProvider>(
+                      builder: (context, localeProvider, child) => Text(
+                        localeProvider.isGerman
+                            ? 'Du hast die Gruppe "${group.name}" verlassen'
+                            : 'You left the group "${group.name}"'
+                      ),
+                    ),
                   ),
                 );
               }
               Navigator.of(ctx).pop();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(isAdmin ? l10n.delete : l10n.locale.languageCode == 'de' ? 'Verlassen' : 'Leave'),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+              foregroundColor: WidgetStateProperty.all(Colors.white),
+            ),
+            child: Consumer<LocaleProvider>(
+              builder: (context, localeProvider, child) => Text(
+                isAdmin
+                    ? l10n.delete
+                    : localeProvider.isGerman
+                        ? 'Verlassen'
+                        : 'Leave'
+              ),
+            ),
           ),
         ],
       ),

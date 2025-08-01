@@ -44,8 +44,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.updateProfile(
       displayName: _displayNameController.text.trim(),
-      avatarUrl: _avatarUrlController.text.trim().isEmpty 
-          ? null 
+      avatarUrl: _avatarUrlController.text.trim().isEmpty
+          ? null
           : _avatarUrlController.text.trim(),
     );
 
@@ -74,7 +74,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Profilbild'),
-        content: const Text('Foto-Upload wird in einer späteren Version verfügbar sein. Du kannst momentan nur eine URL eingeben.'),
+        content: const Text(
+            'Foto-Upload wird in einer späteren Version verfügbar sein. Du kannst momentan nur eine URL eingeben.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -101,7 +102,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.of(ctx).pop();
               Provider.of<AuthProvider>(context, listen: false).logout();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+              foregroundColor: WidgetStateProperty.all(Colors.white),
+            ),
             child: const Text('Abmelden'),
           ),
         ],
@@ -141,15 +145,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  
+
                   // Avatar
                   Stack(
                     children: [
                       CircleAvatar(
                         radius: 60,
-                        backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-                            ? NetworkImage(user.avatarUrl!) as ImageProvider
-                            : null,
+                        backgroundImage:
+                            user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+                                ? NetworkImage(user.avatarUrl!) as ImageProvider
+                                : null,
                         backgroundColor: Colors.teal,
                         child: user.avatarUrl == null || user.avatarUrl!.isEmpty
                             ? Text(
@@ -170,12 +175,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             radius: 18,
                             backgroundColor: Colors.teal,
                             child: IconButton(
-                              icon: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                              icon: const Icon(Icons.camera_alt,
+                                  size: 18, color: Colors.white),
                               onPressed: () {
                                 // Foto-Upload-Funktionalität für später
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Foto-Upload kommt in einer späteren Version'),
+                                    content: Text(
+                                        'Foto-Upload kommt in einer späteren Version'),
                                   ),
                                 );
                               },
@@ -184,9 +191,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Display Name
                   TextFormField(
                     controller: _displayNameController,
@@ -205,9 +212,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Email (Read-only)
                   TextFormField(
                     initialValue: user.email,
@@ -218,9 +225,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       helperText: 'E-Mail kann nicht geändert werden',
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Avatar URL
                   if (_isEditing)
                     TextFormField(
@@ -240,9 +247,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         return null;
                       },
                     ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Account Info Card
                   Card(
                     child: Padding(
@@ -258,13 +265,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _InfoRow(
                             icon: Icons.calendar_today,
                             label: 'Registriert am',
-                            value: '${user.createdAt.day}.${user.createdAt.month}.${user.createdAt.year}',
+                            value:
+                                '${user.createdAt.day}.${user.createdAt.month}.${user.createdAt.year}',
                           ),
                           const SizedBox(height: 8),
                           _InfoRow(
                             icon: Icons.login,
                             label: 'Letzter Login',
-                            value: '${user.lastLoginAt.day}.${user.lastLoginAt.month}.${user.lastLoginAt.year}',
+                            value:
+                                '${user.lastLoginAt.day}.${user.lastLoginAt.month}.${user.lastLoginAt.year}',
                           ),
                           const SizedBox(height: 8),
                           _InfoRow(
@@ -276,9 +285,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Logout Button
                   SizedBox(
                     width: double.infinity,
@@ -286,13 +295,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: _showLogoutDialog,
                       icon: const Icon(Icons.logout),
                       label: const Text('Abmelden'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.red),
+                        foregroundColor: WidgetStateProperty.all(Colors.white),
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
                 ],
               ),

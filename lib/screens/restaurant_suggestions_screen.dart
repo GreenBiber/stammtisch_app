@@ -8,19 +8,20 @@ import '../providers/restaurant_provider.dart';
 import '../services/location_service.dart';
 import '../widgets/xp_animation.dart';
 import '../widgets/user_profile_card.dart';
-import '../l10n/app_localizations.dart';
+import '../l10n/l10n.dart';
 
 class RestaurantSuggestionsScreen extends StatefulWidget {
   const RestaurantSuggestionsScreen({super.key});
 
   @override
-  State<RestaurantSuggestionsScreen> createState() => _RestaurantSuggestionsScreenState();
+  State<RestaurantSuggestionsScreen> createState() =>
+      _RestaurantSuggestionsScreenState();
 }
 
-class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScreen> {
+class _RestaurantSuggestionsScreenState
+    extends State<RestaurantSuggestionsScreen> {
   final GlobalKey<XPAnimationOverlayState> _overlayKey = GlobalKey();
   final Set<String> _userVotes = {};
-  bool _isSubmittingRestaurant = false;
 
   @override
   void initState() {
@@ -29,15 +30,14 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
   }
 
   Future<void> _loadRestaurants() async {
-    final restaurantProvider = Provider.of<RestaurantProvider>(context, listen: false);
-    
+    final restaurantProvider =
+        Provider.of<RestaurantProvider>(context, listen: false);
+
     // Debug: Location Status
-    print('🔍 DEBUG: Starting restaurant load...');
-    
+
     final location = await LocationService().getCurrentLocation();
-    
+
     if (location == null) {
-      print('❌ DEBUG: No location available!');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -46,31 +46,28 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
           ),
         );
       }
-    } else {
-      print('✅ DEBUG: Location: ${location.latitude}, ${location.longitude}');
-    }
-    
+    } else {}
+
     await restaurantProvider.loadRestaurantSuggestions(
       latitude: location?.latitude,
       longitude: location?.longitude,
     );
-    
-    // Debug: Ergebnisse prüfen
-    print('📱 DEBUG: Loaded ${restaurantProvider.suggestions.length} restaurants');
-    for (var restaurant in restaurantProvider.suggestions) {
-      print('  - ${restaurant.name}: photoRef=${restaurant.photoReference}');
-    }
+
+    // Restaurant suggestions loaded successfully
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Consumer4<PointsProvider, AuthProvider, GroupProvider, RestaurantProvider>(
-      builder: (context, pointsProvider, authProvider, groupProvider, restaurantProvider, child) {
+    return Consumer4<PointsProvider, AuthProvider, GroupProvider,
+        RestaurantProvider>(
+      builder: (context, pointsProvider, authProvider, groupProvider,
+          restaurantProvider, child) {
         final currentUserId = authProvider.currentUserId;
         final activeGroup = groupProvider.getActiveGroup(context);
-        final userPoints = pointsProvider.getUserPoints(currentUserId, activeGroup?.id ?? '');
+        final userPoints =
+            pointsProvider.getUserPoints(currentUserId, activeGroup?.id ?? '');
 
         return XPAnimationOverlay(
           key: _overlayKey,
@@ -84,19 +81,24 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                     padding: const EdgeInsets.only(right: 16),
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.2),
+                          color: Colors.orange.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.warning, size: 16, color: Colors.orange),
+                            const Icon(Icons.warning,
+                                size: 16, color: Colors.orange),
                             const SizedBox(width: 4),
                             Text(
-                              l10n.locale.languageCode == 'de' ? 'Offline' : 'Offline',
-                              style: const TextStyle(fontSize: 12, color: Colors.orange),
+                              context.isGerman
+                                  ? 'Offline'
+                                  : 'Offline',
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.orange),
                             ),
                           ],
                         ),
@@ -123,9 +125,9 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                     margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.blue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                      border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -144,27 +146,35 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                 // API Status Info
                 Container(
                   width: double.infinity,
-                  margin: EdgeInsets.fromLTRB(16, restaurantProvider.weatherRecommendation != null ? 8 : 16, 16, 16),
+                  margin: EdgeInsets.fromLTRB(
+                      16,
+                      restaurantProvider.weatherRecommendation != null ? 8 : 16,
+                      16,
+                      16),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: restaurantProvider.hasValidApiKey && restaurantProvider.hasApiQuota 
-                        ? Colors.green.withOpacity(0.1) 
-                        : Colors.orange.withOpacity(0.1),
+                    color: restaurantProvider.hasValidApiKey &&
+                            restaurantProvider.hasApiQuota
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: restaurantProvider.hasValidApiKey && restaurantProvider.hasApiQuota 
-                          ? Colors.green.withOpacity(0.3) 
-                          : Colors.orange.withOpacity(0.3),
+                      color: restaurantProvider.hasValidApiKey &&
+                              restaurantProvider.hasApiQuota
+                          ? Colors.green.withValues(alpha: 0.3)
+                          : Colors.orange.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
-                        restaurantProvider.hasValidApiKey && restaurantProvider.hasApiQuota 
-                            ? Icons.cloud_done 
+                        restaurantProvider.hasValidApiKey &&
+                                restaurantProvider.hasApiQuota
+                            ? Icons.cloud_done
                             : Icons.cloud_off,
-                        color: restaurantProvider.hasValidApiKey && restaurantProvider.hasApiQuota 
-                            ? Colors.green 
+                        color: restaurantProvider.hasValidApiKey &&
+                                restaurantProvider.hasApiQuota
+                            ? Colors.green
                             : Colors.orange,
                       ),
                       const SizedBox(width: 12),
@@ -174,27 +184,34 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                           children: [
                             Text(
                               !restaurantProvider.hasValidApiKey
-                                  ? (l10n.locale.languageCode == 'de' ? 'API-Key nicht konfiguriert' : 'API Key not configured')
+                                  ? (context.isGerman
+                                      ? 'API-Key nicht konfiguriert'
+                                      : 'API Key not configured')
                                   : restaurantProvider.hasApiQuota
-                                      ? (l10n.locale.languageCode == 'de' ? 'Live Restaurant-Daten' : 'Live Restaurant Data')
-                                      : (l10n.locale.languageCode == 'de' ? 'Offline-Modus aktiv' : 'Offline Mode Active'),
+                                      ? (context.isGerman
+                                          ? 'Live Restaurant-Daten'
+                                          : 'Live Restaurant Data')
+                                      : (context.isGerman
+                                          ? 'Offline-Modus aktiv'
+                                          : 'Offline Mode Active'),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: restaurantProvider.hasValidApiKey && restaurantProvider.hasApiQuota 
-                                    ? Colors.green 
+                                color: restaurantProvider.hasValidApiKey &&
+                                        restaurantProvider.hasApiQuota
+                                    ? Colors.green
                                     : Colors.orange,
                               ),
                             ),
                             Text(
                               !restaurantProvider.hasValidApiKey
-                                  ? (l10n.locale.languageCode == 'de' 
+                                  ? (context.isGerman
                                       ? 'Setze deinen Google Places API-Key in places_service.dart'
                                       : 'Set your Google Places API key in places_service.dart')
                                   : restaurantProvider.hasApiQuota
-                                      ? (l10n.locale.languageCode == 'de' 
+                                      ? (context.isGerman
                                           ? 'Verbleibende API-Anfragen: ${restaurantProvider.remainingQuota}'
                                           : 'Remaining API requests: ${restaurantProvider.remainingQuota}')
-                                      : (l10n.locale.languageCode == 'de'
+                                      : (context.isGerman
                                           ? 'API-Limit erreicht - zeige Fallback-Restaurants'
                                           : 'API limit reached - showing fallback restaurants'),
                               style: const TextStyle(fontSize: 12),
@@ -215,14 +232,15 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                         final prefs = await SharedPreferences.getInstance();
                         await prefs.remove('places_api_daily_requests');
                         await prefs.remove('places_api_last_date');
-                        
+
                         // Reload
                         await _loadRestaurants();
-                        
-                        if (mounted) {
+
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('🔧 Debug: API Quota zurückgesetzt'),
+                              content:
+                                  Text('🔧 Debug: API Quota zurückgesetzt'),
                               backgroundColor: Colors.blue,
                             ),
                           );
@@ -230,8 +248,8 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                       },
                       icon: const Icon(Icons.refresh),
                       label: const Text('Debug: Reset API Quota'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.blue),
                       ),
                     ),
                   ),
@@ -242,7 +260,8 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                       ? const Center(child: CircularProgressIndicator())
                       : restaurantProvider.error != null
                           ? _buildErrorState(restaurantProvider.error!)
-                          : _buildRestaurantList(restaurantProvider.suggestions),
+                          : _buildRestaurantList(
+                              restaurantProvider.suggestions),
                 ),
               ],
             ),
@@ -261,7 +280,9 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
-            l10n.locale.languageCode == 'de' ? 'Fehler beim Laden' : 'Loading Error',
+            context.isGerman
+                ? 'Fehler beim Laden'
+                : 'Loading Error',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -278,7 +299,7 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
 
   Widget _buildRestaurantList(List<dynamic> restaurants) {
     final l10n = context.l10n;
-    
+
     if (restaurants.isEmpty) {
       return Center(
         child: Column(
@@ -287,7 +308,9 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
             const Icon(Icons.restaurant, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              l10n.locale.languageCode == 'de' ? 'Keine Restaurants gefunden' : 'No restaurants found',
+              context.isGerman
+                  ? 'Keine Restaurants gefunden'
+                  : 'No restaurants found',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -306,17 +329,18 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
       itemBuilder: (context, index) {
         final restaurant = restaurants[index];
         final hasVoted = _userVotes.contains(restaurant.id);
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 4,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Restaurant Image
               _buildRestaurantImage(restaurant),
-              
+
               // Restaurant Info
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -328,51 +352,62 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
                         Expanded(
                           child: Text(
                             restaurant.name,
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),
                         _buildRatingChip(restaurant.rating),
                       ],
                     ),
-                    
+
                     if (restaurant.description != null) ...[
                       const SizedBox(height: 8),
-                      Text(restaurant.description!, style: const TextStyle(fontSize: 14)),
+                      Text(restaurant.description!,
+                          style: const TextStyle(fontSize: 14)),
                     ],
-                    
+
                     if (restaurant.vicinity != null) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                          const Icon(Icons.location_on,
+                              size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               restaurant.vicinity!,
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                     ],
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Voting Section
                     Row(
                       children: [
                         ElevatedButton.icon(
-                          onPressed: hasVoted ? null : () => _voteForRestaurant(restaurant.id),
-                          icon: Icon(hasVoted ? Icons.thumb_up : Icons.thumb_up_outlined),
+                          onPressed: hasVoted
+                              ? null
+                              : () => _voteForRestaurant(restaurant.id),
+                          icon: Icon(hasVoted
+                              ? Icons.thumb_up
+                              : Icons.thumb_up_outlined),
                           label: Text(hasVoted ? l10n.voted : l10n.vote),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: hasVoted ? Colors.green.withOpacity(0.7) : null,
-                          ),
+                          style: hasVoted
+                              ? ButtonStyle(
+                                  backgroundColor: WidgetStateProperty.all(
+                                      Colors.green.withValues(alpha: 0.7)),
+                                )
+                              : null,
                         ),
                         const Spacer(),
                         Text(
-                          '${restaurant.userRatingsTotal} ${l10n.locale.languageCode == 'de' ? 'Bewertungen' : 'reviews'}',
+                          '${restaurant.userRatingsTotal} ${context.isGerman ? 'Bewertungen' : 'reviews'}',
                           style: const TextStyle(fontSize: 12),
                         ),
                       ],
@@ -388,18 +423,15 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
   }
 
   Widget _buildRestaurantImage(dynamic restaurant) {
-    final restaurantProvider = Provider.of<RestaurantProvider>(context, listen: false);
-    
-    print('🖼️ DEBUG: Building image for ${restaurant.name}');
-    print('  - photoReference: ${restaurant.photoReference}');
-    print('  - hasValidApiKey: ${restaurantProvider.hasValidApiKey}');
-    
+    final restaurantProvider =
+        Provider.of<RestaurantProvider>(context, listen: false);
+
     // Prüfe ob ein Photo Reference vorhanden ist
-    if (restaurant.photoReference != null && restaurantProvider.hasValidApiKey) {
-      final imageUrl = restaurantProvider.getPhotoUrl(restaurant.photoReference);
-      
-      print('  - Generated URL: ${imageUrl?.replaceAll(RegExp(r'key=.*'), 'key=XXX')}');
-      
+    if (restaurant.photoReference != null &&
+        restaurantProvider.hasValidApiKey) {
+      final imageUrl =
+          restaurantProvider.getPhotoUrl(restaurant.photoReference);
+
       if (imageUrl != null) {
         return ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -410,14 +442,14 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
             fit: BoxFit.cover,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) {
-                print('  ✅ Image loaded successfully');
                 return child;
               }
               return Container(
                 height: 180,
                 decoration: BoxDecoration(
                   color: Colors.grey[800],
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
                 ),
                 child: const Center(
                   child: CircularProgressIndicator(),
@@ -425,15 +457,13 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
               );
             },
             errorBuilder: (context, error, stackTrace) {
-              print('  ❌ Image loading error: $error');
               return _buildPlaceholderImage();
             },
           ),
         );
       }
     }
-    
-    print('  ⚠️ Using placeholder image');
+
     // Fallback: Platzhalter-Bild
     return _buildPlaceholderImage();
   }
@@ -455,7 +485,7 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.amber.withOpacity(0.2),
+        color: Colors.amber.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -473,14 +503,13 @@ class _RestaurantSuggestionsScreenState extends State<RestaurantSuggestionsScree
   }
 
   void _voteForRestaurant(String restaurantId) {
-    final l10n = context.l10n;
     setState(() {
       _userVotes.add(restaurantId);
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.locale.languageCode == 'de'
+        content: Text(context.isGerman
             ? 'Du hast abgestimmt! 👍'
             : 'You voted! 👍'),
         backgroundColor: Colors.green,

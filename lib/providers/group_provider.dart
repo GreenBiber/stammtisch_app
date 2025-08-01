@@ -189,4 +189,24 @@ class GroupProvider with ChangeNotifier {
       // Group not found - handle gracefully
     }
   }
+
+  // Method to get group by ID
+  Group? getGroupById(String groupId) {
+    try {
+      return _groups.firstWhere((g) => g.id == groupId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Method to get user by ID (placeholder - in real app would query user service)
+  dynamic getUserById(String userId) {
+    // This is a placeholder - in a real app this would query a user service
+    // For now, return a mock user object
+    return {
+      'id': userId,
+      'displayName': 'User $userId',
+      'email': 'user$userId@example.com',
+    };
+  }
 }

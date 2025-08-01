@@ -1,0 +1,269 @@
+{
+  "@@locale": "en",
+  "welcome": "Welcome back! 🍻",
+  "login": "Login",
+  "register": "Register",
+  "email": "Email",
+  "password": "Password",
+  "displayName": "Display Name",
+  "confirmPassword": "Confirm Password",
+  "agreeTerms": "I accept the terms of service and privacy policy",
+  "rememberMe": "Remember me",
+  "logout": "Logout",
+  "forgotPassword": "Forgot password?",
+  "noAccount": "No account? Register here",
+  "hasAccount": "Already have an account? Login here",
+  "myGroups": "My Groups",
+  "createGroup": "Create Group",
+  "noGroups": "No groups yet",
+  "firstGroup": "Create your first group!",
+  "inviteMembers": "Invite Members",
+  "groupNotFound": "Group not found",
+  "groupName": "Group Name",
+  "groupAvatar": "Avatar Image URL (optional)",
+  "leaveGroup": "Leave Group",
+  "deleteGroup": "Delete Group",
+  "groupSettings": "Group Settings",
+  "memberCount": "{count} Members",
+  "@memberCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "admin": "Admin",
+  "member": "Member",
+  "nextEvent": "Next Event",
+  "participate": "Participate?",
+  "yes": "Yes",
+  "maybe": "Maybe",
+  "no": "No",
+  "confirmed": "Confirmed",
+  "cancelled": "Cancelled",
+  "minParticipants": "not enough participants",
+  "participantCount": "{count} Confirmations",
+  "@participantCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventDate": "Date",
+  "eventStatus": "Status",
+  "eventParticipants": "Participants",
+  "xpGained": "XP gained!",
+  "levelUp": "Level Up!",
+  "achievement": "Achievement unlocked!",
+  "level": "Level",
+  "streak": "Streak",
+  "totalXP": "Total XP",
+  "xpForAction": "+{xp} XP for {action}",
+  "@xpForAction": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      },
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "levelProgress": "{percent}% to next level",
+  "@levelProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "currentLevel": "Level {level}",
+  "@currentLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "nextLevel": "Level {current} → {next}",
+  "@nextLevel": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "next": {
+        "type": "int"
+      }
+    }
+  },
+  "leaderboard": "Leaderboard",
+  "calendar": "Calendar",
+  "restaurants": "Restaurants",
+  "chat": "Chat",
+  "profile": "Profile",
+  "settings": "Settings",
+  "reminders": "Reminders",
+  "suggestions": "Suggestions",
+  "restaurantSuggestions": "Restaurant Suggestions",
+  "suggestRestaurant": "Suggest Restaurant",
+  "restaurantName": "Restaurant Name",
+  "restaurantDescription": "Description (optional)",
+  "category": "Category",
+  "rating": "Rating",
+  "votes": "Votes",
+  "vote": "Vote",
+  "voted": "Voted",
+  "details": "Details",
+  "suggestedBy": "Suggested by {name}",
+  "@suggestedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarOverview": "Calendar Overview",
+  "selectedDay": "Selected day: {date}",
+  "@selectedDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "plannedEvents": "Planned Events",
+  "noEventToday": "No event on this day",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "yesterday": "Yesterday",
+  "inDays": "In {days} days",
+  "@inDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{days} days ago",
+  "@daysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "myProfile": "My Profile",
+  "accountInfo": "Account Information",
+  "registeredOn": "Registered on",
+  "lastLogin": "Last login",
+  "accountStatus": "Account Status",
+  "active": "Active",
+  "inactive": "Inactive",
+  "editProfile": "Edit Profile",
+  "save": "Save",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "close": "Close",
+  "delete": "Delete",
+  "edit": "Edit",
+  "add": "Add",
+  "remove": "Remove",
+  "search": "Search",
+  "filter": "Filter",
+  "sort": "Sort",
+  "refresh": "Refresh",
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+  "warning": "Warning",
+  "info": "Information",
+  "invalidEmail": "Invalid email address",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "passwordsDontMatch": "Passwords do not match",
+  "fieldRequired": "This field is required",
+  "emailExists": "Email address already registered",
+  "loginFailed": "Login failed",
+  "wrongPassword": "Wrong password",
+  "userNotFound": "Email address not found",
+  "networkError": "Network error",
+  "unknownError": "Unknown error",
+  "firstTimer": "First Timer",
+  "regular": "Regular",
+  "loyaltyChampion": "Loyalty Champion",
+  "generousSoul": "Generous Soul",
+  "bierbaron": "Beer Baron",
+  "foodie": "Foodie",
+  "restaurantScout": "Restaurant Scout",
+  "streakMaster": "Streak Master",
+  "perfectYear": "Perfect Year",
+  "lightningFast": "Lightning Fast",
+  "levelMaster": "Level Master",
+  "stammtischGod": "Group Master",
+  "partyStarter": "Party Starter",
+  "adminPointsTitle": "Admin Points",
+  "noGroupSelected": "No group selected",
+  "adminRightsRequired": "Admin rights required",
+  "adminPointsInfo": "Here you can award points to group members.",
+  "selectUser": "Select User",
+  "selectAction": "Select Action",
+  "points": "Points",
+  "customPoints": "Custom Points",
+  "pointsAmount": "Points Amount",
+  "reason": "Reason",
+  "reasonHint": "Reason for awarding points",
+  "awardPoints": "Award Points",
+  "recentAwards": "Recent Awards",
+  "noRecentAwards": "No recent awards",
+  "pointsAwarded": "Points awarded",
+  "unknown": "Unknown",
+  "linkCopied": "Link copied",
+  "shareNotImplemented": "Sharing not yet implemented",
+  "qrCodeNotImplemented": "QR Code not yet implemented",
+  "members": "Members",
+  "inviteLink": "Invite Link",
+  "copyLink": "Copy Link",
+  "shareLink": "Share Link",
+  "qrCode": "QR Code",
+  "qrCodePlaceholder": "QR Code placeholder",
+  "generateQRCode": "Generate QR Code",
+  "instructions": "Instructions",
+  "inviteStep1": "1. Share the invite link or QR code",
+  "inviteStep2": "2. New members register",
+  "inviteStep3": "3. They automatically join the group",
+  "currentMembers": "Current Members",
+  "reminderSettings": "Reminder Settings",
+  "notificationsEnabled": "Notifications Enabled",
+  "dayBefore": "1 Day Before",
+  "hourBefore": "1 Hour Before",
+  "minutesBefore": "30 Minutes Before",
+  "testNotification": "Send Test Notification",
+  "testNotificationSent": "Test notification sent",
+  "notificationTypes": "Notification Types",
+  "eventReminders": "Event Reminders",
+  "chatNotifications": "Chat Notifications",
+  "pointsNotifications": "Points Notifications",
+  "systemNotifications": "System Notifications",
+  "weatherBasedSuggestions": "Weather-based Suggestions",
+  "useLocation": "Use Location",
+  "fallbackList": "Fallback Restaurants",
+  "noSuggestions": "No suggestions available",
+  "typeMessage": "Type a message...",
+  "sendMessage": "Send Message",
+  "chatPlaceholder": "Chat will be available soon",
+  "language": "Language",
+  "german": "Deutsch",
+  "english": "English",
+  "xpEventParticipation": "Event Participation",
+  "xpEventOrganizing": "Event Organized",
+  "xpFirstToConfirm": "First to Confirm",
+  "xpStreakMilestone": "Streak Milestone",
+  "xpRestaurantSuggestion": "Restaurant Suggested",
+  "xpGroupCreation": "Group Created",
+  "xpInviteFriend": "Friend Invited",
+  "xpCustom": "Custom",
+  "xpBuyRound": "Bought a round",
+  "xpPerfectMonth": "Perfect month",
+  "xpFirstTime": "First participation",
+  "xpAdminBonus": "Admin bonus"
+}

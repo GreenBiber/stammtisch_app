@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/group.dart';
 import '../providers/event_provider.dart';
 import '../providers/auth_provider.dart';
-import '../l10n/app_localizations.dart';
+import '../l10n/l10n.dart';
 import 'event_screen.dart';
 import 'calendar_screen.dart';
 import 'reminder_settings_screen.dart';
@@ -63,7 +63,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                       value: 'members',
                       child: ListTile(
                         leading: const Icon(Icons.people),
-                        title: Text(l10n.locale.languageCode == 'de' 
+                        title: Text(context.isGerman 
                             ? 'Mitglieder verwalten' 
                             : 'Manage Members'),
                         contentPadding: EdgeInsets.zero,
@@ -154,7 +154,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
 
                 // Quick Actions
                 Text(
-                  l10n.locale.languageCode == 'de' ? 'Aktionen' : 'Actions',
+                  context.isGerman ? 'Aktionen' : 'Actions',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -172,7 +172,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                   children: [
                     _ActionCard(
                       icon: Icons.event,
-                      title: l10n.locale.languageCode == 'de' ? "Stammtisch" : "Event",
+                      title: context.isGerman ? "Stammtisch" : "Event",
                       subtitle: l10n.nextEvent, // LOKALISIERT
                       color: Colors.teal,
                       onTap: () {
@@ -185,7 +185,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                     _ActionCard(
                       icon: Icons.calendar_month,
                       title: l10n.calendar, // LOKALISIERT
-                      subtitle: l10n.locale.languageCode == 'de' ? "Terminübersicht" : "Schedule Overview",
+                      subtitle: context.isGerman ? "Terminübersicht" : "Schedule Overview",
                       color: Colors.blue,
                       onTap: () {
                         Navigator.push(
@@ -197,7 +197,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                     _ActionCard(
                       icon: Icons.chat_bubble_outline,
                       title: l10n.chat, // LOKALISIERT
-                      subtitle: l10n.locale.languageCode == 'de' ? "Gruppenchat" : "Group Chat",
+                      subtitle: context.isGerman ? "Gruppenchat" : "Group Chat",
                       color: Colors.green,
                       onTap: () {
                         Navigator.push(
@@ -223,8 +223,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                     if (isAdmin)
                       _ActionCard(
                         icon: Icons.star,
-                        title: l10n.locale.languageCode == 'de' ? 'Punkte' : 'Points',
-                        subtitle: l10n.locale.languageCode == 'de' ? 'Punkte vergeben' : 'Award Points',
+                        title: context.isGerman ? 'Punkte' : 'Points',
+                        subtitle: context.isGerman ? 'Punkte vergeben' : 'Award Points',
                         color: Colors.purple,
                         onTap: () {
                           Navigator.push(
@@ -255,7 +255,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                       ListTile(
                         leading: const Icon(Icons.notifications_active),
                         title: Text(l10n.reminders), // LOKALISIERT
-                        subtitle: Text(l10n.locale.languageCode == 'de' 
+                        subtitle: Text(context.isGerman 
                             ? "Push-Benachrichtigungen verwalten" 
                             : "Manage push notifications"),
                         trailing: const Icon(Icons.chevron_right),
@@ -272,7 +272,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                         const Divider(height: 1),
                         ListTile(
                           leading: const Icon(Icons.people),
-                          title: Text(l10n.locale.languageCode == 'de' 
+                          title: Text(context.isGerman 
                               ? "Mitglieder verwalten" 
                               : "Manage Members"),
                           subtitle: Text(l10n.memberCount(widget.group.members.length)), // LOKALISIERT
@@ -282,10 +282,10 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                         const Divider(height: 1),
                         ListTile(
                           leading: const Icon(Icons.qr_code),
-                          title: Text(l10n.locale.languageCode == 'de' 
+                          title: Text(context.isGerman 
                               ? "QR-Code Einladung" 
                               : "QR Code Invite"),
-                          subtitle: Text(l10n.locale.languageCode == 'de' 
+                          subtitle: Text(context.isGerman 
                               ? "Mitglieder mit QR-Code einladen" 
                               : "Invite members with QR code"),
                           trailing: const Icon(Icons.chevron_right),
@@ -293,7 +293,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => GroupInviteScreen(group: widget.group),
+                                builder: (context) => GroupInviteScreen(groupId: widget.group.id),
                               ),
                             );
                           },
@@ -302,7 +302,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                         ListTile(
                           leading: const Icon(Icons.settings),
                           title: Text(l10n.groupSettings), // LOKALISIERT
-                          subtitle: Text(l10n.locale.languageCode == 'de' 
+                          subtitle: Text(context.isGerman 
                               ? "Name, Bild und mehr" 
                               : "Name, image and more"),
                           trailing: const Icon(Icons.chevron_right),
@@ -318,7 +318,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                 // User Info Card
                 if (user != null)
                   Card(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Row(
@@ -342,7 +342,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            l10n.locale.languageCode == 'de'
+                            context.isGerman
                                 ? 'Angemeldet als: ${user.displayName}'
                                 : 'Logged in as: ${user.displayName}',
                             style: const TextStyle(fontSize: 12),
@@ -365,7 +365,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.groupSettings), // LOKALISIERT
-        content: Text(l10n.locale.languageCode == 'de'
+        content: Text(context.isGerman
             ? 'Gruppeneinstellungen werden in einer späteren Version verfügbar sein.'
             : 'Group settings will be available in a future version.'),
         actions: [
@@ -383,7 +383,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.locale.languageCode == 'de' 
+        title: Text(context.isGerman 
             ? 'Mitglieder - ${widget.group.name}'
             : 'Members - ${widget.group.name}'),
         content: SizedBox(
@@ -402,14 +402,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                     backgroundColor: Colors.teal,
                     child: Text(
                       memberId == Provider.of<AuthProvider>(context, listen: false).currentUserId
-                          ? (l10n.locale.languageCode == 'de' ? 'Du' : 'You')
+                          ? (context.isGerman ? 'Du' : 'You')
                           : memberId.substring(0, 2).toUpperCase(),
                       style: const TextStyle(fontSize: 10, color: Colors.white),
                     ),
                   ),
                   title: Text(
                     memberId == Provider.of<AuthProvider>(context, listen: false).currentUserId
-                        ? (l10n.locale.languageCode == 'de' 
+                        ? (context.isGerman 
                             ? 'Du (${Provider.of<AuthProvider>(context, listen: false).currentUser?.displayName})'
                             : 'You (${Provider.of<AuthProvider>(context, listen: false).currentUser?.displayName})')
                         : memberId,
@@ -437,11 +437,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => GroupInviteScreen(group: widget.group),
+                  builder: (context) => GroupInviteScreen(groupId: widget.group.id),
                 ),
               );
             },
-            child: Text(l10n.locale.languageCode == 'de' 
+            child: Text(context.isGerman 
                 ? 'QR-Code Einladung' 
                 : 'QR Code Invite'),
           ),

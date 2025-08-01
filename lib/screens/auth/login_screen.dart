@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? context.l10n.loginFailed),
+          content: Text(authProvider.errorMessage ?? AppLocalizations.of(context)!.loginFailed),
           backgroundColor: Colors.red,
         ),
       );
@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n; // Lokalisierung
+    final l10n = AppLocalizations.of(context)!; // Lokalisierung
 
     return Scaffold(
       appBar: AppBar(
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 60),
-                    
+
                     // Logo/Header
                     Icon(
                       Icons.local_bar,
@@ -86,10 +86,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
                     Text(
                       'Stammtisch App',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                       textAlign: TextAlign.center,
                     ),
                     Text(
@@ -97,9 +98,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),
-                    
+
                     const SizedBox(height: 48),
-                    
+
                     // Login Form
                     Form(
                       key: _formKey,
@@ -125,9 +126,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 16),
-                          
+
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
@@ -155,9 +156,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 16),
-                          
+
                           // Remember Me Checkbox
                           Row(
                             children: [
@@ -172,17 +173,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               Text(l10n.rememberMe), // LOKALISIERT
                             ],
                           ),
-                          
+
                           const SizedBox(height: 24),
-                          
+
                           // Login Button
                           SizedBox(
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: authProvider.status == AuthStatus.loading
-                                  ? null
-                                  : _login,
+                              onPressed:
+                                  authProvider.status == AuthStatus.loading
+                                      ? null
+                                      : _login,
                               child: authProvider.status == AuthStatus.loading
                                   ? const SizedBox(
                                       height: 20,
@@ -197,9 +199,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                             ),
                           ),
-                          
+
                           const SizedBox(height: 16),
-                          
+
                           // Register Link
                           TextButton(
                             onPressed: authProvider.status == AuthStatus.loading
@@ -210,16 +212,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // Sprach-Umschalter
-                    Center(
+                    const Center(
                       child: LanguageSwitcher(showText: true),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Demo Credentials (nur für Development)
                     if (const bool.fromEnvironment('dart.vm.product') == false)
                       Card(
@@ -234,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                l10n.locale.languageCode == 'de'
+                                Localizations.localeOf(context).languageCode == 'de'
                                     ? 'Erstelle einen Account oder nutze die Demo-Credentials'
                                     : 'Create an account or use demo credentials',
                                 style: const TextStyle(fontSize: 12),

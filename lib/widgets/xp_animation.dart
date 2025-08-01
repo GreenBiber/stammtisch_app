@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../l10n/app_localizations.dart';
+import '../l10n/l10n.dart';
 
 class XPGainAnimation extends StatefulWidget {
   final String text;
@@ -79,13 +79,14 @@ class _XPGainAnimationState extends State<XPGainAnimation>
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.9),
+                  color: Colors.green.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.3),
+                      color: Colors.green.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -200,7 +201,7 @@ class _LevelUpAnimationState extends State<LevelUpAnimation>
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.orange.withOpacity(0.5),
+                      color: Colors.orange.withValues(alpha: 0.5),
                       blurRadius: 20,
                       offset: const Offset(0, 4),
                     ),
@@ -210,7 +211,7 @@ class _LevelUpAnimationState extends State<LevelUpAnimation>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      l10n.locale.languageCode == 'de'
+                      Localizations.localeOf(context).languageCode == 'de'
                           ? '🎉 LEVEL UP! 🎉'
                           : '🎉 LEVEL UP! 🎉', // Englisch bleibt gleich
                       style: const TextStyle(
@@ -230,7 +231,8 @@ class _LevelUpAnimationState extends State<LevelUpAnimation>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.levelTitle, // Level-Titel wird bereits lokalisiert übergeben
+                      widget
+                          .levelTitle, // Level-Titel wird bereits lokalisiert übergeben
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.white,
@@ -263,11 +265,12 @@ class AchievementUnlockedAnimation extends StatefulWidget {
   });
 
   @override
-  State<AchievementUnlockedAnimation> createState() => _AchievementUnlockedAnimationState();
+  State<AchievementUnlockedAnimation> createState() =>
+      _AchievementUnlockedAnimationState();
 }
 
-class _AchievementUnlockedAnimationState extends State<AchievementUnlockedAnimation>
-    with TickerProviderStateMixin {
+class _AchievementUnlockedAnimationState
+    extends State<AchievementUnlockedAnimation> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _slideAnimation;
   late Animation<double> _bounceAnimation;
@@ -320,15 +323,14 @@ class _AchievementUnlockedAnimationState extends State<AchievementUnlockedAnimat
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n; // Lokalisierung hinzugefügt
-
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         return FadeTransition(
           opacity: _fadeAnimation,
           child: Transform.translate(
-            offset: Offset(_slideAnimation.value * MediaQuery.of(context).size.width, 0),
+            offset: Offset(
+                _slideAnimation.value * MediaQuery.of(context).size.width, 0),
             child: ScaleTransition(
               scale: _bounceAnimation,
               child: Container(
@@ -343,7 +345,7 @@ class _AchievementUnlockedAnimationState extends State<AchievementUnlockedAnimat
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.purple.withOpacity(0.4),
+                      color: Colors.purple.withValues(alpha: 0.4),
                       blurRadius: 15,
                       offset: const Offset(0, 3),
                     ),
@@ -363,7 +365,7 @@ class _AchievementUnlockedAnimationState extends State<AchievementUnlockedAnimat
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.locale.languageCode == 'de'
+                            Localizations.localeOf(context).languageCode == 'de'
                                 ? 'Achievement freigeschaltet!'
                                 : 'Achievement unlocked!', // LOKALISIERT
                             style: const TextStyle(
@@ -373,7 +375,8 @@ class _AchievementUnlockedAnimationState extends State<AchievementUnlockedAnimat
                             ),
                           ),
                           Text(
-                            widget.achievementName, // Achievement-Name wird bereits lokalisiert übergeben
+                            widget
+                                .achievementName, // Achievement-Name wird bereits lokalisiert übergeben
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -381,7 +384,8 @@ class _AchievementUnlockedAnimationState extends State<AchievementUnlockedAnimat
                             ),
                           ),
                           Text(
-                            widget.achievementDescription, // Beschreibung wird bereits lokalisiert übergeben
+                            widget
+                                .achievementDescription, // Beschreibung wird bereits lokalisiert übergeben
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
@@ -452,10 +456,12 @@ class XPAnimationOverlayState extends State<XPAnimationOverlay> {
     final animation = AchievementUnlockedAnimation(
       achievementName: name, // Name wird bereits lokalisiert übergeben
       achievementIcon: icon,
-      achievementDescription: description, // Beschreibung wird bereits lokalisiert übergeben
+      achievementDescription:
+          description, // Beschreibung wird bereits lokalisiert übergeben
       onComplete: () {
         setState(() {
-          _activeAnimations.removeWhere((w) => w is AchievementUnlockedAnimation);
+          _activeAnimations
+              .removeWhere((w) => w is AchievementUnlockedAnimation);
         });
       },
     );
@@ -478,17 +484,17 @@ class XPAnimationOverlayState extends State<XPAnimationOverlay> {
                 children: [
                   // XP Gains (top center)
                   ..._activeAnimations
-                      .where((w) => w is XPGainAnimation)
+                      .whereType<XPGainAnimation>()
                       .map((w) => Positioned(
                             top: 100,
                             left: 0,
                             right: 0,
                             child: Center(child: w),
                           )),
-                  
+
                   // Level Ups (center)
                   ..._activeAnimations
-                      .where((w) => w is LevelUpAnimation)
+                      .whereType<LevelUpAnimation>()
                       .map((w) => Positioned(
                             top: 0,
                             left: 0,
@@ -496,10 +502,10 @@ class XPAnimationOverlayState extends State<XPAnimationOverlay> {
                             bottom: 0,
                             child: Center(child: w),
                           )),
-                  
+
                   // Achievements (top right)
                   ..._activeAnimations
-                      .where((w) => w is AchievementUnlockedAnimation)
+                      .whereType<AchievementUnlockedAnimation>()
                       .map((w) => Positioned(
                             top: 50,
                             right: 0,
@@ -569,7 +575,13 @@ class _ConfettiAnimationState extends State<ConfettiAnimation>
     });
 
     _confettiColors = List.generate(20, (index) {
-      final colors = [Colors.red, Colors.blue, Colors.green, Colors.yellow, Colors.purple];
+      final colors = [
+        Colors.red,
+        Colors.blue,
+        Colors.green,
+        Colors.yellow,
+        Colors.purple
+      ];
       return colors[index % colors.length];
     });
   }
@@ -623,9 +635,9 @@ class ConfettiPainter extends CustomPainter {
       final progress = animation.value;
       final x = positions[i].dx * size.width;
       final y = positions[i].dy * size.height + (progress * size.height * 1.2);
-      
-      paint.color = colors[i].withOpacity(1.0 - progress);
-      
+
+      paint.color = colors[i].withValues(alpha: 1.0 - progress);
+
       canvas.drawCircle(
         Offset(x, y),
         4.0,

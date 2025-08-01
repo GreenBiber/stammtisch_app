@@ -137,9 +137,10 @@ class LanguageToggleButton extends StatelessWidget {
             style: const TextStyle(fontSize: 16),
           ),
           label: Text(localeProvider.currentLanguageName),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey.withOpacity(0.2),
-            foregroundColor: Colors.white,
+          style: ButtonStyle(
+            backgroundColor:
+                WidgetStateProperty.all(Colors.grey.withOpacity(0.2)),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
           ),
         );
       },
@@ -176,7 +177,7 @@ class LanguageSelectionDialog extends StatelessWidget {
               final langCode = entry.key;
               final info = entry.value;
               final isActive = localeProvider.locale.languageCode == langCode;
-              
+
               return ListTile(
                 leading: Text(
                   info['flag']!,
@@ -184,7 +185,7 @@ class LanguageSelectionDialog extends StatelessWidget {
                 ),
                 title: Text(info['name']!),
                 subtitle: Text(info['code']!),
-                trailing: isActive 
+                trailing: isActive
                     ? const Icon(Icons.check, color: Colors.teal)
                     : null,
                 onTap: () {

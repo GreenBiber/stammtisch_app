@@ -24,22 +24,22 @@ class ChatProvider with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final messagesJson = prefs.getString(_storageKey);
-      
+
       if (messagesJson != null) {
         final Map<String, dynamic> allMessages = json.decode(messagesJson);
-        
+
         _groupMessages.clear();
         for (final entry in allMessages.entries) {
           final groupId = entry.key;
           final messageList = entry.value as List;
-          
+
           _groupMessages[groupId] = messageList
               .map((msg) => ChatMessage.fromJson(msg))
               .toList()
-              ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+            ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
         }
       }
-      
+
       print('📱 Loaded ${_groupMessages.length} chat groups');
     } catch (e) {
       print('❌ Error loading chat messages: $e');
@@ -53,12 +53,13 @@ class ChatProvider with ChangeNotifier {
   Future<void> _saveMessages() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       final Map<String, dynamic> allMessages = {};
       for (final entry in _groupMessages.entries) {
-        allMessages[entry.key] = entry.value.map((msg) => msg.toJson()).toList();
+        allMessages[entry.key] =
+            entry.value.map((msg) => msg.toJson()).toList();
       }
-      
+
       await prefs.setString(_storageKey, json.encode(allMessages));
       print('💾 Chat messages saved');
     } catch (e) {
@@ -90,9 +91,9 @@ class ChatProvider with ChangeNotifier {
     if (!_groupMessages.containsKey(groupId)) {
       _groupMessages[groupId] = [];
     }
-    
+
     _groupMessages[groupId]!.add(message);
-    
+
     // Keep only last 100 messages per group to prevent storage issues
     if (_groupMessages[groupId]!.length > 100) {
       _groupMessages[groupId]!.removeAt(0);
@@ -100,8 +101,9 @@ class ChatProvider with ChangeNotifier {
 
     await _saveMessages();
     notifyListeners();
-    
-    print('💬 Message sent: ${content.substring(0, content.length.clamp(0, 30))}...');
+
+    print(
+        '💬 Message sent: ${content.substring(0, content.length.clamp(0, 30))}...');
   }
 
   // Send system message
@@ -139,7 +141,8 @@ class ChatProvider with ChangeNotifier {
 
   // Initialize demo messages for a group
   Future<void> initializeDemoMessages(String groupId) async {
-    if (_groupMessages.containsKey(groupId) && _groupMessages[groupId]!.isNotEmpty) {
+    if (_groupMessages.containsKey(groupId) &&
+        _groupMessages[groupId]!.isNotEmpty) {
       return; // Already has messages
     }
 
@@ -149,7 +152,8 @@ class ChatProvider with ChangeNotifier {
         groupId: groupId,
         senderId: 'demo_user_1',
         senderName: 'Liam',
-        content: 'Hey alle zusammen, wollte nur mal nachfragen wie es euch so geht.',
+        content:
+            'Hey alle zusammen, wollte nur mal nachfragen wie es euch so geht.',
         timestamp: DateTime.now().subtract(const Duration(hours: 2)),
         type: MessageType.text,
       ),
@@ -159,7 +163,8 @@ class ChatProvider with ChangeNotifier {
         senderId: 'demo_user_2',
         senderName: 'Ethan',
         content: 'Hey Liam! Mir geht\'s super, danke der Nachfrage.',
-        timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
+        timestamp:
+            DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
         type: MessageType.text,
       ),
       ChatMessage(
@@ -168,7 +173,8 @@ class ChatProvider with ChangeNotifier {
         senderId: 'system',
         senderName: 'Stammtisch Bot',
         content: '🍺 Nächster Stammtisch: Dienstag, 4. Februar um 19:00 Uhr',
-        timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 30)),
+        timestamp:
+            DateTime.now().subtract(const Duration(hours: 1, minutes: 30)),
         type: MessageType.eventUpdate,
       ),
       ChatMessage(
@@ -194,7 +200,7 @@ class ChatProvider with ChangeNotifier {
     _groupMessages[groupId] = demoMessages;
     await _saveMessages();
     notifyListeners();
-    
+
     print('🎭 Demo messages initialized for group $groupId');
   }
 
@@ -212,10 +218,11 @@ class ChatProvider with ChangeNotifier {
   List<ChatMessage> searchMessages(String groupId, String query) {
     final messages = _groupMessages[groupId] ?? [];
     if (query.trim().isEmpty) return messages;
-    
-    return messages.where((msg) => 
-      msg.content.toLowerCase().contains(query.toLowerCase()) ||
-      msg.senderName.toLowerCase().contains(query.toLowerCase())
-    ).toList();
+
+    return messages
+        .where((msg) =>
+            msg.content.toLowerCase().contains(query.toLowerCase()) ||
+            msg.senderName.toLowerCase().contains(query.toLowerCase()))
+        .toList();
   }
 }

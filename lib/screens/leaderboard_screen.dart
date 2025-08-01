@@ -4,7 +4,7 @@ import '../providers/points_provider.dart';
 import '../providers/group_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/points.dart';
-import '../l10n/app_localizations.dart';
+import '../l10n/l10n.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -46,7 +46,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 children: [
                   const Icon(Icons.leaderboard, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  Text(l10n.locale.languageCode == 'de' 
+                  Text(context.isGerman 
                       ? 'Keine Gruppe ausgewählt'
                       : 'No group selected'),
                 ],
@@ -62,12 +62,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         // Build tabs with localization
         final tabs = [
           Tab(icon: const Icon(Icons.leaderboard), text: l10n.leaderboard), // LOKALISIERT
-          Tab(icon: const Icon(Icons.analytics), text: l10n.locale.languageCode == 'de' ? 'Statistiken' : 'Statistics'),
+          Tab(icon: const Icon(Icons.analytics), text: context.isGerman ? 'Statistiken' : 'Statistics'),
         ];
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(l10n.locale.languageCode == 'de' 
+            title: Text(context.isGerman 
                 ? '${activeGroup.name} - Rangliste'
                 : '${activeGroup.name} - Leaderboard'),
             bottom: TabBar(
@@ -98,14 +98,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             const Icon(Icons.emoji_events, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              l10n.locale.languageCode == 'de' 
+              context.isGerman 
                   ? 'Noch keine XP-Daten'
                   : 'No XP data yet',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.locale.languageCode == 'de'
+              context.isGerman
                   ? 'Nehmt am Stammtisch teil um XP zu sammeln!'
                   : 'Participate in events to earn XP!',
               textAlign: TextAlign.center,
@@ -137,7 +137,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
-                color: isCurrentUser ? Colors.teal.withOpacity(0.1) : null,
+                color: isCurrentUser ? Colors.teal.withValues(alpha: 0.1) : null,
                 child: ListTile(
                   leading: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -172,7 +172,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     ],
                   ),
                   title: Text(
-                    isCurrentUser ? (l10n.locale.languageCode == 'de' ? 'Du' : 'You') : userPoints.userId, // TODO: Echte Namen
+                    isCurrentUser ? (context.isGerman ? 'Du' : 'You') : userPoints.userId, // TODO: Echte Namen
                     style: TextStyle(
                       fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -183,7 +183,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                       Text('${userPoints.levelTitle} (${l10n.level} ${userPoints.currentLevel})'), // LOKALISIERT
                       if (userPoints.achievements.isNotEmpty)
                         Text(
-                          l10n.locale.languageCode == 'de'
+                          context.isGerman
                               ? '🏆 ${userPoints.achievements.length} Achievements'
                               : '🏆 ${userPoints.achievements.length} Achievements',
                           style: const TextStyle(fontSize: 12),
@@ -261,7 +261,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         const SizedBox(height: 8),
         Text(
           userPoints.userId == Provider.of<AuthProvider>(context, listen: false).currentUserId
-              ? (l10n.locale.languageCode == 'de' ? 'Du' : 'You')
+              ? (context.isGerman ? 'Du' : 'You')
               : userPoints.userId, // TODO: Echte Namen
           style: const TextStyle(
             fontSize: 12,
@@ -319,7 +319,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.locale.languageCode == 'de' 
+            context.isGerman 
                 ? 'Gruppen-Statistiken'
                 : 'Group Statistics',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -338,25 +338,25 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             childAspectRatio: 1.2,
             children: [
               _StatsCard(
-                title: l10n.locale.languageCode == 'de' ? 'Mitglieder' : 'Members',
+                title: context.isGerman ? 'Mitglieder' : 'Members',
                 value: '${groupStats['totalMembers']}',
                 icon: Icons.people,
                 color: Colors.blue,
               ),
               _StatsCard(
-                title: l10n.locale.languageCode == 'de' ? 'Gesamt XP' : 'Total XP',
+                title: context.isGerman ? 'Gesamt XP' : 'Total XP',
                 value: '${groupStats['totalXP']}',
                 icon: Icons.star,
                 color: Colors.orange,
               ),
               _StatsCard(
-                title: l10n.locale.languageCode == 'de' ? 'Ø Level' : 'Avg Level',
+                title: context.isGerman ? 'Ø Level' : 'Avg Level',
                 value: '${groupStats['averageLevel'].toStringAsFixed(1)}',
                 icon: Icons.trending_up,
                 color: Colors.green,
               ),
               _StatsCard(
-                title: l10n.locale.languageCode == 'de' ? 'Beste Streak' : 'Best Streak',
+                title: context.isGerman ? 'Beste Streak' : 'Best Streak',
                 value: '${groupStats['highestStreak']}',
                 icon: Icons.local_fire_department,
                 color: Colors.red,
@@ -368,7 +368,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           
           // Achievement Overview
           Text(
-            l10n.locale.languageCode == 'de'
+            context.isGerman
                 ? 'Achievement-Übersicht'
                 : 'Achievement Overview',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -387,7 +387,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                       const Icon(Icons.emoji_events, color: Colors.amber),
                       const SizedBox(width: 8),
                       Text(
-                        l10n.locale.languageCode == 'de'
+                        context.isGerman
                             ? 'Gesamt Achievements: ${groupStats['totalAchievements']}'
                             : 'Total Achievements: ${groupStats['totalAchievements']}',
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -399,16 +399,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     value: groupStats['totalMembers'] > 0 
                         ? (groupStats['totalAchievements'] / (Achievement.allAchievements.length * groupStats['totalMembers'])).clamp(0.0, 1.0)
                         : 0.0,
-                    backgroundColor: Colors.grey.withOpacity(0.3),
+                    backgroundColor: Colors.grey.withValues(alpha: 0.3),
                     valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     groupStats['totalMembers'] > 0
-                        ? l10n.locale.languageCode == 'de'
+                        ? context.isGerman
                             ? '${((groupStats['totalAchievements'] / (Achievement.allAchievements.length * groupStats['totalMembers'])) * 100).toStringAsFixed(1)}% aller möglichen Achievements freigeschaltet'
                             : '${((groupStats['totalAchievements'] / (Achievement.allAchievements.length * groupStats['totalMembers'])) * 100).toStringAsFixed(1)}% of all possible achievements unlocked'
-                        : l10n.locale.languageCode == 'de'
+                        : context.isGerman
                             ? 'Noch keine Achievements freigeschaltet'
                             : 'No achievements unlocked yet',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -422,7 +422,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
 
           // Level Distribution
           Text(
-            l10n.locale.languageCode == 'de'
+            context.isGerman
                 ? 'Level-Verteilung'
                 : 'Level Distribution',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -447,14 +447,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                         const Icon(Icons.trending_up, size: 48, color: Colors.grey),
                         const SizedBox(height: 12),
                         Text(
-                          l10n.locale.languageCode == 'de'
+                          context.isGerman
                               ? 'Noch keine Level-Daten'
                               : 'No level data yet',
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          l10n.locale.languageCode == 'de'
+                          context.isGerman
                               ? 'Sammelt XP um eure Level zu steigern!'
                               : 'Earn XP to increase your levels!',
                           style: TextStyle(
@@ -536,7 +536,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                                   const SizedBox(height: 4),
                                   LinearProgressIndicator(
                                     value: percentage / 100,
-                                    backgroundColor: Colors.grey.withOpacity(0.3),
+                                    backgroundColor: Colors.grey.withValues(alpha: 0.3),
                                     valueColor: AlwaysStoppedAnimation<Color>(_getLevelColor(level)),
                                     minHeight: 6,
                                   ),

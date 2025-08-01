@@ -7,6 +7,7 @@ import '../providers/points_provider.dart';
 import '../widgets/xp_animation.dart';
 import '../widgets/user_profile_card.dart';
 import '../models/points.dart';
+import '../l10n/l10n.dart';
 import '../l10n/app_localizations.dart';
 
 class EventScreen extends StatefulWidget {
@@ -22,17 +23,22 @@ class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n; // Lokalisierung
+    // Lokalisierung
+    final l10n = AppLocalizations.of(context)!;
 
-    return Consumer4<GroupProvider, EventProvider, AuthProvider, PointsProvider>(
-      builder: (context, groupProvider, eventProvider, authProvider, pointsProvider, child) {
+    return Consumer4<GroupProvider, EventProvider, AuthProvider,
+        PointsProvider>(
+      builder: (context, groupProvider, eventProvider, authProvider,
+          pointsProvider, child) {
         final activeGroup = groupProvider.getActiveGroup(context);
         final currentUserId = authProvider.currentUserId;
-        
+
         // Check if user has any groups
         if (activeGroup == null) {
           return Scaffold(
-            appBar: AppBar(title: Text(l10n.locale.languageCode == 'de' ? 'Stammtisch' : 'Event')),
+            appBar: AppBar(
+                title: Text(
+                    context.isGerman ? 'Stammtisch' : 'Event')),
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -44,12 +50,15 @@ class _EventScreenState extends State<EventScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    l10n.locale.languageCode == 'de' ? 'Keine Gruppe ausgewählt' : 'No group selected',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    context.isGerman
+                        ? 'Keine Gruppe ausgewählt'
+                        : 'No group selected',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.locale.languageCode == 'de' 
+                    context.isGerman
                         ? 'Wähle zuerst eine Gruppe aus oder erstelle eine neue.'
                         : 'First select a group or create a new one.',
                     textAlign: TextAlign.center,
@@ -64,7 +73,9 @@ class _EventScreenState extends State<EventScreen> {
 
         if (event == null) {
           return Scaffold(
-            appBar: AppBar(title: Text(l10n.locale.languageCode == 'de' ? 'Stammtisch' : 'Event')),
+            appBar: AppBar(
+                title: Text(
+                    context.isGerman ? 'Stammtisch' : 'Event')),
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -76,12 +87,15 @@ class _EventScreenState extends State<EventScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    l10n.locale.languageCode == 'de' ? 'Kein Termin vorhanden' : 'No event available',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    context.isGerman
+                        ? 'Kein Termin vorhanden'
+                        : 'No event available',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.locale.languageCode == 'de'
+                    context.isGerman
                         ? 'Für die Gruppe "${activeGroup.name}" wurde noch kein Event erstellt.'
                         : 'No event has been created for group "${activeGroup.name}" yet.',
                     textAlign: TextAlign.center,
@@ -92,7 +106,9 @@ class _EventScreenState extends State<EventScreen> {
                       eventProvider.generateEventForGroup(activeGroup.id);
                     },
                     icon: const Icon(Icons.add_circle),
-                    label: Text(l10n.locale.languageCode == 'de' ? 'Event erstellen' : 'Create Event'),
+                    label: Text(context.isGerman
+                        ? 'Event erstellen'
+                        : 'Create Event'),
                   ),
                 ],
               ),
@@ -100,14 +116,20 @@ class _EventScreenState extends State<EventScreen> {
           );
         }
 
-        final dateStr = "${event.date.day}.${event.date.month}.${event.date.year}";
+        final dateStr =
+            "${event.date.day}.${event.date.month}.${event.date.year}";
         final status = event.isConfirmed
-            ? (l10n.locale.languageCode == 'de' ? "✅ Findet statt" : "✅ Confirmed")
-            : (l10n.locale.languageCode == 'de' ? "❌ Abgesagt (zu wenige Zusagen)" : "❌ Cancelled (not enough participants)");
+            ? (context.isGerman
+                ? "✅ Findet statt"
+                : "✅ Confirmed")
+            : (context.isGerman
+                ? "❌ Abgesagt (zu wenige Zusagen)"
+                : "❌ Cancelled (not enough participants)");
 
         // Get current user's participation status
         final userParticipation = event.participation[currentUserId];
-        final userPoints = pointsProvider.getUserPoints(currentUserId, activeGroup.id);
+        final userPoints =
+            pointsProvider.getUserPoints(currentUserId, activeGroup.id);
 
         // Separate participants by response
         final participants = event.participation.entries.toList();
@@ -119,7 +141,7 @@ class _EventScreenState extends State<EventScreen> {
           key: _overlayKey,
           child: Scaffold(
             appBar: AppBar(
-              title: Text(l10n.locale.languageCode == 'de' 
+              title: Text(context.isGerman
                   ? '${activeGroup.name} - Stammtisch'
                   : '${activeGroup.name} - Event'),
               actions: [
@@ -129,9 +151,11 @@ class _EventScreenState extends State<EventScreen> {
                     padding: const EdgeInsets.only(right: 8),
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: _getLevelColor(userPoints.currentLevel).withOpacity(0.2),
+                          color: _getLevelColor(userPoints.currentLevel)
+                              .withOpacity(0.2),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: _getLevelColor(userPoints.currentLevel),
@@ -196,25 +220,35 @@ class _EventScreenState extends State<EventScreen> {
                               children: [
                                 Icon(
                                   Icons.event,
-                                  color: event.isConfirmed ? Colors.green : Colors.red,
+                                  color: event.isConfirmed
+                                      ? Colors.green
+                                      : Colors.red,
                                   size: 28,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         "📅 $dateStr",
-                                        style: Theme.of(context).textTheme.titleLarge,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge,
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         status,
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          color: event.isConfirmed ? Colors.green : Colors.red,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              color: event.isConfirmed
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -222,20 +256,22 @@ class _EventScreenState extends State<EventScreen> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            
+
                             // Progress Indicator für Mindestanzahl
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(l10n.locale.languageCode == 'de' 
+                                    Text(context.isGerman
                                         ? "Zusagen: ${event.yesCount} / 4"
                                         : "Confirmations: ${event.yesCount} / 4"),
                                     Text(
                                       "${((event.yesCount / 4) * 100).toInt()}%",
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -244,7 +280,9 @@ class _EventScreenState extends State<EventScreen> {
                                   value: (event.yesCount / 4).clamp(0.0, 1.0),
                                   backgroundColor: Colors.grey.withOpacity(0.3),
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    event.isConfirmed ? Colors.green : Colors.orange,
+                                    event.isConfirmed
+                                        ? Colors.green
+                                        : Colors.orange,
                                   ),
                                   minHeight: 8,
                                 ),
@@ -256,10 +294,13 @@ class _EventScreenState extends State<EventScreen> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: _getParticipationColor(userParticipation).withOpacity(0.1),
+                                  color:
+                                      _getParticipationColor(userParticipation)
+                                          .withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: _getParticipationColor(userParticipation),
+                                    color: _getParticipationColor(
+                                        userParticipation),
                                     width: 1,
                                   ),
                                 ),
@@ -267,16 +308,18 @@ class _EventScreenState extends State<EventScreen> {
                                   children: [
                                     Icon(
                                       _getParticipationIcon(userParticipation),
-                                      color: _getParticipationColor(userParticipation),
+                                      color: _getParticipationColor(
+                                          userParticipation),
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      l10n.locale.languageCode == 'de'
-                                          ? "Deine Antwort: ${_getParticipationText(userParticipation, l10n)}"
-                                          : "Your response: ${_getParticipationText(userParticipation, l10n)}",
+                                      context.isGerman
+                                          ? "Deine Antwort: ${_getParticipationText(userParticipation)}"
+                                          : "Your response: ${_getParticipationText(userParticipation)}",
                                       style: TextStyle(
-                                        color: _getParticipationColor(userParticipation),
+                                        color: _getParticipationColor(
+                                            userParticipation),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -300,28 +343,32 @@ class _EventScreenState extends State<EventScreen> {
                           children: [
                             Text(
                               l10n.participate, // LOKALISIERT
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                             const SizedBox(height: 12),
-                            
+
                             // XP Info Card
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: Colors.green.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.green.withOpacity(0.3)),
+                                border: Border.all(
+                                    color: Colors.green.withOpacity(0.3)),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.star, color: Colors.green, size: 20),
+                                  const Icon(Icons.star,
+                                      color: Colors.green, size: 20),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          l10n.locale.languageCode == 'de'
+                                          context.isGerman
                                               ? 'XP-Belohnungen'
                                               : 'XP Rewards',
                                           style: const TextStyle(
@@ -330,7 +377,7 @@ class _EventScreenState extends State<EventScreen> {
                                           ),
                                         ),
                                         Text(
-                                          l10n.locale.languageCode == 'de'
+                                          context.isGerman
                                               ? '🍺 Zusage: +${XPAction.attendEvent.baseXP} XP  |  ⚡ Früh dran: +${XPAction.earlyConfirmation.baseXP} XP'
                                               : '🍺 Confirm: +${XPAction.attendEvent.baseXP} XP  |  ⚡ Early: +${XPAction.earlyConfirmation.baseXP} XP',
                                           style: const TextStyle(fontSize: 12),
@@ -348,85 +395,89 @@ class _EventScreenState extends State<EventScreen> {
                               children: [
                                 Expanded(
                                   child: ElevatedButton.icon(
-                                    onPressed: _isProcessingXP 
-                                        ? null 
+                                    onPressed: _isProcessingXP
+                                        ? null
                                         : () => _setParticipation(
-                                            'yes', 
-                                            eventProvider, 
-                                            pointsProvider,
-                                            activeGroup.id, 
-                                            currentUserId, 
-                                            event.date,
-                                            l10n,
-                                          ),
-                                    icon: _isProcessingXP 
+                                              'yes',
+                                              eventProvider,
+                                              pointsProvider,
+                                              activeGroup.id,
+                                              currentUserId,
+                                              event.date,
+                                            ),
+                                    icon: _isProcessingXP
                                         ? const SizedBox(
                                             width: 16,
                                             height: 16,
-                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2),
                                           )
                                         : const Icon(Icons.check),
                                     label: Text(l10n.yes), // LOKALISIERT
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: userParticipation == 'yes' 
-                                          ? Colors.green 
-                                          : null,
-                                      foregroundColor: userParticipation == 'yes'
-                                          ? Colors.white
-                                          : null,
-                                    ),
+                                    style: userParticipation == 'yes'
+                                        ? ButtonStyle(
+                                            backgroundColor:
+                                                WidgetStateProperty.all(
+                                                    Colors.green),
+                                            foregroundColor:
+                                                WidgetStateProperty.all(
+                                                    Colors.white),
+                                          )
+                                        : null,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: ElevatedButton.icon(
-                                    onPressed: _isProcessingXP 
-                                        ? null 
+                                    onPressed: _isProcessingXP
+                                        ? null
                                         : () => _setParticipation(
-                                            'maybe', 
-                                            eventProvider, 
-                                            pointsProvider,
-                                            activeGroup.id, 
-                                            currentUserId, 
-                                            event.date,
-                                            l10n,
-                                          ),
+                                              'maybe',
+                                              eventProvider,
+                                              pointsProvider,
+                                              activeGroup.id,
+                                              currentUserId,
+                                              event.date,
+                                            ),
                                     icon: const Icon(Icons.help),
                                     label: Text(l10n.maybe), // LOKALISIERT
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: userParticipation == 'maybe' 
-                                          ? Colors.orange 
-                                          : null,
-                                      foregroundColor: userParticipation == 'maybe'
-                                          ? Colors.white
-                                          : null,
-                                    ),
+                                    style: userParticipation == 'maybe'
+                                        ? ButtonStyle(
+                                            backgroundColor:
+                                                WidgetStateProperty.all(
+                                                    Colors.orange),
+                                            foregroundColor:
+                                                WidgetStateProperty.all(
+                                                    Colors.white),
+                                          )
+                                        : null,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: ElevatedButton.icon(
-                                    onPressed: _isProcessingXP 
-                                        ? null 
+                                    onPressed: _isProcessingXP
+                                        ? null
                                         : () => _setParticipation(
-                                            'no', 
-                                            eventProvider, 
-                                            pointsProvider,
-                                            activeGroup.id, 
-                                            currentUserId, 
-                                            event.date,
-                                            l10n,
-                                          ),
+                                              'no',
+                                              eventProvider,
+                                              pointsProvider,
+                                              activeGroup.id,
+                                              currentUserId,
+                                              event.date,
+                                            ),
                                     icon: const Icon(Icons.close),
                                     label: Text(l10n.no), // LOKALISIERT
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: userParticipation == 'no' 
-                                          ? Colors.red 
-                                          : null,
-                                      foregroundColor: userParticipation == 'no'
-                                          ? Colors.white
-                                          : null,
-                                    ),
+                                    style: userParticipation == 'no'
+                                        ? ButtonStyle(
+                                            backgroundColor:
+                                                WidgetStateProperty.all(
+                                                    Colors.red),
+                                            foregroundColor:
+                                                WidgetStateProperty.all(
+                                                    Colors.white),
+                                          )
+                                        : null,
                                   ),
                                 ),
                               ],
@@ -446,63 +497,59 @@ class _EventScreenState extends State<EventScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10n.locale.languageCode == 'de'
+                              context.isGerman
                                   ? "🧑‍🤝‍🧑 Teilnehmerübersicht"
                                   : "🧑‍🤝‍🧑 Participants Overview",
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                             const SizedBox(height: 12),
-                            
                             if (yes.isNotEmpty) ...[
                               _buildParticipantSection(
-                                l10n.locale.languageCode == 'de'
+                                context.isGerman
                                     ? "✔️ Zugesagt (${yes.length}):"
                                     : "✔️ Confirmed (${yes.length}):",
                                 yes,
                                 Colors.green,
                                 pointsProvider,
                                 activeGroup.id,
-                                l10n,
                               ),
-                              if (maybe.isNotEmpty || no.isNotEmpty) const SizedBox(height: 12),
+                              if (maybe.isNotEmpty || no.isNotEmpty)
+                                const SizedBox(height: 12),
                             ],
-                            
                             if (maybe.isNotEmpty) ...[
                               _buildParticipantSection(
-                                l10n.locale.languageCode == 'de'
+                                context.isGerman
                                     ? "❔ Vielleicht (${maybe.length}):"
                                     : "❔ Maybe (${maybe.length}):",
                                 maybe,
                                 Colors.orange,
                                 pointsProvider,
                                 activeGroup.id,
-                                l10n,
                               ),
                               if (no.isNotEmpty) const SizedBox(height: 12),
                             ],
-                            
                             if (no.isNotEmpty) ...[
                               _buildParticipantSection(
-                                l10n.locale.languageCode == 'de'
+                                context.isGerman
                                     ? "❌ Abgesagt (${no.length}):"
                                     : "❌ Declined (${no.length}):",
                                 no,
                                 Colors.red,
                                 pointsProvider,
                                 activeGroup.id,
-                                l10n,
                               ),
                             ],
-                            
                             if (participants.isEmpty)
                               Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(20),
                                   child: Text(
-                                    l10n.locale.languageCode == 'de'
+                                    context.isGerman
                                         ? "Noch keine Antworten erhalten.\nSei der Erste und sammle Bonus-XP! 🌟"
                                         : "No responses received yet.\nBe the first and earn bonus XP! 🌟",
-                                    style: const TextStyle(fontStyle: FontStyle.italic),
+                                    style: const TextStyle(
+                                        fontStyle: FontStyle.italic),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -527,7 +574,6 @@ class _EventScreenState extends State<EventScreen> {
     Color color,
     PointsProvider pointsProvider,
     String groupId,
-    AppLocalizations l10n,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -541,9 +587,11 @@ class _EventScreenState extends State<EventScreen> {
         ),
         const SizedBox(height: 8),
         ...participants.map((participant) {
-          final userPoints = pointsProvider.getUserPoints(participant.key, groupId);
-          final isCurrentUser = participant.key == Provider.of<AuthProvider>(context, listen: false).currentUserId;
-          
+          final userPoints =
+              pointsProvider.getUserPoints(participant.key, groupId);
+          final isCurrentUser = participant.key ==
+              Provider.of<AuthProvider>(context, listen: false).currentUserId;
+
           return Padding(
             padding: const EdgeInsets.only(left: 16, top: 4),
             child: Row(
@@ -576,9 +624,12 @@ class _EventScreenState extends State<EventScreen> {
                 ],
                 Expanded(
                   child: Text(
-                    isCurrentUser ? (l10n.locale.languageCode == 'de' ? 'Du' : 'You') : _getUserDisplayName(participant.key),
+                    isCurrentUser
+                        ? (context.isGerman ? 'Du' : 'You')
+                        : _getUserDisplayName(participant.key),
                     style: TextStyle(
-                      fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                      fontWeight:
+                          isCurrentUser ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -605,7 +656,6 @@ class _EventScreenState extends State<EventScreen> {
     String groupId,
     String userId,
     DateTime eventDate,
-    AppLocalizations l10n,
   ) async {
     if (_isProcessingXP) return;
 
@@ -619,12 +669,14 @@ class _EventScreenState extends State<EventScreen> {
 
       // Vergib XP bei Zusage
       if (choice == 'yes') {
-        final events = await pointsProvider.awardXP(userId, groupId, XPAction.attendEvent);
-        
+        final events =
+            await pointsProvider.awardXP(userId, groupId, XPAction.attendEvent);
+
         // Prüfe ob früh zugesagt (mehr als 7 Tage vor Event)
         final daysUntilEvent = eventDate.difference(DateTime.now()).inDays;
         if (daysUntilEvent >= 7) {
-          final earlyEvents = await pointsProvider.awardXP(userId, groupId, XPAction.earlyConfirmation);
+          final earlyEvents = await pointsProvider.awardXP(
+              userId, groupId, XPAction.earlyConfirmation);
           events.addAll(earlyEvents);
         }
 
@@ -635,15 +687,15 @@ class _EventScreenState extends State<EventScreen> {
       // Feedback
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_getParticipationFeedback(choice, l10n)),
+          content: Text(_getParticipationFeedback(choice)),
           backgroundColor: _getParticipationColor(choice),
         ),
       );
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.locale.languageCode == 'de' ? 'Fehler: $e' : 'Error: $e'),
+          content: Text(
+              context.isGerman ? 'Fehler: $e' : 'Error: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -660,10 +712,10 @@ class _EventScreenState extends State<EventScreen> {
     String userId,
     String groupId,
   ) {
-    final l10n = context.l10n;
-    
+    // Lokalisierung bereits über Build Context verfügbar
+
     if (events.contains('xp_gained')) {
-      _overlayKey.currentState?.showXPGain(l10n.locale.languageCode == 'de'
+      _overlayKey.currentState?.showXPGain(context.isGerman
           ? '🍺 +${XPAction.attendEvent.baseXP} XP - Teilnahme bestätigt!'
           : '🍺 +${XPAction.attendEvent.baseXP} XP - Participation confirmed!');
     }
@@ -672,7 +724,8 @@ class _EventScreenState extends State<EventScreen> {
       final userPoints = pointsProvider.getUserPoints(userId, groupId);
       if (userPoints != null) {
         Future.delayed(const Duration(milliseconds: 500), () {
-          _overlayKey.currentState?.showLevelUp(userPoints.currentLevel, userPoints.levelTitle);
+          _overlayKey.currentState
+              ?.showLevelUp(userPoints.currentLevel, userPoints.levelTitle);
         });
       }
     }
@@ -680,41 +733,46 @@ class _EventScreenState extends State<EventScreen> {
     if (events.contains('achievement_unlocked')) {
       Future.delayed(const Duration(milliseconds: 1000), () {
         _overlayKey.currentState?.showAchievementUnlock(
-          l10n.locale.languageCode == 'de' ? 'Neues Achievement!' : 'New Achievement!', 
-          '🏆', 
-          l10n.locale.languageCode == 'de' 
-              ? 'Du hast ein Achievement freigeschaltet!'
-              : 'You unlocked an achievement!'
-        );
+            context.isGerman
+                ? 'Neues Achievement!'
+                : 'New Achievement!',
+            '🏆',
+            context.isGerman
+                ? 'Du hast ein Achievement freigeschaltet!'
+                : 'You unlocked an achievement!');
       });
     }
   }
 
-  String _getParticipationText(String participation, AppLocalizations l10n) {
+  String _getParticipationText(String participation) {
     switch (participation) {
-      case 'yes': return l10n.locale.languageCode == 'de' ? 'Zugesagt ✅' : 'Confirmed ✅';
-      case 'maybe': return l10n.locale.languageCode == 'de' ? 'Vielleicht ❔' : 'Maybe ❔';
-      case 'no': return l10n.locale.languageCode == 'de' ? 'Abgesagt ❌' : 'Declined ❌';
-      default: return l10n.locale.languageCode == 'de' ? 'Unbekannt' : 'Unknown';
+      case 'yes':
+        return context.isGerman ? 'Zugesagt ✅' : 'Confirmed ✅';
+      case 'maybe':
+        return context.isGerman ? 'Vielleicht ❔' : 'Maybe ❔';
+      case 'no':
+        return context.isGerman ? 'Abgesagt ❌' : 'Declined ❌';
+      default:
+        return context.isGerman ? 'Unbekannt' : 'Unknown';
     }
   }
 
-  String _getParticipationFeedback(String participation, AppLocalizations l10n) {
+  String _getParticipationFeedback(String participation) {
     switch (participation) {
-      case 'yes': 
-        return l10n.locale.languageCode == 'de'
+      case 'yes':
+        return context.isGerman
             ? 'Super! Du bist dabei! 🍺 (+${XPAction.attendEvent.baseXP} XP)'
             : 'Great! You\'re in! 🍺 (+${XPAction.attendEvent.baseXP} XP)';
-      case 'maybe': 
-        return l10n.locale.languageCode == 'de'
+      case 'maybe':
+        return context.isGerman
             ? 'Okay, lass uns wissen wenn du dich entscheidest!'
             : 'Okay, let us know when you decide!';
-      case 'no': 
-        return l10n.locale.languageCode == 'de'
+      case 'no':
+        return context.isGerman
             ? 'Schade! Vielleicht beim nächsten Mal.'
             : 'Too bad! Maybe next time.';
-      default: 
-        return l10n.locale.languageCode == 'de'
+      default:
+        return context.isGerman
             ? 'Antwort gespeichert.'
             : 'Response saved.';
     }
@@ -722,34 +780,52 @@ class _EventScreenState extends State<EventScreen> {
 
   Color _getParticipationColor(String participation) {
     switch (participation) {
-      case 'yes': return Colors.green;
-      case 'maybe': return Colors.orange;
-      case 'no': return Colors.red;
-      default: return Colors.grey;
+      case 'yes':
+        return Colors.green;
+      case 'maybe':
+        return Colors.orange;
+      case 'no':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   IconData _getParticipationIcon(String participation) {
     switch (participation) {
-      case 'yes': return Icons.check_circle;
-      case 'maybe': return Icons.help;
-      case 'no': return Icons.cancel;
-      default: return Icons.circle;
+      case 'yes':
+        return Icons.check_circle;
+      case 'maybe':
+        return Icons.help;
+      case 'no':
+        return Icons.cancel;
+      default:
+        return Icons.circle;
     }
   }
 
   Color _getLevelColor(int level) {
     switch (level) {
-      case 1: return Colors.brown;
-      case 2: return Colors.grey;
-      case 3: return Colors.orange;
-      case 4: return Colors.blue;
-      case 5: return Colors.purple;
-      case 6: return Colors.red;
-      case 7: return Colors.pink;
-      case 8: return Colors.indigo;
-      case 9: return Colors.amber;
-      default: return Colors.deepPurple;
+      case 1:
+        return Colors.brown;
+      case 2:
+        return Colors.grey;
+      case 3:
+        return Colors.orange;
+      case 4:
+        return Colors.blue;
+      case 5:
+        return Colors.purple;
+      case 6:
+        return Colors.red;
+      case 7:
+        return Colors.pink;
+      case 8:
+        return Colors.indigo;
+      case 9:
+        return Colors.amber;
+      default:
+        return Colors.deepPurple;
     }
   }
 

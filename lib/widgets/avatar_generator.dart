@@ -15,7 +15,7 @@ class AvatarGenerator extends StatelessWidget {
     final cleaned = input.trim();
     if (cleaned.isEmpty) return "?";
 
-    final words = cleaned.split(RegExp(r'\\s+'));
+    final words = cleaned.split(RegExp(r'\s+'));
     if (words.length >= 2) {
       return (words[0][0] + words[1][0]).toUpperCase();
     } else if (words[0].length >= 2) {
@@ -29,7 +29,7 @@ class AvatarGenerator extends StatelessWidget {
   Color _colorFromName(String input) {
     if (input.isEmpty) return Colors.grey;
     final hash = input.codeUnits.fold<int>(0, (int p, int c) => p + c);
-    final colors = Colors.primaries;
+    const colors = Colors.primaries;
     return colors[hash % colors.length];
   }
 
@@ -40,7 +40,8 @@ class AvatarGenerator extends StatelessWidget {
       backgroundColor: _colorFromName(name),
       child: Text(
         _initials(name),
-        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        style:
+            const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
   }

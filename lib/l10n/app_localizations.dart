@@ -1,494 +1,1273 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class AppLocalizations {
-  AppLocalizations(this.locale);
-  
-  final Locale locale;
-  
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_de.dart';
+import 'app_localizations_en.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
   static AppLocalizations? of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
-  
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
-  
-  // Deutsche Übersetzungen
-  static const Map<String, String> _localizedStrings = {
-    // Auth & Login
-    'welcome': 'Willkommen zurück! 🍻',
-    'login': 'Anmelden',
-    'register': 'Registrieren',
-    'email': 'E-Mail',
-    'password': 'Passwort',
-    'displayName': 'Anzeigename',
-    'confirmPassword': 'Passwort bestätigen',
-    'agreeTerms': 'Ich akzeptiere die Nutzungsbedingungen und Datenschutzerklärung',
-    'rememberMe': 'Angemeldet bleiben',
-    'logout': 'Abmelden',
-    'forgotPassword': 'Passwort vergessen?',
-    'noAccount': 'Noch kein Konto? Hier registrieren',
-    'hasAccount': 'Bereits ein Konto? Hier anmelden',
-    
-    // Groups
-    'myGroups': 'Meine Stammtischgruppen',
-    'createGroup': 'Gruppe erstellen',
-    'noGroups': 'Noch keine Gruppen',
-    'firstGroup': 'Erstelle deine erste Stammtischgruppe!',
-    'groupName': 'Gruppenname',
-    'groupAvatar': 'Avatar-Bild-URL (optional)',
-    'leaveGroup': 'Gruppe verlassen',
-    'deleteGroup': 'Gruppe löschen',
-    'groupSettings': 'Gruppeneinstellungen',
-    'memberCount': '%d Mitglieder',
-    'admin': 'Admin',
-    'member': 'Mitglied',
-    
-    // Events
-    'nextEvent': 'Nächster Stammtisch',
-    'participate': 'Teilnehmen?',
-    'yes': 'Ja',
-    'maybe': 'Vielleicht',
-    'no': 'Nein',
-    'confirmed': 'Findet statt',
-    'cancelled': 'Abgesagt',
-    'minParticipants': 'zu wenige Zusagen',
-    'participantCount': '%d Zusagen',
-    'eventDate': 'Datum',
-    'eventStatus': 'Status',
-    'eventParticipants': 'Teilnehmer',
-    
-    // XP & Points
-    'xpGained': 'XP erhalten!',
-    'levelUp': 'Level Up!',
-    'achievement': 'Achievement freigeschaltet!',
-    'level': 'Level',
-    'streak': 'Streak',
-    'totalXP': 'Gesamt XP',
-    'xpForAction': '+%d XP für %s',
-    'levelProgress': '%d%% zum nächsten Level',
-    'currentLevel': 'Level %d',
-    'nextLevel': 'Level %d → %d',
-    
-    // Navigation
-    'leaderboard': 'Rangliste',
-    'calendar': 'Kalender',
-    'restaurants': 'Restaurants',
-    'chat': 'Chat',
-    'profile': 'Profil',
-    'settings': 'Einstellungen',
-    'reminders': 'Erinnerungen',
-    'suggestions': 'Vorschläge',
-    
-    // Restaurants
-    'restaurantSuggestions': 'Restaurantvorschläge',
-    'suggestRestaurant': 'Restaurant vorschlagen',
-    'restaurantName': 'Restaurant Name',
-    'restaurantDescription': 'Beschreibung (optional)',
-    'category': 'Kategorie',
-    'rating': 'Bewertung',
-    'votes': 'Stimmen',
-    'vote': 'Abstimmen',
-    'voted': 'Gevotet',
-    'details': 'Details',
-    'suggestedBy': 'Vorgeschlagen von %s',
-    
-    // Calendar
-    'calendarOverview': 'Kalenderübersicht',
-    'selectedDay': 'Ausgewählter Tag: %s',
-    'plannedEvents': 'Geplante Events',
-    'noEventToday': 'Kein Event an diesem Tag',
-    'today': 'Heute',
-    'tomorrow': 'Morgen',
-    'yesterday': 'Gestern',
-    'inDays': 'In %d Tagen',
-    'daysAgo': 'Vor %d Tagen',
-    
-    // Profile
-    'myProfile': 'Mein Profil',
-    'accountInfo': 'Account-Informationen',
-    'registeredOn': 'Registriert am',
-    'lastLogin': 'Letzter Login',
-    'accountStatus': 'Account-Status',
-    'active': 'Aktiv',
-    'inactive': 'Inaktiv',
-    'editProfile': 'Profil bearbeiten',
-    'save': 'Speichern',
-    'cancel': 'Abbrechen',
-    
-    // Common
-    'ok': 'OK',
-    'close': 'Schließen',
-    'delete': 'Löschen',
-    'edit': 'Bearbeiten',
-    'add': 'Hinzufügen',
-    'remove': 'Entfernen',
-    'search': 'Suchen',
-    'filter': 'Filter',
-    'sort': 'Sortieren',
-    'refresh': 'Aktualisieren',
-    'loading': 'Laden...',
-    'error': 'Fehler',
-    'success': 'Erfolgreich',
-    'warning': 'Warnung',
-    'info': 'Information',
-    
-    // Errors
-    'invalidEmail': 'Ungültige E-Mail-Adresse',
-    'passwordTooShort': 'Passwort muss mindestens 6 Zeichen lang sein',
-    'passwordsDontMatch': 'Passwörter stimmen nicht überein',
-    'fieldRequired': 'Dieses Feld ist erforderlich',
-    'emailExists': 'E-Mail-Adresse bereits registriert',
-    'loginFailed': 'Anmeldung fehlgeschlagen',
-    'wrongPassword': 'Falsches Passwort',
-    'userNotFound': 'E-Mail-Adresse nicht gefunden',
-    'networkError': 'Netzwerkfehler',
-    'unknownError': 'Unbekannter Fehler',
-    
-    // Achievements
-    'firstTimer': 'Erstmalig dabei',
-    'regular': 'Stammgast',
-    'loyaltyChampion': 'Treue-Seele',
-    'generousSoul': 'Großzügige Seele',
-    'bierbaron': 'Bierbaron',
-    'foodie': 'Feinschmecker',
-    'restaurantScout': 'Restaurant-Scout',
-    'streakMaster': 'Streak-Meister',
-    'perfectYear': 'Perfektes Jahr',
-    'lightningFast': 'Blitz-Zusager',
-    'levelMaster': 'Level-Meister',
-    'stammtischGod': 'Stammtisch-Gott',
-    'partyStarter': 'Party-Starter',
-  };
-  
-  // Englische Übersetzungen
-  static const Map<String, String> _localizedStringsEn = {
-    // Auth & Login
-    'welcome': 'Welcome back! 🍻',
-    'login': 'Login',
-    'register': 'Register',
-    'email': 'Email',
-    'password': 'Password',
-    'displayName': 'Display Name',
-    'confirmPassword': 'Confirm Password',
-    'agreeTerms': 'I accept the terms of service and privacy policy',
-    'rememberMe': 'Remember me',
-    'logout': 'Logout',
-    'forgotPassword': 'Forgot password?',
-    'noAccount': 'No account? Register here',
-    'hasAccount': 'Already have an account? Login here',
-    
-    // Groups
-    'myGroups': 'My Groups',
-    'createGroup': 'Create Group',
-    'noGroups': 'No groups yet',
-    'firstGroup': 'Create your first group!',
-    'groupName': 'Group Name',
-    'groupAvatar': 'Avatar Image URL (optional)',
-    'leaveGroup': 'Leave Group',
-    'deleteGroup': 'Delete Group',
-    'groupSettings': 'Group Settings',
-    'memberCount': '%d Members',
-    'admin': 'Admin',
-    'member': 'Member',
-    
-    // Events
-    'nextEvent': 'Next Event',
-    'participate': 'Participate?',
-    'yes': 'Yes',
-    'maybe': 'Maybe',
-    'no': 'No',
-    'confirmed': 'Confirmed',
-    'cancelled': 'Cancelled',
-    'minParticipants': 'not enough participants',
-    'participantCount': '%d Confirmations',
-    'eventDate': 'Date',
-    'eventStatus': 'Status',
-    'eventParticipants': 'Participants',
-    
-    // XP & Points
-    'xpGained': 'XP gained!',
-    'levelUp': 'Level Up!',
-    'achievement': 'Achievement unlocked!',
-    'level': 'Level',
-    'streak': 'Streak',
-    'totalXP': 'Total XP',
-    'xpForAction': '+%d XP for %s',
-    'levelProgress': '%d%% to next level',
-    'currentLevel': 'Level %d',
-    'nextLevel': 'Level %d → %d',
-    
-    // Navigation
-    'leaderboard': 'Leaderboard',
-    'calendar': 'Calendar',
-    'restaurants': 'Restaurants',
-    'chat': 'Chat',
-    'profile': 'Profile',
-    'settings': 'Settings',
-    'reminders': 'Reminders',
-    'suggestions': 'Suggestions',
-    
-    // Restaurants
-    'restaurantSuggestions': 'Restaurant Suggestions',
-    'suggestRestaurant': 'Suggest Restaurant',
-    'restaurantName': 'Restaurant Name',
-    'restaurantDescription': 'Description (optional)',
-    'category': 'Category',
-    'rating': 'Rating',
-    'votes': 'Votes',
-    'vote': 'Vote',
-    'voted': 'Voted',
-    'details': 'Details',
-    'suggestedBy': 'Suggested by %s',
-    
-    // Calendar
-    'calendarOverview': 'Calendar Overview',
-    'selectedDay': 'Selected day: %s',
-    'plannedEvents': 'Planned Events',
-    'noEventToday': 'No event on this day',
-    'today': 'Today',
-    'tomorrow': 'Tomorrow',
-    'yesterday': 'Yesterday',
-    'inDays': 'In %d days',
-    'daysAgo': '%d days ago',
-    
-    // Profile
-    'myProfile': 'My Profile',
-    'accountInfo': 'Account Information',
-    'registeredOn': 'Registered on',
-    'lastLogin': 'Last login',
-    'accountStatus': 'Account Status',
-    'active': 'Active',
-    'inactive': 'Inactive',
-    'editProfile': 'Edit Profile',
-    'save': 'Save',
-    'cancel': 'Cancel',
-    
-    // Common
-    'ok': 'OK',
-    'close': 'Close',
-    'delete': 'Delete',
-    'edit': 'Edit',
-    'add': 'Add',
-    'remove': 'Remove',
-    'search': 'Search',
-    'filter': 'Filter',
-    'sort': 'Sort',
-    'refresh': 'Refresh',
-    'loading': 'Loading...',
-    'error': 'Error',
-    'success': 'Success',
-    'warning': 'Warning',
-    'info': 'Information',
-    
-    // Errors
-    'invalidEmail': 'Invalid email address',
-    'passwordTooShort': 'Password must be at least 6 characters',
-    'passwordsDontMatch': 'Passwords do not match',
-    'fieldRequired': 'This field is required',
-    'emailExists': 'Email address already registered',
-    'loginFailed': 'Login failed',
-    'wrongPassword': 'Wrong password',
-    'userNotFound': 'Email address not found',
-    'networkError': 'Network error',
-    'unknownError': 'Unknown error',
-    
-    // Achievements
-    'firstTimer': 'First Timer',
-    'regular': 'Regular',
-    'loyaltyChampion': 'Loyalty Champion',
-    'generousSoul': 'Generous Soul',
-    'bierbaron': 'Beer Baron',
-    'foodie': 'Foodie',
-    'restaurantScout': 'Restaurant Scout',
-    'streakMaster': 'Streak Master',
-    'perfectYear': 'Perfect Year',
-    'lightningFast': 'Lightning Fast',
-    'levelMaster': 'Level Master',
-    'stammtischGod': 'Group Master',
-    'partyStarter': 'Party Starter',
-  };
-  
-  String _getValue(String key) {
-    if (locale.languageCode == 'en') {
-      return _localizedStringsEn[key] ?? key;
-    }
-    return _localizedStrings[key] ?? key;
-  }
-  
-  // Helper für formatierte Strings
-  String _getFormattedValue(String key, List<Object> args) {
-    String value = _getValue(key);
-    for (int i = 0; i < args.length; i++) {
-      value = value.replaceAll('%${i + 1}', args[i].toString());
-      value = value.replaceAll('%d', args[i].toString());
-      value = value.replaceAll('%s', args[i].toString());
-    }
-    return value;
-  }
-  
-  // Auth & Login
-  String get welcome => _getValue('welcome');
-  String get login => _getValue('login');
-  String get register => _getValue('register');
-  String get email => _getValue('email');
-  String get password => _getValue('password');
-  String get displayName => _getValue('displayName');
-  String get confirmPassword => _getValue('confirmPassword');
-  String get agreeTerms => _getValue('agreeTerms');
-  String get rememberMe => _getValue('rememberMe');
-  String get logout => _getValue('logout');
-  String get forgotPassword => _getValue('forgotPassword');
-  String get noAccount => _getValue('noAccount');
-  String get hasAccount => _getValue('hasAccount');
-  
-  // Groups
-  String get myGroups => _getValue('myGroups');
-  String get createGroup => _getValue('createGroup');
-  String get noGroups => _getValue('noGroups');
-  String get firstGroup => _getValue('firstGroup');
-  String get groupName => _getValue('groupName');
-  String get groupAvatar => _getValue('groupAvatar');
-  String get leaveGroup => _getValue('leaveGroup');
-  String get deleteGroup => _getValue('deleteGroup');
-  String get groupSettings => _getValue('groupSettings');
-  String memberCount(int count) => _getFormattedValue('memberCount', [count]);
-  String get admin => _getValue('admin');
-  String get member => _getValue('member');
-  
-  // Events
-  String get nextEvent => _getValue('nextEvent');
-  String get participate => _getValue('participate');
-  String get yes => _getValue('yes');
-  String get maybe => _getValue('maybe');
-  String get no => _getValue('no');
-  String get confirmed => _getValue('confirmed');
-  String get cancelled => _getValue('cancelled');
-  String get minParticipants => _getValue('minParticipants');
-  String participantCount(int count) => _getFormattedValue('participantCount', [count]);
-  String get eventDate => _getValue('eventDate');
-  String get eventStatus => _getValue('eventStatus');
-  String get eventParticipants => _getValue('eventParticipants');
-  
-  // XP & Points
-  String get xpGained => _getValue('xpGained');
-  String get levelUp => _getValue('levelUp');
-  String get achievement => _getValue('achievement');
-  String get level => _getValue('level');
-  String get streak => _getValue('streak');
-  String get totalXP => _getValue('totalXP');
-  String xpForAction(int xp, String action) => _getFormattedValue('xpForAction', [xp, action]);
-  String levelProgress(int percent) => _getFormattedValue('levelProgress', [percent]);
-  String currentLevel(int level) => _getFormattedValue('currentLevel', [level]);
-  String nextLevel(int current, int next) => _getFormattedValue('nextLevel', [current, next]);
-  
-  // Navigation
-  String get leaderboard => _getValue('leaderboard');
-  String get calendar => _getValue('calendar');
-  String get restaurants => _getValue('restaurants');
-  String get chat => _getValue('chat');
-  String get profile => _getValue('profile');
-  String get settings => _getValue('settings');
-  String get reminders => _getValue('reminders');
-  String get suggestions => _getValue('suggestions');
-  
-  // Restaurants
-  String get restaurantSuggestions => _getValue('restaurantSuggestions');
-  String get suggestRestaurant => _getValue('suggestRestaurant');
-  String get restaurantName => _getValue('restaurantName');
-  String get restaurantDescription => _getValue('restaurantDescription');
-  String get category => _getValue('category');
-  String get rating => _getValue('rating');
-  String get votes => _getValue('votes');
-  String get vote => _getValue('vote');
-  String get voted => _getValue('voted');
-  String get details => _getValue('details');
-  String suggestedBy(String name) => _getFormattedValue('suggestedBy', [name]);
-  
-  // Calendar
-  String get calendarOverview => _getValue('calendarOverview');
-  String selectedDay(String date) => _getFormattedValue('selectedDay', [date]);
-  String get plannedEvents => _getValue('plannedEvents');
-  String get noEventToday => _getValue('noEventToday');
-  String get today => _getValue('today');
-  String get tomorrow => _getValue('tomorrow');
-  String get yesterday => _getValue('yesterday');
-  String inDays(int days) => _getFormattedValue('inDays', [days]);
-  String daysAgo(int days) => _getFormattedValue('daysAgo', [days]);
-  
-  // Profile
-  String get myProfile => _getValue('myProfile');
-  String get accountInfo => _getValue('accountInfo');
-  String get registeredOn => _getValue('registeredOn');
-  String get lastLogin => _getValue('lastLogin');
-  String get accountStatus => _getValue('accountStatus');
-  String get active => _getValue('active');
-  String get inactive => _getValue('inactive');
-  String get editProfile => _getValue('editProfile');
-  String get save => _getValue('save');
-  String get cancel => _getValue('cancel');
-  
-  // Common
-  String get ok => _getValue('ok');
-  String get close => _getValue('close');
-  String get delete => _getValue('delete');
-  String get edit => _getValue('edit');
-  String get add => _getValue('add');
-  String get remove => _getValue('remove');
-  String get search => _getValue('search');
-  String get filter => _getValue('filter');
-  String get sort => _getValue('sort');
-  String get refresh => _getValue('refresh');
-  String get loading => _getValue('loading');
-  String get error => _getValue('error');
-  String get success => _getValue('success');
-  String get warning => _getValue('warning');
-  String get info => _getValue('info');
-  
-  // Errors
-  String get invalidEmail => _getValue('invalidEmail');
-  String get passwordTooShort => _getValue('passwordTooShort');
-  String get passwordsDontMatch => _getValue('passwordsDontMatch');
-  String get fieldRequired => _getValue('fieldRequired');
-  String get emailExists => _getValue('emailExists');
-  String get loginFailed => _getValue('loginFailed');
-  String get wrongPassword => _getValue('wrongPassword');
-  String get userNotFound => _getValue('userNotFound');
-  String get networkError => _getValue('networkError');
-  String get unknownError => _getValue('unknownError');
-  
-  // Achievements
-  String get firstTimer => _getValue('firstTimer');
-  String get regular => _getValue('regular');
-  String get loyaltyChampion => _getValue('loyaltyChampion');
-  String get generousSoul => _getValue('generousSoul');
-  String get bierbaron => _getValue('bierbaron');
-  String get foodie => _getValue('foodie');
-  String get restaurantScout => _getValue('restaurantScout');
-  String get streakMaster => _getValue('streakMaster');
-  String get perfectYear => _getValue('perfectYear');
-  String get lightningFast => _getValue('lightningFast');
-  String get levelMaster => _getValue('levelMaster');
-  String get stammtischGod => _getValue('stammtischGod');
-  String get partyStarter => _getValue('partyStarter');
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en')
+  ];
+
+  /// No description provided for @welcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back! 🍻'**
+  String get welcome;
+
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
+  /// No description provided for @register.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @displayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Name'**
+  String get displayName;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @agreeTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'I accept the terms of service and privacy policy'**
+  String get agreeTerms;
+
+  /// No description provided for @rememberMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember me'**
+  String get rememberMe;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @noAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'No account? Register here'**
+  String get noAccount;
+
+  /// No description provided for @hasAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Login here'**
+  String get hasAccount;
+
+  /// No description provided for @myGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'My Groups'**
+  String get myGroups;
+
+  /// No description provided for @createGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get createGroup;
+
+  /// No description provided for @noGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups yet'**
+  String get noGroups;
+
+  /// No description provided for @firstGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first group!'**
+  String get firstGroup;
+
+  /// No description provided for @inviteMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Members'**
+  String get inviteMembers;
+
+  /// No description provided for @groupNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Group not found'**
+  String get groupNotFound;
+
+  /// No description provided for @groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get groupName;
+
+  /// No description provided for @groupAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar Image URL (optional)'**
+  String get groupAvatar;
+
+  /// No description provided for @leaveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Group'**
+  String get leaveGroup;
+
+  /// No description provided for @deleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get deleteGroup;
+
+  /// No description provided for @groupSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Settings'**
+  String get groupSettings;
+
+  /// No description provided for @memberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Members'**
+  String memberCount(int count);
+
+  /// No description provided for @admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get admin;
+
+  /// No description provided for @member.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get member;
+
+  /// No description provided for @nextEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Event'**
+  String get nextEvent;
+
+  /// No description provided for @participate.
+  ///
+  /// In en, this message translates to:
+  /// **'Participate?'**
+  String get participate;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @maybe.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe'**
+  String get maybe;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get confirmed;
+
+  /// No description provided for @cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get cancelled;
+
+  /// No description provided for @minParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'not enough participants'**
+  String get minParticipants;
+
+  /// No description provided for @participantCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Confirmations'**
+  String participantCount(int count);
+
+  /// No description provided for @eventDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get eventDate;
+
+  /// No description provided for @eventStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get eventStatus;
+
+  /// No description provided for @eventParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get eventParticipants;
+
+  /// No description provided for @xpGained.
+  ///
+  /// In en, this message translates to:
+  /// **'XP gained!'**
+  String get xpGained;
+
+  /// No description provided for @levelUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Level Up!'**
+  String get levelUp;
+
+  /// No description provided for @achievement.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement unlocked!'**
+  String get achievement;
+
+  /// No description provided for @level.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get level;
+
+  /// No description provided for @streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get streak;
+
+  /// No description provided for @totalXP.
+  ///
+  /// In en, this message translates to:
+  /// **'Total XP'**
+  String get totalXP;
+
+  /// No description provided for @xpForAction.
+  ///
+  /// In en, this message translates to:
+  /// **'+{xp} XP for {action}'**
+  String xpForAction(int xp, String action);
+
+  /// No description provided for @levelProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% to next level'**
+  String levelProgress(int percent);
+
+  /// No description provided for @currentLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String currentLevel(int level);
+
+  /// No description provided for @nextLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {current} → {next}'**
+  String nextLevel(int current, int next);
+
+  /// No description provided for @leaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboard'**
+  String get leaderboard;
+
+  /// No description provided for @calendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendar;
+
+  /// No description provided for @restaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants'**
+  String get restaurants;
+
+  /// No description provided for @chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chat;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @reminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminders;
+
+  /// No description provided for @suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get suggestions;
+
+  /// No description provided for @restaurantSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Suggestions'**
+  String get restaurantSuggestions;
+
+  /// No description provided for @suggestRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest Restaurant'**
+  String get suggestRestaurant;
+
+  /// No description provided for @restaurantName.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Name'**
+  String get restaurantName;
+
+  /// No description provided for @restaurantDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get restaurantDescription;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @rating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get rating;
+
+  /// No description provided for @votes.
+  ///
+  /// In en, this message translates to:
+  /// **'Votes'**
+  String get votes;
+
+  /// No description provided for @vote.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote'**
+  String get vote;
+
+  /// No description provided for @voted.
+  ///
+  /// In en, this message translates to:
+  /// **'Voted'**
+  String get voted;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @suggestedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested by {name}'**
+  String suggestedBy(String name);
+
+  /// No description provided for @calendarOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar Overview'**
+  String get calendarOverview;
+
+  /// No description provided for @selectedDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected day: {date}'**
+  String selectedDay(String date);
+
+  /// No description provided for @plannedEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned Events'**
+  String get plannedEvents;
+
+  /// No description provided for @noEventToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No event on this day'**
+  String get noEventToday;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @inDays.
+  ///
+  /// In en, this message translates to:
+  /// **'In {days} days'**
+  String inDays(int days);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days ago'**
+  String daysAgo(int days);
+
+  /// No description provided for @myProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get myProfile;
+
+  /// No description provided for @accountInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Information'**
+  String get accountInfo;
+
+  /// No description provided for @registeredOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered on'**
+  String get registeredOn;
+
+  /// No description provided for @lastLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Last login'**
+  String get lastLogin;
+
+  /// No description provided for @accountStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Status'**
+  String get accountStatus;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filter;
+
+  /// No description provided for @sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @success.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get success;
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @info.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get info;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get invalidEmail;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @passwordsDontMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDontMatch;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @emailExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address already registered'**
+  String get emailExists;
+
+  /// No description provided for @loginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed'**
+  String get loginFailed;
+
+  /// No description provided for @wrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password'**
+  String get wrongPassword;
+
+  /// No description provided for @userNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address not found'**
+  String get userNotFound;
+
+  /// No description provided for @networkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error'**
+  String get networkError;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get unknownError;
+
+  /// No description provided for @firstTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'First Timer'**
+  String get firstTimer;
+
+  /// No description provided for @regular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular'**
+  String get regular;
+
+  /// No description provided for @loyaltyChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'Loyalty Champion'**
+  String get loyaltyChampion;
+
+  /// No description provided for @generousSoul.
+  ///
+  /// In en, this message translates to:
+  /// **'Generous Soul'**
+  String get generousSoul;
+
+  /// No description provided for @bierbaron.
+  ///
+  /// In en, this message translates to:
+  /// **'Beer Baron'**
+  String get bierbaron;
+
+  /// No description provided for @foodie.
+  ///
+  /// In en, this message translates to:
+  /// **'Foodie'**
+  String get foodie;
+
+  /// No description provided for @restaurantScout.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Scout'**
+  String get restaurantScout;
+
+  /// No description provided for @streakMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak Master'**
+  String get streakMaster;
+
+  /// No description provided for @perfectYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect Year'**
+  String get perfectYear;
+
+  /// No description provided for @lightningFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Lightning Fast'**
+  String get lightningFast;
+
+  /// No description provided for @levelMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Level Master'**
+  String get levelMaster;
+
+  /// No description provided for @stammtischGod.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Master'**
+  String get stammtischGod;
+
+  /// No description provided for @partyStarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Party Starter'**
+  String get partyStarter;
+
+  /// No description provided for @adminPointsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Points'**
+  String get adminPointsTitle;
+
+  /// No description provided for @noGroupSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No group selected'**
+  String get noGroupSelected;
+
+  /// No description provided for @adminRightsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin rights required'**
+  String get adminRightsRequired;
+
+  /// No description provided for @adminPointsInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Here you can award points to group members.'**
+  String get adminPointsInfo;
+
+  /// No description provided for @selectUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Select User'**
+  String get selectUser;
+
+  /// No description provided for @selectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Action'**
+  String get selectAction;
+
+  /// No description provided for @points.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get points;
+
+  /// No description provided for @customPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Points'**
+  String get customPoints;
+
+  /// No description provided for @pointsAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Points Amount'**
+  String get pointsAmount;
+
+  /// No description provided for @reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reason;
+
+  /// No description provided for @reasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for awarding points'**
+  String get reasonHint;
+
+  /// No description provided for @awardPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Award Points'**
+  String get awardPoints;
+
+  /// No description provided for @recentAwards.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Awards'**
+  String get recentAwards;
+
+  /// No description provided for @noRecentAwards.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent awards'**
+  String get noRecentAwards;
+
+  /// No description provided for @pointsAwarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Points awarded'**
+  String get pointsAwarded;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get linkCopied;
+
+  /// No description provided for @shareNotImplemented.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing not yet implemented'**
+  String get shareNotImplemented;
+
+  /// No description provided for @qrCodeNotImplemented.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code not yet implemented'**
+  String get qrCodeNotImplemented;
+
+  /// No description provided for @members.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get members;
+
+  /// No description provided for @inviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Link'**
+  String get inviteLink;
+
+  /// No description provided for @copyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Link'**
+  String get copyLink;
+
+  /// No description provided for @shareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Link'**
+  String get shareLink;
+
+  /// No description provided for @qrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code'**
+  String get qrCode;
+
+  /// No description provided for @qrCodePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code placeholder'**
+  String get qrCodePlaceholder;
+
+  /// No description provided for @generateQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate QR Code'**
+  String get generateQRCode;
+
+  /// No description provided for @instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get instructions;
+
+  /// No description provided for @inviteStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Share the invite link or QR code'**
+  String get inviteStep1;
+
+  /// No description provided for @inviteStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. New members register'**
+  String get inviteStep2;
+
+  /// No description provided for @inviteStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. They automatically join the group'**
+  String get inviteStep3;
+
+  /// No description provided for @currentMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Members'**
+  String get currentMembers;
+
+  /// No description provided for @reminderSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder Settings'**
+  String get reminderSettings;
+
+  /// No description provided for @notificationsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications Enabled'**
+  String get notificationsEnabled;
+
+  /// No description provided for @dayBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'1 Day Before'**
+  String get dayBefore;
+
+  /// No description provided for @hourBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'1 Hour Before'**
+  String get hourBefore;
+
+  /// No description provided for @minutesBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'30 Minutes Before'**
+  String get minutesBefore;
+
+  /// No description provided for @testNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Test Notification'**
+  String get testNotification;
+
+  /// No description provided for @testNotificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Test notification sent'**
+  String get testNotificationSent;
+
+  /// No description provided for @notificationTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Types'**
+  String get notificationTypes;
+
+  /// No description provided for @eventReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Reminders'**
+  String get eventReminders;
+
+  /// No description provided for @chatNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Notifications'**
+  String get chatNotifications;
+
+  /// No description provided for @pointsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Points Notifications'**
+  String get pointsNotifications;
+
+  /// No description provided for @systemNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'System Notifications'**
+  String get systemNotifications;
+
+  /// No description provided for @weatherBasedSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather-based Suggestions'**
+  String get weatherBasedSuggestions;
+
+  /// No description provided for @useLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Location'**
+  String get useLocation;
+
+  /// No description provided for @fallbackList.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback Restaurants'**
+  String get fallbackList;
+
+  /// No description provided for @noSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'No suggestions available'**
+  String get noSuggestions;
+
+  /// No description provided for @typeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get typeMessage;
+
+  /// No description provided for @sendMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Message'**
+  String get sendMessage;
+
+  /// No description provided for @chatPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat will be available soon'**
+  String get chatPlaceholder;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @german.
+  ///
+  /// In en, this message translates to:
+  /// **'Deutsch'**
+  String get german;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// No description provided for @xpEventParticipation.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Participation'**
+  String get xpEventParticipation;
+
+  /// No description provided for @xpEventOrganizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Organized'**
+  String get xpEventOrganizing;
+
+  /// No description provided for @xpFirstToConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'First to Confirm'**
+  String get xpFirstToConfirm;
+
+  /// No description provided for @xpStreakMilestone.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak Milestone'**
+  String get xpStreakMilestone;
+
+  /// No description provided for @xpRestaurantSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Suggested'**
+  String get xpRestaurantSuggestion;
+
+  /// No description provided for @xpGroupCreation.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Created'**
+  String get xpGroupCreation;
+
+  /// No description provided for @xpInviteFriend.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend Invited'**
+  String get xpInviteFriend;
+
+  /// No description provided for @xpCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get xpCustom;
+
+  /// No description provided for @xpBuyRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Bought a round'**
+  String get xpBuyRound;
+
+  /// No description provided for @xpPerfectMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect month'**
+  String get xpPerfectMonth;
+
+  /// No description provided for @xpFirstTime.
+  ///
+  /// In en, this message translates to:
+  /// **'First participation'**
+  String get xpFirstTime;
+
+  /// No description provided for @xpAdminBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin bonus'**
+  String get xpAdminBonus;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) {
-    return ['en', 'de'].contains(locale.languageCode);
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
   }
 
   @override
-  Future<AppLocalizations> load(Locale locale) async {
-    return AppLocalizations(locale);
-  }
+  bool isSupported(Locale locale) =>
+      <String>['de', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
-// Extension für einfacheren Zugriff
-extension AppLocalizationsX on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+  }
+
+  throw FlutterError(
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

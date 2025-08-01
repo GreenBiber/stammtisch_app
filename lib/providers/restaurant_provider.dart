@@ -5,7 +5,7 @@ import '../services/weather_service.dart';
 class RestaurantProvider with ChangeNotifier {
   final PlacesService _placesService = PlacesService();
   final WeatherService _weatherService = WeatherService();
-  
+
   List<Restaurant> _suggestions = [];
   bool _isLoading = false;
   String? _error;
@@ -13,7 +13,7 @@ class RestaurantProvider with ChangeNotifier {
   int _remainingQuota = 1000;
   WeatherData? _currentWeather;
   String? _weatherRecommendation;
-  
+
   // Fallback restaurants when API limit reached
   static const List<Map<String, dynamic>> _fallbackRestaurants = [
     {
@@ -27,7 +27,7 @@ class RestaurantProvider with ChangeNotifier {
       'isOpen': true,
     },
     {
-      'id': 'fallback_2', 
+      'id': 'fallback_2',
       'name': 'Burger Garage',
       'description': 'Handgemachte Burger & Craft Beer',
       'rating': 4.2,
@@ -39,7 +39,7 @@ class RestaurantProvider with ChangeNotifier {
     {
       'id': 'fallback_3',
       'name': 'Sushiko',
-      'description': 'Frisches Sushi in modernem Ambiente', 
+      'description': 'Frisches Sushi in modernem Ambiente',
       'rating': 4.8,
       'userRatingsTotal': 156,
       'vicinity': 'Bahnhofsviertel',
@@ -67,7 +67,7 @@ class RestaurantProvider with ChangeNotifier {
     try {
       // Update Quota Status
       await _updateQuotaStatus();
-      
+
       // Load weather data first
       if (latitude != null && longitude != null) {
         try {
@@ -75,44 +75,48 @@ class RestaurantProvider with ChangeNotifier {
             latitude: latitude,
             longitude: longitude,
           );
-          _weatherRecommendation = _weatherService.getWeatherBasedRecommendation(_currentWeather);
-          print('🌤️ Weather loaded: ${_weatherRecommendation}');
+          _weatherRecommendation =
+              _weatherService.getWeatherBasedRecommendation(_currentWeather);
+          print('🌤️ Weather loaded: $_weatherRecommendation');
         } catch (weatherError) {
           print('⚠️ Weather API Error: $weatherError');
         }
       }
-      
-      if (hasValidApiKey && _hasApiQuota && latitude != null && longitude != null) {
+
+      if (hasValidApiKey &&
+          _hasApiQuota &&
+          latitude != null &&
+          longitude != null) {
         try {
           // Use Google Places API with weather-based search
           print('🔍 Loading restaurants from Google Places API...');
           print('📍 Location: $latitude, $longitude');
-          
+
           // Get weather-based restaurant types
-          final restaurantTypes = _weatherService.getWeatherBasedRestaurantTypes(_currentWeather);
+          final restaurantTypes =
+              _weatherService.getWeatherBasedRestaurantTypes(_currentWeather);
           print('🌤️ Weather-based search types: $restaurantTypes');
-          
+
           _suggestions = await _placesService.searchRestaurants(
             latitude: latitude,
             longitude: longitude,
             type: restaurantTypes.first, // Use primary type for API call
           );
-          
+
           print('✅ Loaded ${_suggestions.length} restaurants from API');
-          
+
           // Update quota after successful request
           await _updateQuotaStatus();
-          
         } catch (apiError) {
           print('⚠️ API Error, falling back to demo data: $apiError');
           _loadFallbackRestaurants();
         }
       } else {
         // Use fallback data
-        print('📱 Using fallback restaurants (API key: ${hasValidApiKey ? "valid" : "invalid"}, Quota: $_hasApiQuota, Location: ${latitude != null ? "available" : "missing"})');
+        print(
+            '📱 Using fallback restaurants (API key: ${hasValidApiKey ? "valid" : "invalid"}, Quota: $_hasApiQuota, Location: ${latitude != null ? "available" : "missing"})');
         _loadFallbackRestaurants();
       }
-      
     } catch (e) {
       _error = e.toString();
       print('❌ Error loading restaurants: $e');
@@ -122,13 +126,12 @@ class RestaurantProvider with ChangeNotifier {
       _setLoading(false);
     }
   }
-  
+
   void _loadFallbackRestaurants() {
-    _suggestions = _fallbackRestaurants
-        .map((data) => Restaurant.fromJson(data))
-        .toList();
+    _suggestions =
+        _fallbackRestaurants.map((data) => Restaurant.fromJson(data)).toList();
   }
-  
+
   Future<void> _updateQuotaStatus() async {
     try {
       _remainingQuota = await _placesService.getRemainingQuota();

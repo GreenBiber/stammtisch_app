@@ -216,13 +216,17 @@ enum XPAction {
   perfectMonth(200, 'Perfekter Monat', '🏆'),
   streakBonus(30, 'Streak-Bonus', '🔥'),
   firstTime(20, 'Erste Teilnahme', '🌟'),
-  adminBonus(0, 'Admin-Bonus', '👑'); // Variable XP
+  adminBonus(0, 'Admin-Bonus', '👑'), // Variable XP
+  custom(0, 'Benutzerdefiniert', '⚙️'); // Variable XP
 
   const XPAction(this.baseXP, this.description, this.icon);
   
   final int baseXP;
   final String description;
   final String icon;
+
+  // Getter für Kompatibilität
+  int get points => baseXP;
 }
 
 // Achievement Definitionen

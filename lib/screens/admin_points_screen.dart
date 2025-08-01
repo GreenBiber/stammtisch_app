@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/points_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/group_provider.dart';
+import '../providers/points_provider.dart';
 import '../models/points.dart';
 import '../l10n/app_localizations.dart';
 
@@ -14,202 +14,73 @@ class AdminPointsScreen extends StatefulWidget {
 }
 
 class _AdminPointsScreenState extends State<AdminPointsScreen> {
-  final _customPointsController = TextEditingController();
-  final _reasonController = TextEditingController();
   String? _selectedUserId;
   XPAction? _selectedAction;
+  int _customPoints = 0;
+  String _customReason = '';
+  final _reasonController = TextEditingController();
+  final _pointsController = TextEditingController();
 
   @override
   void dispose() {
-    _customPointsController.dispose();
     _reasonController.dispose();
+    _pointsController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final l10n = AppLocalizations.of(context);
 
-    return Consumer3<PointsProvider, AuthProvider, GroupProvider>(
-      builder: (context, pointsProvider, authProvider, groupProvider, child) {
-        final activeGroup = groupProvider.getActiveGroup(context);
-        final currentUserId = authProvider.currentUserId;
-        
-        if (activeGroup == null || !activeGroup.admins.contains(currentUserId)) {
+    return Consumer3<AuthProvider, GroupProvider, PointsProvider>(
+      builder: (context, authProvider, groupProvider, pointsProvider, child) {
+        final user = authProvider.currentUser;
+        final group = groupProvider.getActiveGroup(context);
+
+        if (user == null || group == null) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text(l10n.locale.languageCode == 'de' ? 'Punkte verwalten' : 'Manage Points'),
-            ),
-            body: const Center(
-              child: Text('Nur Admins können Punkte verwalten'),
-            ),
+            appBar:
+                AppBar(title: Text(l10n?.adminPointsTitle ?? 'Admin Punkte')),
+            body: Center(
+                child:
+                    Text(l10n?.noGroupSelected ?? 'Keine Gruppe ausgewählt')),
           );
         }
 
-        final groupMembers = activeGroup.members.where((id) => id != currentUserId).toList();
+        if (!group.isAdmin(user.id)) {
+          return Scaffold(
+            appBar:
+                AppBar(title: Text(l10n?.adminPointsTitle ?? 'Admin Punkte')),
+            body: Center(
+                child: Text(
+                    l10n?.adminRightsRequired ?? 'Admin-Rechte erforderlich')),
+          );
+        }
+
+        final members =
+            group.members.where((memberId) => memberId != user.id).toList();
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(l10n.locale.languageCode == 'de' ? 'Punkte verwalten' : 'Manage Points'),
+            title: Text(l10n?.adminPointsTitle ?? 'Punkte vergeben'),
+            elevation: 0,
           ),
-          body: Padding(
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Admin Info Card
-                Card(
-                  color: Colors.orange.withOpacity(0.1),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.admin_panel_settings, color: Colors.orange),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.locale.languageCode == 'de' ? 'Admin-Bereich' : 'Admin Area',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                l10n.locale.languageCode == 'de' 
-                                    ? 'Hier kannst du Punkte für Gruppenmitglieder vergeben'
-                                    : 'Here you can award points to group members',
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // User Selection
-                Text(
-                  l10n.locale.languageCode == 'de' ? 'Mitglied auswählen' : 'Select Member',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                Card(
-                  child: Column(
-                    children: groupMembers.map((memberId) {
-                      final userPoints = pointsProvider.getUserPoints(memberId, activeGroup.id);
-                      final isSelected = _selectedUserId == memberId;
-
-                      return ListTile(
-                        selected: isSelected,
-                        selectedTileColor: Colors.teal.withOpacity(0.1),
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.teal,
-                          child: Text(
-                            memberId.substring(0, 2).toUpperCase(),
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                        title: Text(memberId),
-                        subtitle: userPoints != null 
-                            ? Text('Level ${userPoints.level} • ${userPoints.totalXP} XP')
-                            : Text(l10n.locale.languageCode == 'de' ? 'Noch keine Punkte' : 'No points yet'),
-                        trailing: isSelected 
-                            ? const Icon(Icons.check_circle, color: Colors.teal)
-                            : null,
-                        onTap: () {
-                          setState(() {
-                            _selectedUserId = isSelected ? null : memberId;
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-                if (_selectedUserId != null) ...[
-                  const SizedBox(height: 24),
-
-                  // Action Selection
-                  Text(
-                    l10n.locale.languageCode == 'de' ? 'Punktevergabe-Grund' : 'Points Award Reason',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  Card(
-                    child: Column(
-                      children: [
-                        // Predefined Actions
-                        ...XPAction.values.where((action) => action != XPAction.adminBonus).map((action) {
-                          final isSelected = _selectedAction == action;
-                          return ListTile(
-                            selected: isSelected,
-                            selectedTileColor: Colors.teal.withOpacity(0.1),
-                            leading: Icon(
-                              _getActionIcon(action),
-                              color: isSelected ? Colors.teal : null,
-                            ),
-                            title: Text(_getActionTitle(action, l10n.locale.languageCode == 'de')),
-                            subtitle: Text('${action.xpReward} XP'),
-                            trailing: isSelected 
-                                ? const Icon(Icons.check_circle, color: Colors.teal)
-                                : null,
-                            onTap: () {
-                              setState(() {
-                                _selectedAction = isSelected ? null : action;
-                                if (isSelected) {
-                                  _customPointsController.clear();
-                                  _reasonController.clear();
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-
-                        const Divider(),
-
-                        // Custom Points
-                        ListTile(
-                          leading: const Icon(Icons.edit),
-                          title: Text(l10n.locale.languageCode == 'de' ? 'Benutzerdefiniert' : 'Custom'),
-                          subtitle: Text(l10n.locale.languageCode == 'de' 
-                              ? 'Eigene Punkte und Grund eingeben' 
-                              : 'Enter custom points and reason'),
-                          onTap: () {
-                            _showCustomPointsDialog();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Award Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: (_selectedAction != null || _customPointsController.text.isNotEmpty) 
-                          ? _awardPoints 
-                          : null,
-                      icon: const Icon(Icons.star),
-                      label: Text(l10n.locale.languageCode == 'de' ? 'Punkte vergeben' : 'Award Points'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ),
-                ],
+                _buildInfoCard(l10n),
+                const SizedBox(height: 20),
+                _buildUserSelection(members, groupProvider, l10n),
+                const SizedBox(height: 20),
+                _buildActionSelection(l10n),
+                const SizedBox(height: 20),
+                _buildCustomPointsSection(l10n),
+                const SizedBox(height: 30),
+                _buildAwardButton(pointsProvider, l10n),
+                const SizedBox(height: 30),
+                _buildRecentAwards(pointsProvider, groupProvider, l10n),
               ],
             ),
           ),
@@ -218,181 +89,269 @@ class _AdminPointsScreenState extends State<AdminPointsScreen> {
     );
   }
 
-  IconData _getActionIcon(XPAction action) {
-    switch (action) {
-      case XPAction.organizeEvent:
-        return Icons.event;
-      case XPAction.suggestRestaurant:
-        return Icons.restaurant;
-      case XPAction.buyRound:
-        return Icons.local_bar;
-      case XPAction.attendEvent:
-        return Icons.check_circle;
-      case XPAction.earlyConfirmation:
-        return Icons.flash_on;
-      case XPAction.perfectMonth:
-        return Icons.star;
-      case XPAction.streakBonus:
-        return Icons.local_fire_department;
-      case XPAction.firstTime:
-        return Icons.celebration;
-      case XPAction.adminBonus:
-        return Icons.star;
-    }
-  }
-
-  String _getActionTitle(XPAction action, bool isGerman) {
-    switch (action) {
-      case XPAction.organizeEvent:
-        return isGerman ? 'Event organisiert' : 'Event organized';
-      case XPAction.suggestRestaurant:
-        return isGerman ? 'Restaurant vorgeschlagen' : 'Restaurant suggested';
-      case XPAction.buyRound:
-        return isGerman ? 'Getränkerunde spendiert' : 'Bought drinks round';
-      case XPAction.attendEvent:
-        return isGerman ? 'Event-Teilnahme' : 'Event attendance';
-      case XPAction.earlyConfirmation:
-        return isGerman ? 'Früh zugesagt' : 'Early confirmation';
-      case XPAction.perfectMonth:
-        return isGerman ? 'Perfekter Monat' : 'Perfect month';
-      case XPAction.streakBonus:
-        return isGerman ? 'Streak-Bonus' : 'Streak bonus';
-      case XPAction.firstTime:
-        return isGerman ? 'Erste Teilnahme' : 'First participation';
-      case XPAction.adminBonus:
-        return isGerman ? 'Admin-Bonus' : 'Admin bonus';
-    }
-  }
-
-  void _showCustomPointsDialog() {
-    final l10n = context.l10n;
-    
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.locale.languageCode == 'de' ? 'Benutzerdefinierte Punkte' : 'Custom Points'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+  Widget _buildInfoCard(AppLocalizations? l10n) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           children: [
-            TextField(
-              controller: _customPointsController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: l10n.locale.languageCode == 'de' ? 'Punkte' : 'Points',
-                hintText: l10n.locale.languageCode == 'de' ? 'z.B. 15' : 'e.g. 15',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _reasonController,
-              decoration: InputDecoration(
-                labelText: l10n.locale.languageCode == 'de' ? 'Grund' : 'Reason',
-                hintText: l10n.locale.languageCode == 'de' 
-                    ? 'z.B. Getränkerunde spendiert' 
-                    : 'e.g. Bought drinks for everyone',
-              ),
-              maxLines: 2,
+            const Icon(Icons.star, color: Colors.amber, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              l10n?.adminPointsInfo ??
+                  'Als Admin kannst du Mitgliedern Punkte für besondere Leistungen vergeben.',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.locale.languageCode == 'de' ? 'Abbrechen' : 'Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              setState(() {
-                _selectedAction = null; // Clear predefined selection
-              });
-            },
-            child: Text(l10n.locale.languageCode == 'de' ? 'OK' : 'OK'),
-          ),
-        ],
       ),
     );
   }
 
-  void _awardPoints() async {
+  Widget _buildUserSelection(List<String> members, GroupProvider groupProvider,
+      AppLocalizations? l10n) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n?.selectUser ?? 'Benutzer auswählen',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            ...members.map((memberId) {
+              final user = groupProvider.getUserById(memberId);
+              return RadioListTile<String>(
+                title: Text(user?.displayName ?? 'Unbekannt'),
+                subtitle: Text('@${user?.email ?? ''}'),
+                value: memberId,
+                groupValue: _selectedUserId,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedUserId = value;
+                  });
+                },
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionSelection(AppLocalizations? l10n) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n?.selectAction ?? 'Aktion auswählen',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            ...XPAction.values.map((action) {
+              if (action == XPAction.custom) return const SizedBox.shrink();
+
+              return RadioListTile<XPAction>(
+                title: Text(_getActionName(action, l10n)),
+                subtitle: Text('${action.points} ${l10n?.points ?? 'Punkte'}'),
+                value: action,
+                groupValue: _selectedAction,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedAction = value;
+                    _customPoints = 0;
+                    _customReason = '';
+                    _reasonController.clear();
+                    _pointsController.clear();
+                  });
+                },
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomPointsSection(AppLocalizations? l10n) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Radio<XPAction>(
+                  value: XPAction.custom,
+                  groupValue: _selectedAction,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedAction = value;
+                    });
+                  },
+                ),
+                Text(
+                  l10n?.customPoints ?? 'Benutzerdefinierte Punkte',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            if (_selectedAction == XPAction.custom) ...[
+              const SizedBox(height: 12),
+              TextField(
+                controller: _pointsController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: l10n?.pointsAmount ?? 'Anzahl Punkte',
+                  hintText: '1-50',
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _customPoints = int.tryParse(value) ?? 0;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _reasonController,
+                decoration: InputDecoration(
+                  labelText: l10n?.reason ?? 'Grund',
+                  hintText:
+                      l10n?.reasonHint ?? 'Warum werden diese Punkte vergeben?',
+                ),
+                maxLines: 2,
+                onChanged: (value) {
+                  setState(() {
+                    _customReason = value;
+                  });
+                },
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAwardButton(
+      PointsProvider pointsProvider, AppLocalizations? l10n) {
+    final canAward = _selectedUserId != null &&
+        ((_selectedAction != null && _selectedAction != XPAction.custom) ||
+            (_selectedAction == XPAction.custom &&
+                _customPoints > 0 &&
+                _customReason.trim().isNotEmpty));
+
+    return ElevatedButton.icon(
+      onPressed: canAward ? () => _awardPoints(pointsProvider, l10n) : null,
+      icon: const Icon(Icons.star),
+      label: Text(l10n?.awardPoints ?? 'Punkte vergeben'),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+      ),
+    );
+  }
+
+  Widget _buildRecentAwards(PointsProvider pointsProvider,
+      GroupProvider groupProvider, AppLocalizations? l10n) {
+    // This would show recent manual point awards by admins
+    // For now, just show a placeholder
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n?.recentAwards ?? 'Kürzliche Vergaben',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n?.noRecentAwards ?? 'Noch keine manuellen Punktevergaben.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _awardPoints(PointsProvider pointsProvider, AppLocalizations? l10n) {
     if (_selectedUserId == null) return;
 
-    final l10n = context.l10n;
-    final pointsProvider = Provider.of<PointsProvider>(context, listen: false);
+    final points = _selectedAction == XPAction.custom
+        ? _customPoints
+        : (_selectedAction?.points ?? 0);
+    final reason = _selectedAction == XPAction.custom
+        ? _customReason
+        : _getActionName(_selectedAction!, l10n);
+
     final groupProvider = Provider.of<GroupProvider>(context, listen: false);
-    final activeGroup = groupProvider.getActiveGroup(context);
-
-    if (activeGroup == null) return;
-
-    int points;
-    String reason;
-
-    if (_selectedAction != null) {
-      points = _selectedAction!.xpReward;
-      reason = _getActionTitle(_selectedAction!, l10n.locale.languageCode == 'de');
-    } else {
-      final customPoints = int.tryParse(_customPointsController.text);
-      if (customPoints == null || customPoints <= 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.locale.languageCode == 'de' 
-                ? 'Bitte gib gültige Punkte ein' 
-                : 'Please enter valid points'),
-            backgroundColor: Colors.red,
-          ),
+    final group = groupProvider.getActiveGroup(context);
+    if (group != null) {
+      if (_selectedAction == XPAction.custom) {
+        pointsProvider.awardXP(
+          _selectedUserId!,
+          group.id,
+          XPAction.custom,
+          customXP: points,
+          customDescription: _customReason,
         );
-        return;
+      } else {
+        pointsProvider.awardXP(_selectedUserId!, group.id, _selectedAction!);
       }
-      
-      if (_reasonController.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.locale.languageCode == 'de' 
-                ? 'Bitte gib einen Grund ein' 
-                : 'Please enter a reason'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      points = customPoints;
-      reason = _reasonController.text.trim();
     }
 
-    // Award points
-    if (_selectedAction != null) {
-      await pointsProvider.awardXP(
-        _selectedUserId!,
-        activeGroup.id,
-        _selectedAction!,
-      );
-    } else {
-      await pointsProvider.awardCustomXP(
-        _selectedUserId!,
-        activeGroup.id,
-        points,
-        reason: reason,
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            '${l10n?.pointsAwarded ?? 'Punkte vergeben'}: $points für $reason'),
+        backgroundColor: Colors.green,
+      ),
+    );
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.locale.languageCode == 'de' 
-              ? '$points Punkte für $_selectedUserId vergeben!' 
-              : '$points points awarded to $_selectedUserId!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+    // Reset form
+    setState(() {
+      _selectedUserId = null;
+      _selectedAction = null;
+      _customPoints = 0;
+      _customReason = '';
+      _reasonController.clear();
+      _pointsController.clear();
+    });
+  }
 
-      // Reset form
-      setState(() {
-        _selectedUserId = null;
-        _selectedAction = null;
-        _customPointsController.clear();
-        _reasonController.clear();
-      });
+  String _getActionName(XPAction action, AppLocalizations? l10n) {
+    switch (action) {
+      case XPAction.attendEvent:
+        return l10n?.xpEventParticipation ?? 'Stammtisch besucht';
+      case XPAction.organizeEvent:
+        return l10n?.xpEventOrganizing ?? 'Event organisiert';
+      case XPAction.earlyConfirmation:
+        return l10n?.xpFirstToConfirm ?? 'Früh zugesagt';
+      case XPAction.streakBonus:
+        return l10n?.xpStreakMilestone ?? 'Streak-Bonus';
+      case XPAction.suggestRestaurant:
+        return l10n?.xpRestaurantSuggestion ?? 'Restaurant vorgeschlagen';
+      case XPAction.buyRound:
+        return l10n?.xpBuyRound ?? 'Getränkerunde spendiert';
+      case XPAction.perfectMonth:
+        return l10n?.xpPerfectMonth ?? 'Perfekter Monat';
+      case XPAction.firstTime:
+        return l10n?.xpFirstTime ?? 'Erste Teilnahme';
+      case XPAction.adminBonus:
+        return l10n?.xpAdminBonus ?? 'Admin-Bonus';
+      case XPAction.custom:
+        return l10n?.xpCustom ?? 'Benutzerdefiniert';
     }
   }
 }

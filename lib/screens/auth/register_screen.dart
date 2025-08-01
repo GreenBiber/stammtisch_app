@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -38,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n.locale.languageCode == 'de'
+            context.isGerman
                 ? 'Bitte akzeptiere die Nutzungsbedingungen'
                 : 'Please accept the terms of service'
           ),
@@ -59,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n.locale.languageCode == 'de'
+            context.isGerman
                 ? 'Registrierung erfolgreich! Willkommen! 🎉'
                 : 'Registration successful! Welcome! 🎉'
           ),
@@ -71,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.errorMessage ?? 
-              (l10n.locale.languageCode == 'de' ? 'Registrierung fehlgeschlagen' : 'Registration failed')),
+              (context.isGerman ? 'Registrierung fehlgeschlagen' : 'Registration failed')),
           backgroundColor: Colors.red,
         ),
       );
@@ -101,7 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     
                     // Header
                     Text(
-                      l10n.locale.languageCode == 'de'
+                      context.isGerman
                           ? 'Konto erstellen'
                           : 'Create Account',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -111,7 +111,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      l10n.locale.languageCode == 'de'
+                      context.isGerman
                           ? 'Werde Teil der Stammtisch-Community!'
                           : 'Join the group community!',
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -133,7 +133,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               labelText: l10n.displayName, // LOKALISIERT
                               prefixIcon: const Icon(Icons.person_outlined),
                               border: const OutlineInputBorder(),
-                              helperText: l10n.locale.languageCode == 'de'
+                              helperText: context.isGerman
                                   ? 'Wie sollen dich andere sehen?'
                                   : 'How should others see you?',
                             ),
@@ -142,7 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 return l10n.fieldRequired; // LOKALISIERT
                               }
                               if (value.trim().length < 2) {
-                                return l10n.locale.languageCode == 'de'
+                                return context.isGerman
                                     ? 'Anzeigename muss mindestens 2 Zeichen lang sein'
                                     : 'Display name must be at least 2 characters';
                               }
@@ -193,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 },
                               ),
                               border: const OutlineInputBorder(),
-                              helperText: l10n.locale.languageCode == 'de'
+                              helperText: context.isGerman
                                   ? 'Mindestens 6 Zeichen'
                                   : 'At least 6 characters',
                             ),
@@ -313,7 +313,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     
                     // Privacy Notice
                     Card(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.blue.withValues(alpha: 0.1),
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Column(
@@ -325,14 +325,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              l10n.locale.languageCode == 'de'
+                              context.isGerman
                                   ? 'Deine Daten sind sicher'
                                   : 'Your data is secure',
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              l10n.locale.languageCode == 'de'
+                              context.isGerman
                                   ? 'Wir speichern deine Daten verschlüsselt und DSGVO-konform. Keine Weitergabe an Dritte.'
                                   : 'We store your data encrypted and GDPR compliant. No sharing with third parties.',
                               style: const TextStyle(fontSize: 12),

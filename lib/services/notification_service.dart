@@ -1,279 +1,241 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class NotificationService {
-  static final NotificationService _instance = NotificationService._internal();
-  factory NotificationService() => _instance;
-  NotificationService._internal();
+enum NotificationType {
+  eventReminder,
+  newMessage,
+  pointsAwarded,
+  eventCreated,
+  eventCancelled,
+}
 
-  final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
-  bool _isInitialized = false;
+class NotificationSettings {
+  final bool enabled;
+  final bool eventReminders;
+  final bool chatMessages;
+  final bool pointsUpdates;
+  final int reminderHours;
+  final int reminderMinutes;
 
-  // Settings Keys
-  static const String _key1Day = 'notification_1_day';
-  static const String _key1Hour = 'notification_1_hour';
-  static const String _key30Min = 'notification_30_min';
+  NotificationSettings({
+    this.enabled = true,
+    this.eventReminders = true,
+    this.chatMessages = true,
+    this.pointsUpdates = true,
+    this.reminderHours = 24,
+    this.reminderMinutes = 30,
+  });
 
-  Future<void> initialize() async {
-    if (_isInitialized) return;
-
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+  factory NotificationSettings.fromJson(Map<String, dynamic> json) {
+    return NotificationSettings(
+      enabled: json['enabled'] ?? true,
+      eventReminders: json['eventReminders'] ?? true,
+      chatMessages: json['chatMessages'] ?? true,
+      pointsUpdates: json['pointsUpdates'] ?? true,
+      reminderHours: json['reminderHours'] ?? 24,
+      reminderMinutes: json['reminderMinutes'] ?? 30,
     );
-
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
-
-    await _notifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
-    );
-
-    _isInitialized = true;
-    print('✅ NotificationService initialized');
   }
 
-  void _onNotificationTapped(NotificationResponse response) {
-    print('🔔 Notification tapped: ${response.payload}');
-    // Hier könnte Navigation zur entsprechenden Seite implementiert werden
-  }
-
-  // Permission Request
-  Future<bool> requestPermissions() async {
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      final android = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-      if (android != null) {
-        final granted = await android.requestNotificationsPermission();
-        return granted ?? false;
-      }
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      final iOS = _notifications.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
-      if (iOS != null) {
-        final granted = await iOS.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-        return granted ?? false;
-      }
-    }
-    return true; // Fallback für andere Plattformen
-  }
-
-  // Settings Getter
-  Future<Map<String, bool>> getNotificationSettings() async {
-    final prefs = await SharedPreferences.getInstance();
+  Map<String, dynamic> toJson() {
     return {
-      '1_day': prefs.getBool(_key1Day) ?? true,
-      '1_hour': prefs.getBool(_key1Hour) ?? true,
-      '30_min': prefs.getBool(_key30Min) ?? false,
+      'enabled': enabled,
+      'eventReminders': eventReminders,
+      'chatMessages': chatMessages,
+      'pointsUpdates': pointsUpdates,
+      'reminderHours': reminderHours,
+      'reminderMinutes': reminderMinutes,
     };
   }
 
-  // Settings Setter
-  Future<void> updateNotificationSettings({
-    bool? oneDayBefore,
-    bool? oneHourBefore,
-    bool? thirtyMinBefore,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    if (oneDayBefore != null) {
-      await prefs.setBool(_key1Day, oneDayBefore);
-    }
-    if (oneHourBefore != null) {
-      await prefs.setBool(_key1Hour, oneHourBefore);
-    }
-    if (thirtyMinBefore != null) {
-      await prefs.setBool(_key30Min, thirtyMinBefore);
-    }
-    
-    print('🔔 Notification settings updated');
+  NotificationSettings copyWith({
+    bool? enabled,
+    bool? eventReminders,
+    bool? chatMessages,
+    bool? pointsUpdates,
+    int? reminderHours,
+    int? reminderMinutes,
+  }) {
+    return NotificationSettings(
+      enabled: enabled ?? this.enabled,
+      eventReminders: eventReminders ?? this.eventReminders,
+      chatMessages: chatMessages ?? this.chatMessages,
+      pointsUpdates: pointsUpdates ?? this.pointsUpdates,
+      reminderHours: reminderHours ?? this.reminderHours,
+      reminderMinutes: reminderMinutes ?? this.reminderMinutes,
+    );
+  }
+}
+
+class NotificationService {
+  static NotificationService? _instance;
+  NotificationService._();
+
+  factory NotificationService() {
+    _instance ??= NotificationService._();
+    return _instance!;
   }
 
-  // Event Reminder Notifications
-  Future<void> scheduleEventReminders({
+  static const String _settingsKey = 'notification_settings';
+  NotificationSettings _settings = NotificationSettings();
+
+  NotificationSettings get settings => _settings;
+
+  Future<void> initialize() async {
+    await _loadSettings();
+    
+    // Initialize push notifications if enabled
+    if (_settings.enabled) {
+      await _initializePushNotifications();
+    }
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final settingsJson = prefs.getString(_settingsKey);
+      
+      if (settingsJson != null) {
+        final Map<String, dynamic> settingsMap = 
+            Map<String, dynamic>.from(
+                prefs.getString(_settingsKey) != null 
+                    ? {} // Parse JSON here in real implementation
+                    : {}
+            );
+        _settings = NotificationSettings.fromJson(settingsMap);
+      }
+    } catch (e) {
+      debugPrint('Error loading notification settings: $e');
+    }
+  }
+
+  Future<void> updateSettings(NotificationSettings newSettings) async {
+    _settings = newSettings;
+    await _saveSettings();
+    
+    // Update push notification configuration
+    if (_settings.enabled) {
+      await _initializePushNotifications();
+    } else {
+      await _disablePushNotifications();
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_settingsKey, _settings.toJson().toString());
+    } catch (e) {
+      debugPrint('Error saving notification settings: $e');
+    }
+  }
+
+  Future<void> _initializePushNotifications() async {
+    // TODO: Initialize Firebase Cloud Messaging or similar
+    // This is a placeholder for the actual push notification setup
+    debugPrint('🔔 Push notifications initialized (placeholder)');
+  }
+
+  Future<void> _disablePushNotifications() async {
+    // TODO: Disable push notifications
+    debugPrint('🔕 Push notifications disabled (placeholder)');
+  }
+
+  Future<void> scheduleEventReminder({
     required String eventId,
     required DateTime eventDate,
+    required String eventTitle,
+  }) async {
+    if (!_settings.enabled || !_settings.eventReminders) return;
+
+    final reminderDate = eventDate.subtract(Duration(
+      hours: _settings.reminderHours,
+      minutes: _settings.reminderMinutes,
+    ));
+
+    // TODO: Schedule local notification
+    debugPrint('📅 Event reminder scheduled for $reminderDate: $eventTitle');
+  }
+
+  Future<void> showPointsNotification({
+    required String userId,
+    required int points,
+    required String reason,
+  }) async {
+    if (!_settings.enabled || !_settings.pointsUpdates) return;
+
+    // TODO: Show local notification
+    debugPrint('⭐ Points notification: +$points for $reason');
+  }
+
+  Future<void> showChatNotification({
     required String groupName,
-    bool? oneDayBefore,
-    bool? oneHourBefore,
-    bool? thirtyMinBefore,
+    required String senderName,
+    required String message,
   }) async {
-    if (!_isInitialized) await initialize();
+    if (!_settings.enabled || !_settings.chatMessages) return;
 
-    final settings = await getNotificationSettings();
-    final shouldSend1Day = oneDayBefore ?? settings['1_day']!;
-    final shouldSend1Hour = oneHourBefore ?? settings['1_hour']!;
-    final shouldSend30Min = thirtyMinBefore ?? settings['30_min']!;
-
-    // Cancel existing notifications for this event
-    await cancelEventNotifications(eventId);
-
-    final now = DateTime.now();
-
-    // 1 Tag vorher
-    if (shouldSend1Day) {
-      final notificationTime = eventDate.subtract(const Duration(days: 1));
-      if (notificationTime.isAfter(now)) {
-        await _scheduleNotification(
-          id: _getNotificationId(eventId, '1day'),
-          title: '🍺 Stammtisch morgen!',
-          body: 'Vergiss nicht: Morgen ist Stammtisch bei $groupName',
-          scheduledTime: notificationTime,
-          payload: 'event_reminder_1day_$eventId',
-        );
-      }
-    }
-
-    // 1 Stunde vorher
-    if (shouldSend1Hour) {
-      final notificationTime = eventDate.subtract(const Duration(hours: 1));
-      if (notificationTime.isAfter(now)) {
-        await _scheduleNotification(
-          id: _getNotificationId(eventId, '1hour'),
-          title: '⏰ Stammtisch in 1 Stunde!',
-          body: 'Der Stammtisch bei $groupName beginnt gleich',
-          scheduledTime: notificationTime,
-          payload: 'event_reminder_1hour_$eventId',
-        );
-      }
-    }
-
-    // 30 Minuten vorher
-    if (shouldSend30Min) {
-      final notificationTime = eventDate.subtract(const Duration(minutes: 30));
-      if (notificationTime.isAfter(now)) {
-        await _scheduleNotification(
-          id: _getNotificationId(eventId, '30min'),
-          title: '🏃‍♂️ Stammtisch in 30 Minuten!',
-          body: 'Zeit sich fertig zu machen für $groupName',
-          scheduledTime: notificationTime,
-          payload: 'event_reminder_30min_$eventId',
-        );
-      }
-    }
-
-    print('🔔 Scheduled reminders for event $eventId');
+    // TODO: Show local notification
+    debugPrint('💬 Chat notification from $senderName in $groupName: $message');
   }
 
-  Future<void> _scheduleNotification({
-    required int id,
-    required String title,
-    required String body,
-    required DateTime scheduledTime,
-    String? payload,
-  }) async {
-    const androidDetails = AndroidNotificationDetails(
-      'event_reminders',
-      'Event Reminders',
-      channelDescription: 'Reminders for upcoming events',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    // Verwende schedule statt zonedSchedule für Kompatibilität
-    await _notifications.schedule(
-      id,
-      title,
-      body,
-      scheduledTime,
-      notificationDetails,
-      payload: payload,
-    );
-  }
-
-  // Immediate Notifications
-  Future<void> showImmediateNotification({
-    required String title,
-    required String body,
-    String? payload,
-  }) async {
-    if (!_isInitialized) await initialize();
-
-    const androidDetails = AndroidNotificationDetails(
-      'immediate',
-      'Immediate Notifications',
-      channelDescription: 'Immediate notifications for important events',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _notifications.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      title,
-      body,
-      notificationDetails,
-      payload: payload,
-    );
-  }
-
-  // Utility Methods
-  int _getNotificationId(String eventId, String type) {
-    return '${eventId}_$type'.hashCode.abs();
-  }
-
-  Future<void> cancelEventNotifications(String eventId) async {
-    await _notifications.cancel(_getNotificationId(eventId, '1day'));
-    await _notifications.cancel(_getNotificationId(eventId, '1hour'));
-    await _notifications.cancel(_getNotificationId(eventId, '30min'));
-    print('🔔 Cancelled notifications for event $eventId');
+  Future<void> cancelEventReminder(String eventId) async {
+    // TODO: Cancel scheduled notification
+    debugPrint('❌ Event reminder cancelled for $eventId');
   }
 
   Future<void> cancelAllNotifications() async {
-    await _notifications.cancelAll();
-    print('🔔 All notifications cancelled');
+    // TODO: Cancel all scheduled notifications
+    debugPrint('🚫 All notifications cancelled');
   }
 
-  // Demo notifications for testing
+  Future<bool> requestPermissions() async {
+    // TODO: Request notification permissions from system
+    debugPrint('🔐 Notification permissions requested (placeholder)');
+    return true; // Placeholder
+  }
+
+  Future<bool> hasPermissions() async {
+    // TODO: Check if notifications are permitted
+    return true; // Placeholder
+  }
+
+  // Methoden für ReminderSettingsScreen-Kompatibilität
+  Future<Map<String, bool>> getNotificationSettings() async {
+    return {
+      '1_day': _settings.reminderHours >= 24,
+      '1_hour': _settings.reminderHours >= 1 || _settings.reminderMinutes >= 60,
+      '30_min': _settings.reminderMinutes >= 30,
+    };
+  }
+
+  Future<void> updateNotificationSettings({
+    required bool oneDayBefore,
+    required bool oneHourBefore, 
+    required bool thirtyMinBefore,
+  }) async {
+    // Bestimme die Reminder-Einstellungen basierend auf den Schaltern
+    int reminderHours = 0;
+    int reminderMinutes = 0;
+    
+    if (oneDayBefore) {
+      reminderHours = 24;
+    } else if (oneHourBefore) {
+      reminderHours = 1;
+    } else if (thirtyMinBefore) {
+      reminderMinutes = 30;
+    }
+
+    final newSettings = _settings.copyWith(
+      reminderHours: reminderHours,
+      reminderMinutes: reminderMinutes,
+    );
+    
+    await updateSettings(newSettings);
+  }
+
   Future<void> sendTestNotification() async {
-    await showImmediateNotification(
-      title: '🧪 Test Benachrichtigung',
-      body: 'Das Benachrichtigungssystem funktioniert!',
-      payload: 'test_notification',
-    );
-  }
-
-  Future<void> scheduleTestReminder() async {
-    final testTime = DateTime.now().add(const Duration(seconds: 10));
-    
-    await _scheduleNotification(
-      id: 999999,
-      title: '⏰ Test Erinnerung',
-      body: 'Das ist eine Test-Erinnerung nach 10 Sekunden',
-      scheduledTime: testTime,
-      payload: 'test_reminder',
-    );
-    
-    print('🔔 Test reminder scheduled for ${testTime.toString()}');
+    // TODO: Echte Test-Benachrichtigung senden
+    debugPrint('🔔 Test notification sent (placeholder)');
   }
 }

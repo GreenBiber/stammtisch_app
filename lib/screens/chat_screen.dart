@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../l10n/app_localizations.dart';
+import '../l10n/l10n.dart';
 import '../providers/chat_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/group_provider.dart';
@@ -92,9 +92,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -102,7 +102,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        l10n.locale.languageCode == 'de'
+                        context.isGerman
                             ? '💬 Live-Chat: Nachrichten werden lokal gespeichert'
                             : '💬 Live Chat: Messages are stored locally',
                         style: const TextStyle(
@@ -132,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  l10n.locale.languageCode == 'de'
+                                  context.isGerman
                                       ? 'Noch keine Nachrichten'
                                       : 'No messages yet',
                                   style: TextStyle(
@@ -142,7 +142,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  l10n.locale.languageCode == 'de'
+                                  context.isGerman
                                       ? 'Sei der erste, der eine Nachricht schreibt!'
                                       : 'Be the first to send a message!',
                                   style: TextStyle(
@@ -175,7 +175,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   color: Theme.of(context).scaffoldBackgroundColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, -1),
                     ),
@@ -187,7 +187,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: TextField(
                         controller: _messageController,
                         decoration: InputDecoration(
-                          hintText: l10n.locale.languageCode == 'de'
+                          hintText: context.isGerman
                               ? 'Nachricht schreiben...'
                               : 'Type a message...',
                           border: OutlineInputBorder(
@@ -195,7 +195,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.withOpacity(0.1),
+                          fillColor: Colors.grey.withValues(alpha: 0.1),
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -246,13 +246,13 @@ class _ChatScreenState extends State<ChatScreen> {
     
     switch (message.type) {
       case MessageType.system:
-        bubbleColor = Colors.orange.withOpacity(0.8);
+        bubbleColor = Colors.orange.withValues(alpha: 0.8);
         break;
       case MessageType.eventUpdate:
-        bubbleColor = Colors.blue.withOpacity(0.8);
+        bubbleColor = Colors.blue.withValues(alpha: 0.8);
         break;
       default:
-        bubbleColor = isMe ? Colors.teal.withOpacity(0.8) : Colors.grey.shade700;
+        bubbleColor = isMe ? Colors.teal.withValues(alpha: 0.8) : Colors.grey.shade700;
     }
 
     // System messages are centered
@@ -320,7 +320,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Text(
               message.displayTime,
               style: TextStyle(
-                color: textColor.withOpacity(0.7),
+                color: textColor.withValues(alpha: 0.7),
                 fontSize: 10,
               ),
             ),
@@ -355,14 +355,14 @@ class _ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.locale.languageCode == 'de' ? 'Chat-Info' : 'Chat Info'),
+        title: Text(context.isGerman ? 'Chat-Info' : 'Chat Info'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${l10n.locale.languageCode == 'de' ? 'Gruppe' : 'Group'}: $groupName'),
+            Text('${context.isGerman ? 'Gruppe' : 'Group'}: $groupName'),
             const SizedBox(height: 8),
-            Text('${l10n.locale.languageCode == 'de' ? 'Nachrichten' : 'Messages'}: $messageCount'),
+            Text('${context.isGerman ? 'Nachrichten' : 'Messages'}: $messageCount'),
           ],
         ),
         actions: [
