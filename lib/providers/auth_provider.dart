@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -8,6 +10,8 @@ enum AuthStatus { initial, loading, authenticated, unauthenticated }
 
 class AuthProvider with ChangeNotifier {
   final Uuid _uuid = const Uuid();
+  final Map<String, int> _failedLoginAttempts = {};
+  final Map<String, DateTime> _lockoutUntil = {};
 
   AuthStatus _status = AuthStatus.initial;
   User? _currentUser;
@@ -54,8 +58,8 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
-      if (password.length < 6) {
-        _setError('Passwort muss mindestens 6 Zeichen lang sein');
+      if (!_isStrongPassword(password)) {
+        _setError('Passwort muss mindestens 8 Zeichen haben und Buchstaben, Zahlen und Sonderzeichen enthalten');
         _setStatus(AuthStatus.unauthenticated);
         return false;
       }
@@ -82,7 +86,7 @@ class AuthProvider with ChangeNotifier {
         lastLoginAt: DateTime.now(),
       );
 
-      // Speichere User und Passwort
+      // Speichere User mit gehashtem Passwort
       await _saveUser(user, password);
       _currentUser = user;
       _setStatus(AuthStatus.authenticated);
@@ -104,9 +108,16 @@ class AuthProvider with ChangeNotifier {
     _clearError();
 
     try {
-      // Validierung
+      // Validierung und Ratenbegrenzung
       if (!_isValidEmail(email)) {
         _setError('Ungültige E-Mail-Adresse');
+        _setStatus(AuthStatus.unauthenticated);
+        return false;
+      }
+
+      final normalizedEmail = email.trim().toLowerCase();
+      if (_isLockedOut(normalizedEmail)) {
+        _setError('Zu viele fehlgeschlagene Anmeldeversuche. Bitte warten Sie.');
         _setStatus(AuthStatus.unauthenticated);
         return false;
       }
@@ -115,7 +126,6 @@ class AuthProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final usersJson = prefs.getString('users') ?? '{}';
       final users = Map<String, dynamic>.from(json.decode(usersJson));
-      final normalizedEmail = email.trim().toLowerCase();
 
       if (!users.containsKey(normalizedEmail)) {
         _setError('E-Mail-Adresse nicht gefunden');
@@ -124,14 +134,19 @@ class AuthProvider with ChangeNotifier {
       }
 
       final userData = users[normalizedEmail];
-      final storedPassword = userData['password'];
+      final storedPasswordHash = userData['passwordHash'];
+      final salt = userData['salt'];
 
-      // Einfache Passwort-Prüfung (in Production: gehashed!)
-      if (storedPassword != password) {
+      // Sicherer Passwort-Vergleich mit Hash
+      if (!_verifyPassword(password, storedPasswordHash, salt)) {
+        _recordFailedLogin(normalizedEmail);
         _setError('Falsches Passwort');
         _setStatus(AuthStatus.unauthenticated);
         return false;
       }
+
+      // Reset failed attempts on successful login
+      _clearFailedLogins(normalizedEmail);
 
       // Erstelle User-Objekt und aktualisiere Login-Zeit
       final user = User.fromJson(userData['user']).copyWith(
@@ -223,6 +238,47 @@ class AuthProvider with ChangeNotifier {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  bool _isStrongPassword(String password) {
+    if (password.length < 8) return false;
+    if (!password.contains(RegExp(r'[A-Za-z]'))) return false;
+    if (!password.contains(RegExp(r'[0-9]'))) return false;
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?\":{}|<>]'))) return false;
+    return true;
+  }
+
+  String _generateSalt() {
+    final bytes = List<int>.generate(32, (i) => 
+        DateTime.now().millisecondsSinceEpoch.hashCode + i);
+    return base64.encode(bytes);
+  }
+
+  String _hashPassword(String password, String salt) {
+    final bytes = utf8.encode(password + salt);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  bool _verifyPassword(String password, String hash, String salt) {
+    return _hashPassword(password, salt) == hash;
+  }
+
+  bool _isLockedOut(String email) {
+    if (!_lockoutUntil.containsKey(email)) return false;
+    return DateTime.now().isBefore(_lockoutUntil[email]!);
+  }
+
+  void _recordFailedLogin(String email) {
+    _failedLoginAttempts[email] = (_failedLoginAttempts[email] ?? 0) + 1;
+    if (_failedLoginAttempts[email]! >= 5) {
+      _lockoutUntil[email] = DateTime.now().add(const Duration(minutes: 15));
+    }
+  }
+
+  void _clearFailedLogins(String email) {
+    _failedLoginAttempts.remove(email);
+    _lockoutUntil.remove(email);
+  }
+
   Future<bool> _emailExists(String email) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -241,10 +297,15 @@ class AuthProvider with ChangeNotifier {
     final usersJson = prefs.getString('users') ?? '{}';
     final users = Map<String, dynamic>.from(json.decode(usersJson));
 
+    // Generiere Salt und Hash für sicheres Passwort
+    final salt = _generateSalt();
+    final passwordHash = _hashPassword(password, salt);
+
     // Füge neuen User hinzu
     users[user.email] = {
       'user': user.toJson(),
-      'password': password, // In Production: gehashed!
+      'passwordHash': passwordHash,
+      'salt': salt,
     };
 
     // Speichere Users-Map und aktuellen User
