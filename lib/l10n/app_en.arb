@@ -265,5 +265,16 @@
   "xpBuyRound": "Bought a round",
   "xpPerfectMonth": "Perfect month",
   "xpFirstTime": "First participation",
-  "xpAdminBonus": "Admin bonus"
+  "xpAdminBonus": "Admin bonus",
+  "qrCodeGenerated": "QR Code Generated",
+  "scanQRCode": "Scan QR Code",
+  "pointCameraAtQR": "Point camera at QR code",
+  "qrCodeDetected": "QR Code detected",
+  "scannedData": "Scanned Data",
+  "joinGroup": "Join Group",
+  "scanAgain": "Scan Again",
+  "joiningGroup": "Joining group...",
+  "joinedGroup": "Joined group successfully",
+  "loginRequired": "Login required",
+  "invalidQRCode": "Invalid QR Code"
 }

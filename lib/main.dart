@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'firebase_options.dart';
 import 'l10n/l10n.dart';
 import 'providers/auth_provider.dart';
 import 'providers/group_provider.dart';
@@ -8,11 +10,39 @@ import 'providers/event_provider.dart';
 import 'providers/points_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/restaurant_provider.dart';
-import 'providers/chat_provider.dart';
+// import 'providers/chat_provider.dart';
+import 'services/firebase_service.dart';
+// import 'services/notification_service.dart';
 import 'screens/auth/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables (with error handling)
+  try {
+    await dotenv.load(fileName: ".env");
+    print('✅ Environment variables loaded successfully');
+  } catch (e) {
+    print(
+        '⚠️ Warning: .env file not found or could not be loaded. Using default values.');
+    print('Error details: $e');
+    // Initialize dotenv with empty content to prevent NotInitializedError
+    dotenv.testLoad(fileInput: '');
+  }
+
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('✅ Firebase initialized successfully');
+    
+    // Initialize Firebase Service
+    await FirebaseService().initialize();
+  } catch (e) {
+    print('❌ Firebase initialization failed: $e');
+    // Continue without Firebase for now
+  }
 
   // Initialize providers
   final authProvider = AuthProvider();
@@ -21,7 +51,7 @@ void main() async {
   final pointsProvider = PointsProvider();
   final localeProvider = LocaleProvider();
   final restaurantProvider = RestaurantProvider();
-  final chatProvider = ChatProvider();
+  // final chatProvider = ChatProvider(); // Temporarily disabled
 
   // Initialize providers
   await authProvider.initialize();
@@ -31,7 +61,7 @@ void main() async {
   await groupProvider.loadGroups();
   await eventProvider.loadEvents();
   await pointsProvider.loadPoints();
-  await chatProvider.loadMessages();
+  // await chatProvider.loadMessages(); // Temporarily disabled
 
   runApp(
     MultiProvider(
@@ -43,7 +73,7 @@ void main() async {
         ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
         ChangeNotifierProvider<RestaurantProvider>.value(
             value: restaurantProvider),
-        ChangeNotifierProvider<ChatProvider>.value(value: chatProvider),
+        // ChangeNotifierProvider<ChatProvider>.value(value: chatProvider), // Temporarily disabled
       ],
       child: const StammtischApp(),
     ),
@@ -79,7 +109,8 @@ class StammtischApp extends StatelessWidget {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+                borderSide:
+                    BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

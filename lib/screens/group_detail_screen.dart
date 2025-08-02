@@ -7,9 +7,9 @@ import '../providers/auth_provider.dart';
 import '../l10n/l10n.dart';
 import 'event_screen.dart';
 import 'calendar_screen.dart';
-import 'reminder_settings_screen.dart';
+// import 'reminder_settings_screen.dart'; // Temporarily disabled
 import 'restaurant_suggestions_screen.dart';
-import 'chat_screen.dart';
+// import 'chat_screen.dart'; // Temporarily disabled
 import 'admin_points_screen.dart';
 import 'group_invite_screen.dart';
 
@@ -27,8 +27,10 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      Provider.of<EventProvider>(context, listen: false)
-          .generateEventForGroup(widget.group.id);
+      if (mounted) {
+        Provider.of<EventProvider>(context, listen: false)
+            .generateEventForGroup(widget.group.id);
+      }
     });
   }
 
@@ -63,8 +65,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                       value: 'members',
                       child: ListTile(
                         leading: const Icon(Icons.people),
-                        title: Text(context.isGerman 
-                            ? 'Mitglieder verwalten' 
+                        title: Text(context.isGerman
+                            ? 'Mitglieder verwalten'
                             : 'Manage Members'),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -96,13 +98,16 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                           backgroundColor: Colors.teal,
                           radius: 32,
                           backgroundImage: widget.group.avatarUrl.isNotEmpty
-                              ? NetworkImage(widget.group.avatarUrl) as ImageProvider
+                              ? NetworkImage(widget.group.avatarUrl)
+                                  as ImageProvider
                               : null,
                           child: widget.group.avatarUrl.isEmpty
                               ? Text(
-                                  widget.group.name.substring(0, 2).toUpperCase(),
+                                  widget.group.name
+                                      .substring(0, 2)
+                                      .toUpperCase(),
                                   style: const TextStyle(
-                                    fontSize: 20, 
+                                    fontSize: 20,
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -120,22 +125,29 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                l10n.memberCount(widget.group.members.length), // LOKALISIERT
+                                l10n.memberCount(
+                                    widget.group.members.length), // LOKALISIERT
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
                                   Icon(
-                                    isAdmin ? Icons.admin_panel_settings : Icons.person,
+                                    isAdmin
+                                        ? Icons.admin_panel_settings
+                                        : Icons.person,
                                     size: 16,
-                                    color: isAdmin ? Colors.orange : Colors.grey,
+                                    color:
+                                        isAdmin ? Colors.orange : Colors.grey,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    isAdmin ? l10n.admin : l10n.member, // LOKALISIERT
+                                    isAdmin
+                                        ? l10n.admin
+                                        : l10n.member, // LOKALISIERT
                                     style: TextStyle(
-                                      color: isAdmin ? Colors.orange : Colors.grey,
+                                      color:
+                                          isAdmin ? Colors.orange : Colors.grey,
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -156,8 +168,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                 Text(
                   context.isGerman ? 'Aktionen' : 'Actions',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 12),
 
@@ -178,19 +190,23 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const EventScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const EventScreen()),
                         );
                       },
                     ),
                     _ActionCard(
                       icon: Icons.calendar_month,
                       title: l10n.calendar, // LOKALISIERT
-                      subtitle: context.isGerman ? "Terminübersicht" : "Schedule Overview",
+                      subtitle: context.isGerman
+                          ? "Terminübersicht"
+                          : "Schedule Overview",
                       color: Colors.blue,
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const CalendarScreen()),
                         );
                       },
                     ),
@@ -202,7 +218,13 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ChatScreen()),
+                          // MaterialPageRoute(builder: (context) => const ChatScreen()), // Temporarily disabled
+                          MaterialPageRoute(
+                              builder: (context) => Scaffold(
+                                  appBar: AppBar(title: Text('Chat')),
+                                  body: Center(
+                                      child: Text(
+                                          'Chat (Firebase erforderlich)')))),
                         );
                       },
                     ),
@@ -215,7 +237,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const RestaurantSuggestionsScreen(),
+                            builder: (context) =>
+                                const RestaurantSuggestionsScreen(),
                           ),
                         );
                       },
@@ -224,7 +247,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                       _ActionCard(
                         icon: Icons.star,
                         title: context.isGerman ? 'Punkte' : 'Points',
-                        subtitle: context.isGerman ? 'Punkte vergeben' : 'Award Points',
+                        subtitle: context.isGerman
+                            ? 'Punkte vergeben'
+                            : 'Award Points',
                         color: Colors.purple,
                         onTap: () {
                           Navigator.push(
@@ -244,8 +269,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                 Text(
                   l10n.settings, // LOKALISIERT
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 12),
 
@@ -255,15 +280,20 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                       ListTile(
                         leading: const Icon(Icons.notifications_active),
                         title: Text(l10n.reminders), // LOKALISIERT
-                        subtitle: Text(context.isGerman 
-                            ? "Push-Benachrichtigungen verwalten" 
+                        subtitle: Text(context.isGerman
+                            ? "Push-Benachrichtigungen verwalten"
                             : "Manage push notifications"),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ReminderSettingsScreen(),
+                              // builder: (context) => const ReminderSettingsScreen(), // Temporarily disabled
+                              builder: (context) => Scaffold(
+                                  appBar: AppBar(title: Text('Einstellungen')),
+                                  body: Center(
+                                      child: Text(
+                                          'Einstellungen (Firebase erforderlich)'))),
                             ),
                           );
                         },
@@ -272,28 +302,30 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                         const Divider(height: 1),
                         ListTile(
                           leading: const Icon(Icons.people),
-                          title: Text(context.isGerman 
-                              ? "Mitglieder verwalten" 
+                          title: Text(context.isGerman
+                              ? "Mitglieder verwalten"
                               : "Manage Members"),
-                          subtitle: Text(l10n.memberCount(widget.group.members.length)), // LOKALISIERT
+                          subtitle: Text(l10n.memberCount(
+                              widget.group.members.length)), // LOKALISIERT
                           trailing: const Icon(Icons.chevron_right),
                           onTap: _showMemberManagement,
                         ),
                         const Divider(height: 1),
                         ListTile(
                           leading: const Icon(Icons.qr_code),
-                          title: Text(context.isGerman 
-                              ? "QR-Code Einladung" 
+                          title: Text(context.isGerman
+                              ? "QR-Code Einladung"
                               : "QR Code Invite"),
-                          subtitle: Text(context.isGerman 
-                              ? "Mitglieder mit QR-Code einladen" 
+                          subtitle: Text(context.isGerman
+                              ? "Mitglieder mit QR-Code einladen"
                               : "Invite members with QR code"),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => GroupInviteScreen(groupId: widget.group.id),
+                                builder: (context) =>
+                                    GroupInviteScreen(groupId: widget.group.id),
                               ),
                             );
                           },
@@ -302,8 +334,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                         ListTile(
                           leading: const Icon(Icons.settings),
                           title: Text(l10n.groupSettings), // LOKALISIERT
-                          subtitle: Text(context.isGerman 
-                              ? "Name, Bild und mehr" 
+                          subtitle: Text(context.isGerman
+                              ? "Name, Bild und mehr"
                               : "Name, image and more"),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: _showGroupSettings,
@@ -326,10 +358,12 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                           CircleAvatar(
                             radius: 16,
                             backgroundColor: Colors.teal,
-                            backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+                            backgroundImage: user.avatarUrl != null &&
+                                    user.avatarUrl!.isNotEmpty
                                 ? NetworkImage(user.avatarUrl!) as ImageProvider
                                 : null,
-                            child: user.avatarUrl == null || user.avatarUrl!.isEmpty
+                            child: user.avatarUrl == null ||
+                                    user.avatarUrl!.isEmpty
                                 ? Text(
                                     user.initials,
                                     style: const TextStyle(
@@ -383,7 +417,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(context.isGerman 
+        title: Text(context.isGerman
             ? 'Mitglieder - ${widget.group.name}'
             : 'Members - ${widget.group.name}'),
         content: SizedBox(
@@ -391,7 +425,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(l10n.memberCount(widget.group.members.length)), // LOKALISIERT
+              Text(
+                  l10n.memberCount(widget.group.members.length)), // LOKALISIERT
               const SizedBox(height: 12),
               ...widget.group.members.map((memberId) {
                 final isAdmin = widget.group.admins.contains(memberId);
@@ -401,15 +436,19 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                     radius: 16,
                     backgroundColor: Colors.teal,
                     child: Text(
-                      memberId == Provider.of<AuthProvider>(context, listen: false).currentUserId
+                      memberId ==
+                              Provider.of<AuthProvider>(context, listen: false)
+                                  .currentUserId
                           ? (context.isGerman ? 'Du' : 'You')
                           : memberId.substring(0, 2).toUpperCase(),
                       style: const TextStyle(fontSize: 10, color: Colors.white),
                     ),
                   ),
                   title: Text(
-                    memberId == Provider.of<AuthProvider>(context, listen: false).currentUserId
-                        ? (context.isGerman 
+                    memberId ==
+                            Provider.of<AuthProvider>(context, listen: false)
+                                .currentUserId
+                        ? (context.isGerman
                             ? 'Du (${Provider.of<AuthProvider>(context, listen: false).currentUser?.displayName})'
                             : 'You (${Provider.of<AuthProvider>(context, listen: false).currentUser?.displayName})')
                         : memberId,
@@ -417,12 +456,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                   ),
                   trailing: isAdmin
                       ? Chip(
-                          label: Text(l10n.admin, style: const TextStyle(fontSize: 10)), // LOKALISIERT
+                          label: Text(l10n.admin,
+                              style:
+                                  const TextStyle(fontSize: 10)), // LOKALISIERT
                           backgroundColor: Colors.orange,
                         )
                       : null,
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
@@ -437,13 +478,13 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => GroupInviteScreen(groupId: widget.group.id),
+                  builder: (context) =>
+                      GroupInviteScreen(groupId: widget.group.id),
                 ),
               );
             },
-            child: Text(context.isGerman 
-                ? 'QR-Code Einladung' 
-                : 'QR Code Invite'),
+            child:
+                Text(context.isGerman ? 'QR-Code Einladung' : 'QR Code Invite'),
           ),
         ],
       ),

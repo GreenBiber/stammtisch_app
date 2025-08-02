@@ -27,6 +27,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    // Stop listening to Firebase messages
+    final groupProvider = Provider.of<GroupProvider>(context, listen: false);
+    final activeGroup = groupProvider.getActiveGroup(context);
+    if (activeGroup != null) {
+      Provider.of<ChatProvider>(context, listen: false)
+          .stopListeningToGroup(activeGroup.id);
+    }
+    
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -38,6 +46,10 @@ class _ChatScreenState extends State<ChatScreen> {
     final activeGroup = groupProvider.getActiveGroup(context);
     
     if (activeGroup != null) {
+      // Start listening to Firebase messages
+      chatProvider.startListeningToGroup(activeGroup.id);
+      
+      // Initialize demo messages if no Firebase messages exist
       await chatProvider.initializeDemoMessages(activeGroup.id);
       _scrollToBottom();
     }

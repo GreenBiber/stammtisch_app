@@ -599,4 +599,37 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get xpAdminBonus => 'Admin-Bonus';
+
+  @override
+  String get qrCodeGenerated => 'QR-Code generiert';
+
+  @override
+  String get scanQRCode => 'QR-Code scannen';
+
+  @override
+  String get pointCameraAtQR => 'Kamera auf QR-Code richten';
+
+  @override
+  String get qrCodeDetected => 'QR-Code erkannt';
+
+  @override
+  String get scannedData => 'Gescannte Daten';
+
+  @override
+  String get joinGroup => 'Gruppe beitreten';
+
+  @override
+  String get scanAgain => 'Erneut scannen';
+
+  @override
+  String get joiningGroup => 'Trete Gruppe bei...';
+
+  @override
+  String get joinedGroup => 'Gruppe erfolgreich beigetreten';
+
+  @override
+  String get loginRequired => 'Anmeldung erforderlich';
+
+  @override
+  String get invalidQRCode => 'Ungültiger QR-Code';
 }

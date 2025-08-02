@@ -3,8 +3,19 @@ import '../services/places_service.dart';
 import '../services/weather_service.dart';
 
 class RestaurantProvider with ChangeNotifier {
-  final PlacesService _placesService = PlacesService();
-  final WeatherService _weatherService = WeatherService();
+  PlacesService? _placesService;
+  WeatherService? _weatherService;
+
+  // Safe getters for services
+  PlacesService get placesService {
+    _placesService ??= PlacesService();
+    return _placesService!;
+  }
+
+  WeatherService get weatherService {
+    _weatherService ??= WeatherService();
+    return _weatherService!;
+  }
 
   List<Restaurant> _suggestions = [];
   bool _isLoading = false;
@@ -53,7 +64,14 @@ class RestaurantProvider with ChangeNotifier {
   String? get error => _error;
   bool get hasApiQuota => _hasApiQuota;
   int get remainingQuota => _remainingQuota;
-  bool get hasValidApiKey => _placesService.hasValidApiKey;
+  bool get hasValidApiKey {
+    try {
+      return placesService.hasValidApiKey;
+    } catch (e) {
+      print('⚠️ Error checking API key: $e');
+      return false;
+    }
+  }
   WeatherData? get currentWeather => _currentWeather;
   String? get weatherRecommendation => _weatherRecommendation;
 
@@ -65,18 +83,24 @@ class RestaurantProvider with ChangeNotifier {
     _error = null;
 
     try {
-      // Update Quota Status
-      await _updateQuotaStatus();
+      // Update Quota Status (with error handling)
+      try {
+        await _updateQuotaStatus();
+      } catch (quotaError) {
+        print('⚠️ Error updating quota status: $quotaError');
+        _hasApiQuota = false;
+        _remainingQuota = 0;
+      }
 
       // Load weather data first
       if (latitude != null && longitude != null) {
         try {
-          _currentWeather = await _weatherService.getCurrentWeather(
+          _currentWeather = await weatherService.getCurrentWeather(
             latitude: latitude,
             longitude: longitude,
           );
           _weatherRecommendation =
-              _weatherService.getWeatherBasedRecommendation(_currentWeather);
+              weatherService.getWeatherBasedRecommendation(_currentWeather);
           print('🌤️ Weather loaded: $_weatherRecommendation');
         } catch (weatherError) {
           print('⚠️ Weather API Error: $weatherError');
@@ -94,10 +118,10 @@ class RestaurantProvider with ChangeNotifier {
 
           // Get weather-based restaurant types
           final restaurantTypes =
-              _weatherService.getWeatherBasedRestaurantTypes(_currentWeather);
+              weatherService.getWeatherBasedRestaurantTypes(_currentWeather);
           print('🌤️ Weather-based search types: $restaurantTypes');
 
-          _suggestions = await _placesService.searchRestaurants(
+          _suggestions = await placesService.searchRestaurants(
             latitude: latitude,
             longitude: longitude,
             type: restaurantTypes.first, // Use primary type for API call
@@ -134,7 +158,7 @@ class RestaurantProvider with ChangeNotifier {
 
   Future<void> _updateQuotaStatus() async {
     try {
-      _remainingQuota = await _placesService.getRemainingQuota();
+      _remainingQuota = await placesService.getRemainingQuota();
       debugPrint("********************************");
       debugPrint(_remainingQuota.toString());
       debugPrint("********************************");
@@ -142,6 +166,10 @@ class RestaurantProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print('Error updating quota status: $e');
+      // Set safe fallback values
+      _hasApiQuota = false;
+      _remainingQuota = 0;
+      rethrow; // Re-throw to be handled by caller
     }
   }
 
@@ -152,6 +180,11 @@ class RestaurantProvider with ChangeNotifier {
 
   String? getPhotoUrl(String? photoReference) {
     if (!hasValidApiKey) return null;
-    return _placesService.getPhotoUrl(photoReference);
+    try {
+      return placesService.getPhotoUrl(photoReference);
+    } catch (e) {
+      print('⚠️ Error getting photo URL: $e');
+      return null;
+    }
   }
 }

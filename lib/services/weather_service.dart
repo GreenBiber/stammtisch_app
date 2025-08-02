@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WeatherData {
   final double temperature;
@@ -53,7 +53,15 @@ class WeatherData {
 class WeatherService {
   static const String _baseUrl = 'https://api.openweathermap.org/data/2.5';
   
-  String get _apiKey => ''; // TODO: Add API key when flutter_dotenv is added
+  String get _apiKey {
+    try {
+      return dotenv.env['WEATHER_API_KEY'] ?? '';
+    } catch (e) {
+      // dotenv not initialized or .env file not found
+      print('Warning: dotenv not properly initialized - $e');
+      return '';
+    }
+  }
   
   bool get hasValidApiKey => _apiKey.isNotEmpty;
 

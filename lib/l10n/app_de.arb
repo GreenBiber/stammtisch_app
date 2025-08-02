@@ -189,5 +189,16 @@
   "xpBuyRound": "Getränkerunde spendiert",
   "xpPerfectMonth": "Perfekter Monat",
   "xpFirstTime": "Erste Teilnahme",
-  "xpAdminBonus": "Admin-Bonus"
+  "xpAdminBonus": "Admin-Bonus",
+  "qrCodeGenerated": "QR-Code generiert",
+  "scanQRCode": "QR-Code scannen",
+  "pointCameraAtQR": "Kamera auf QR-Code richten",
+  "qrCodeDetected": "QR-Code erkannt",
+  "scannedData": "Gescannte Daten",
+  "joinGroup": "Gruppe beitreten",
+  "scanAgain": "Erneut scannen",
+  "joiningGroup": "Trete Gruppe bei...",
+  "joinedGroup": "Gruppe erfolgreich beigetreten",
+  "loginRequired": "Anmeldung erforderlich",
+  "invalidQRCode": "Ungültiger QR-Code"
 }

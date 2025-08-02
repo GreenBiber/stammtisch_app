@@ -13,4 +13,7 @@ PRODUCT_BUNDLE_IDENTIFIER = com.example.stammtischApp
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
 
+// Minimum macOS deployment target
+MACOSX_DEPLOYMENT_TARGET = 10.15
+
 #include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"

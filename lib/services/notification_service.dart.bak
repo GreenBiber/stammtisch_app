@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:convert';
 
 enum NotificationType {
   eventReminder,
@@ -78,8 +80,11 @@ class NotificationService {
 
   static const String _settingsKey = 'notification_settings';
   NotificationSettings _settings = NotificationSettings();
+  FirebaseMessaging? _messaging;
+  String? _fcmToken;
 
   NotificationSettings get settings => _settings;
+  String? get fcmToken => _fcmToken;
 
   Future<void> initialize() async {
     await _loadSettings();
@@ -96,12 +101,7 @@ class NotificationService {
       final settingsJson = prefs.getString(_settingsKey);
       
       if (settingsJson != null) {
-        final Map<String, dynamic> settingsMap = 
-            Map<String, dynamic>.from(
-                prefs.getString(_settingsKey) != null 
-                    ? {} // Parse JSON here in real implementation
-                    : {}
-            );
+        final Map<String, dynamic> settingsMap = json.decode(settingsJson);
         _settings = NotificationSettings.fromJson(settingsMap);
       }
     } catch (e) {
@@ -124,21 +124,88 @@ class NotificationService {
   Future<void> _saveSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_settingsKey, _settings.toJson().toString());
+      await prefs.setString(_settingsKey, json.encode(_settings.toJson()));
     } catch (e) {
       debugPrint('Error saving notification settings: $e');
     }
   }
 
   Future<void> _initializePushNotifications() async {
-    // TODO: Initialize Firebase Cloud Messaging or similar
-    // This is a placeholder for the actual push notification setup
-    debugPrint('🔔 Push notifications initialized (placeholder)');
+    try {
+      _messaging = FirebaseMessaging.instance;
+      
+      // Request permission for notifications
+      final notificationSettings = await _messaging!.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+
+      if (notificationSettings.authorizationStatus == AuthorizationStatus.authorized) {
+        debugPrint('🔔 Push notifications permission granted');
+        
+        // Get FCM token
+        _fcmToken = await _messaging!.getToken();
+        debugPrint('📱 FCM Token: $_fcmToken');
+        
+        // Configure foreground message handling
+        FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+        
+        // Configure background message handling
+        FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+        
+        debugPrint('🔔 Push notifications initialized successfully');
+      } else {
+        debugPrint('🔕 Push notifications permission denied');
+      }
+    } catch (e) {
+      debugPrint('❌ Error initializing push notifications: $e');
+    }
   }
 
   Future<void> _disablePushNotifications() async {
-    // TODO: Disable push notifications
-    debugPrint('🔕 Push notifications disabled (placeholder)');
+    try {
+      await _messaging?.deleteToken();
+      _fcmToken = null;
+      debugPrint('🔕 Push notifications disabled');
+    } catch (e) {
+      debugPrint('❌ Error disabling push notifications: $e');
+    }
+  }
+
+  void _handleForegroundMessage(RemoteMessage message) {
+    debugPrint('📱 Foreground message received: ${message.notification?.title}');
+    
+    // Show in-app notification or update UI
+    if (message.notification != null) {
+      _showLocalNotification(
+        title: message.notification!.title ?? 'Stammtisch App',
+        body: message.notification!.body ?? '',
+        data: message.data,
+      );
+    }
+  }
+
+  void _handleBackgroundMessage(RemoteMessage message) {
+    debugPrint('📱 Background message opened: ${message.notification?.title}');
+    
+    // Handle navigation based on message data
+    if (message.data['type'] == 'chat') {
+      // Navigate to chat screen
+    } else if (message.data['type'] == 'event') {
+      // Navigate to event screen
+    }
+  }
+
+  void _showLocalNotification({
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) {
+    // This would show a local notification overlay
+    // For now, just log the notification
+    debugPrint('🔔 Local notification: $title - $body');
   }
 
   Future<void> scheduleEventReminder({
@@ -190,14 +257,37 @@ class NotificationService {
   }
 
   Future<bool> requestPermissions() async {
-    // TODO: Request notification permissions from system
-    debugPrint('🔐 Notification permissions requested (placeholder)');
-    return true; // Placeholder
+    try {
+      if (_messaging == null) {
+        _messaging = FirebaseMessaging.instance;
+      }
+      
+      final settings = await _messaging!.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+      
+      return settings.authorizationStatus == AuthorizationStatus.authorized;
+    } catch (e) {
+      debugPrint('❌ Error requesting notification permissions: $e');
+      return false;
+    }
   }
 
   Future<bool> hasPermissions() async {
-    // TODO: Check if notifications are permitted
-    return true; // Placeholder
+    try {
+      if (_messaging == null) {
+        _messaging = FirebaseMessaging.instance;
+      }
+      
+      final settings = await _messaging!.getNotificationSettings();
+      return settings.authorizationStatus == AuthorizationStatus.authorized;
+    } catch (e) {
+      debugPrint('❌ Error checking notification permissions: $e');
+      return false;
+    }
   }
 
   // Methoden für ReminderSettingsScreen-Kompatibilität

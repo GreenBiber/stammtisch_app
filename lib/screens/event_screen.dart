@@ -36,9 +36,8 @@ class _EventScreenState extends State<EventScreen> {
         // Check if user has any groups
         if (activeGroup == null) {
           return Scaffold(
-            appBar: AppBar(
-                title: Text(
-                    context.isGerman ? 'Stammtisch' : 'Event')),
+            appBar:
+                AppBar(title: Text(context.isGerman ? 'Stammtisch' : 'Event')),
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -73,9 +72,8 @@ class _EventScreenState extends State<EventScreen> {
 
         if (event == null) {
           return Scaffold(
-            appBar: AppBar(
-                title: Text(
-                    context.isGerman ? 'Stammtisch' : 'Event')),
+            appBar:
+                AppBar(title: Text(context.isGerman ? 'Stammtisch' : 'Event')),
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -106,9 +104,8 @@ class _EventScreenState extends State<EventScreen> {
                       eventProvider.generateEventForGroup(activeGroup.id);
                     },
                     icon: const Icon(Icons.add_circle),
-                    label: Text(context.isGerman
-                        ? 'Event erstellen'
-                        : 'Create Event'),
+                    label: Text(
+                        context.isGerman ? 'Event erstellen' : 'Create Event'),
                   ),
                 ],
               ),
@@ -119,9 +116,7 @@ class _EventScreenState extends State<EventScreen> {
         final dateStr =
             "${event.date.day}.${event.date.month}.${event.date.year}";
         final status = event.isConfirmed
-            ? (context.isGerman
-                ? "✅ Findet statt"
-                : "✅ Confirmed")
+            ? (context.isGerman ? "✅ Findet statt" : "✅ Confirmed")
             : (context.isGerman
                 ? "❌ Abgesagt (zu wenige Zusagen)"
                 : "❌ Cancelled (not enough participants)");
@@ -644,7 +639,7 @@ class _EventScreenState extends State<EventScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -685,20 +680,23 @@ class _EventScreenState extends State<EventScreen> {
       }
 
       // Feedback
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_getParticipationFeedback(choice)),
-          backgroundColor: _getParticipationColor(choice),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_getParticipationFeedback(choice)),
+            backgroundColor: _getParticipationColor(choice),
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              context.isGerman ? 'Fehler: $e' : 'Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.isGerman ? 'Fehler: $e' : 'Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       setState(() {
         _isProcessingXP = false;
@@ -732,14 +730,14 @@ class _EventScreenState extends State<EventScreen> {
 
     if (events.contains('achievement_unlocked')) {
       Future.delayed(const Duration(milliseconds: 1000), () {
-        _overlayKey.currentState?.showAchievementUnlock(
-            context.isGerman
-                ? 'Neues Achievement!'
-                : 'New Achievement!',
-            '🏆',
-            context.isGerman
-                ? 'Du hast ein Achievement freigeschaltet!'
-                : 'You unlocked an achievement!');
+        if (mounted) {
+          _overlayKey.currentState?.showAchievementUnlock(
+              context.isGerman ? 'Neues Achievement!' : 'New Achievement!',
+              '🏆',
+              context.isGerman
+                  ? 'Du hast ein Achievement freigeschaltet!'
+                  : 'You unlocked an achievement!');
+        }
       });
     }
   }
@@ -772,9 +770,7 @@ class _EventScreenState extends State<EventScreen> {
             ? 'Schade! Vielleicht beim nächsten Mal.'
             : 'Too bad! Maybe next time.';
       default:
-        return context.isGerman
-            ? 'Antwort gespeichert.'
-            : 'Response saved.';
+        return context.isGerman ? 'Antwort gespeichert.' : 'Response saved.';
     }
   }
 

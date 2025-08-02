@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "545936481270",
+    "project_id": "stammtischapp-47cfc",
+    "storage_bucket": "stammtischapp-47cfc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:545936481270:android:d2410777b55936903c45d7",
+        "android_client_info": {
+          "package_name": "com.example.stammtisch_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFQjiybUis5YMYPMu-aLr1TK1s0L1kLTE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

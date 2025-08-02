@@ -1237,6 +1237,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin bonus'**
   String get xpAdminBonus;
+
+  /// No description provided for @qrCodeGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code Generated'**
+  String get qrCodeGenerated;
+
+  /// No description provided for @scanQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get scanQRCode;
+
+  /// No description provided for @pointCameraAtQR.
+  ///
+  /// In en, this message translates to:
+  /// **'Point camera at QR code'**
+  String get pointCameraAtQR;
+
+  /// No description provided for @qrCodeDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code detected'**
+  String get qrCodeDetected;
+
+  /// No description provided for @scannedData.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned Data'**
+  String get scannedData;
+
+  /// No description provided for @joinGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Group'**
+  String get joinGroup;
+
+  /// No description provided for @scanAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Again'**
+  String get scanAgain;
+
+  /// No description provided for @joiningGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining group...'**
+  String get joiningGroup;
+
+  /// No description provided for @joinedGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined group successfully'**
+  String get joinedGroup;
+
+  /// No description provided for @loginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Login required'**
+  String get loginRequired;
+
+  /// No description provided for @invalidQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid QR Code'**
+  String get invalidQRCode;
 }
 
 class _AppLocalizationsDelegate

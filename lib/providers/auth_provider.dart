@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,7 +58,8 @@ class AuthProvider with ChangeNotifier {
       }
 
       if (!_isStrongPassword(password)) {
-        _setError('Passwort muss mindestens 8 Zeichen haben und Buchstaben, Zahlen und Sonderzeichen enthalten');
+        _setError(
+            'Passwort muss mindestens 8 Zeichen haben und Buchstaben, Zahlen und Sonderzeichen enthalten');
         _setStatus(AuthStatus.unauthenticated);
         return false;
       }
@@ -117,7 +117,8 @@ class AuthProvider with ChangeNotifier {
 
       final normalizedEmail = email.trim().toLowerCase();
       if (_isLockedOut(normalizedEmail)) {
-        _setError('Zu viele fehlgeschlagene Anmeldeversuche. Bitte warten Sie.');
+        _setError(
+            'Zu viele fehlgeschlagene Anmeldeversuche. Bitte warten Sie.');
         _setStatus(AuthStatus.unauthenticated);
         return false;
       }
@@ -247,8 +248,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   String _generateSalt() {
-    final bytes = List<int>.generate(32, (i) => 
-        DateTime.now().millisecondsSinceEpoch.hashCode + i);
+    final bytes = List<int>.generate(
+        32, (i) => DateTime.now().millisecondsSinceEpoch.hashCode + i);
     return base64.encode(bytes);
   }
 

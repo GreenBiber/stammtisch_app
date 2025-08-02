@@ -7,11 +7,11 @@ import '../providers/points_provider.dart';
 import '../models/group.dart';
 import '../widgets/user_profile_card.dart';
 import '../l10n/app_localizations.dart';
-import 'chat_screen.dart';
+// import 'chat_screen.dart'; // Temporarily disabled
 import 'calendar_screen.dart';
 import 'event_screen.dart';
 import 'restaurant_suggestions_screen.dart';
-import 'reminder_settings_screen.dart';
+// import 'reminder_settings_screen.dart'; // Temporarily disabled
 import 'leaderboard_screen.dart';
 
 class GroupTabScreen extends StatefulWidget {
@@ -283,11 +283,13 @@ class _GroupTabScreenState extends State<GroupTabScreen>
                   controller: _tabController,
                   children: const [
                     EventScreen(),
-                    ChatScreen(),
+                    // ChatScreen(), // Temporarily disabled
+                    Center(child: Text('Chat (Firebase erforderlich)')),
                     CalendarScreen(),
                     LeaderboardScreen(),
                     RestaurantSuggestionsScreen(),
-                    ReminderSettingsScreen(),
+                    // ReminderSettingsScreen(), // Temporarily disabled
+                    Center(child: Text('Einstellungen (Firebase erforderlich)')),
                   ],
                 ),
               ),

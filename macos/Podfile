@@ -1,4 +1,4 @@
-platform :osx, '10.14'
+platform :osx, '10.15'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -37,9 +37,17 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_macos_build_settings(target)
     
+    # Fix BoringSSL-GRPC -G flag issue on macOS
+    if target.name == 'BoringSSL-GRPC'
+      target.build_configurations.each do |config|
+        config.build_settings['OTHER_CFLAGS'] = (config.build_settings['OTHER_CFLAGS'] || []).reject { |flag| flag == '-G' }
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] = (config.build_settings['OTHER_CPLUSPLUSFLAGS'] || []).reject { |flag| flag == '-G' }
+      end
+    end
+    
     # Fix DT_TOOLCHAIN_DIR errors
     target.build_configurations.each do |config|
-      config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.13'
+      config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.15'
       
       # Fix DT_TOOLCHAIN_DIR issues
       if config.build_settings['LD_RUNPATH_SEARCH_PATHS']

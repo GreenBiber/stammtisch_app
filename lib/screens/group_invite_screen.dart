@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../providers/group_provider.dart';
 import '../l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ class GroupInviteScreen extends StatefulWidget {
 class _GroupInviteScreenState extends State<GroupInviteScreen> {
   late String _inviteLink;
   bool _isGeneratingQR = false;
+  bool _showQRCode = false;
 
   @override
   void initState() {
@@ -197,29 +199,47 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
             Center(
               child: _isGeneratingQR
                   ? const CircularProgressIndicator()
-                  : Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.withOpacity(0.3)),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.qr_code,
-                              size: 64, color: Colors.grey),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n?.qrCodePlaceholder ??
-                                'QR-Code wird hier angezeigt',
-                            style: const TextStyle(color: Colors.grey),
-                            textAlign: TextAlign.center,
+                  : _showQRCode
+                      ? Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.withOpacity(0.3)),
                           ),
-                        ],
-                      ),
-                    ),
+                          child: QrImageView(
+                            data: _inviteLink,
+                            version: QrVersions.auto,
+                            size: 200.0,
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            errorCorrectionLevel: QrErrorCorrectLevel.M,
+                          ),
+                        )
+                      : Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.qr_code,
+                                  size: 64, color: Colors.grey),
+                              const SizedBox(height: 8),
+                              Text(
+                                l10n?.qrCodePlaceholder ??
+                                    'QR-Code wird hier angezeigt',
+                                style: const TextStyle(color: Colors.grey),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -382,17 +402,17 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
       _isGeneratingQR = true;
     });
 
-    // Simulate QR code generation
-    Future.delayed(const Duration(seconds: 2), () {
+    // Generate QR code after brief delay for UX
+    Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
           _isGeneratingQR = false;
+          _showQRCode = true;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n?.qrCodeNotImplemented ??
-                'QR-Code-Generierung noch nicht implementiert'),
-            backgroundColor: Colors.orange,
+            content: Text(l10n?.qrCodeGenerated ?? 'QR-Code erfolgreich generiert'),
+            backgroundColor: Colors.green,
           ),
         );
       }

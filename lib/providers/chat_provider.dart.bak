@@ -1,13 +1,19 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/message.dart';
+import '../services/firebase_service.dart';
 
 class ChatProvider with ChangeNotifier {
   static const String _storageKey = 'chat_messages';
   final Map<String, List<ChatMessage>> _groupMessages = {};
+  final Map<String, StreamSubscription> _chatStreams = {};
+  final FirebaseService _firebaseService = FirebaseService();
   bool _isLoading = false;
+  bool _useFirebase = true;
 
   bool get isLoading => _isLoading;
 
@@ -77,6 +83,47 @@ class ChatProvider with ChangeNotifier {
   }) async {
     if (content.trim().isEmpty) return;
 
+    try {
+      if (_useFirebase && _firebaseService.isInitialized) {
+        // Send via Firebase
+        await _firebaseService.sendChatMessage(
+          groupId: groupId,
+          message: content.trim(),
+          senderId: senderId,
+          senderName: senderName,
+        );
+        
+        print('📤 Message sent via Firebase');
+      } else {
+        // Fallback to local storage
+        await _sendMessageLocally(
+          groupId: groupId,
+          senderId: senderId,
+          senderName: senderName,
+          content: content,
+          type: type,
+        );
+      }
+    } catch (e) {
+      print('❌ Error sending message: $e');
+      // Fallback to local storage on error
+      await _sendMessageLocally(
+        groupId: groupId,
+        senderId: senderId,
+        senderName: senderName,
+        content: content,
+        type: type,
+      );
+    }
+  }
+
+  Future<void> _sendMessageLocally({
+    required String groupId,
+    required String senderId,
+    required String senderName,
+    required String content,
+    MessageType type = MessageType.text,
+  }) async {
     final message = ChatMessage(
       id: const Uuid().v4(),
       groupId: groupId,
@@ -103,7 +150,68 @@ class ChatProvider with ChangeNotifier {
     notifyListeners();
 
     print(
-        '💬 Message sent: ${content.substring(0, content.length.clamp(0, 30))}...');
+        '💬 Message sent locally: ${content.substring(0, content.length.clamp(0, 30))}...');
+  }
+
+  // Start listening to Firebase chat messages for a group
+  void startListeningToGroup(String groupId) {
+    if (!_useFirebase || !_firebaseService.isInitialized) return;
+    
+    // Cancel existing stream for this group
+    _chatStreams[groupId]?.cancel();
+    
+    try {
+      _chatStreams[groupId] = _firebaseService.getChatMessages(groupId).listen(
+        (snapshot) {
+          _handleFirebaseMessages(groupId, snapshot);
+        },
+        onError: (error) {
+          print('❌ Error listening to chat messages for group $groupId: $error');
+          // Fallback to local messages
+        },
+      );
+      
+      print('🔄 Started listening to Firebase chat for group: $groupId');
+    } catch (e) {
+      print('❌ Failed to start listening to group $groupId: $e');
+    }
+  }
+
+  void _handleFirebaseMessages(String groupId, QuerySnapshot snapshot) {
+    try {
+      final messages = <ChatMessage>[];
+      
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final message = ChatMessage(
+          id: doc.id,
+          groupId: groupId,
+          senderId: data['senderId'] ?? '',
+          senderName: data['senderName'] ?? 'Unknown',
+          content: data['message'] ?? '',
+          timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          type: MessageType.text,
+        );
+        messages.add(message);
+      }
+      
+      // Sort by timestamp (newest first from Firebase, but we want oldest first locally)
+      messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      
+      _groupMessages[groupId] = messages;
+      notifyListeners();
+      
+      print('📨 Received ${messages.length} messages for group $groupId');
+    } catch (e) {
+      print('❌ Error handling Firebase messages: $e');
+    }
+  }
+
+  // Stop listening to a group
+  void stopListeningToGroup(String groupId) {
+    _chatStreams[groupId]?.cancel();
+    _chatStreams.remove(groupId);
+    print('🔇 Stopped listening to group: $groupId');
   }
 
   // Send system message
@@ -224,5 +332,15 @@ class ChatProvider with ChangeNotifier {
             msg.content.toLowerCase().contains(query.toLowerCase()) ||
             msg.senderName.toLowerCase().contains(query.toLowerCase()))
         .toList();
+  }
+
+  @override
+  void dispose() {
+    // Cancel all chat streams
+    for (var stream in _chatStreams.values) {
+      stream.cancel();
+    }
+    _chatStreams.clear();
+    super.dispose();
   }
 }

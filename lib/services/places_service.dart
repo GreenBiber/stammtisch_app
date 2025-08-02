@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Restaurant {
@@ -64,12 +64,20 @@ class Restaurant {
 }
 
 class PlacesService {
-  static const String _baseUrl = 'https://maps.googleapis.com/maps/api/place';
+  static const String _baseUrl = 'https://places.googleapis.com/v1/places';
   static const String _quotaKey = 'places_api_quota';
   static const String _lastResetKey = 'places_api_last_reset';
   static const int _dailyQuotaLimit = 1000;
 
-  String get _apiKey => ''; // TODO: Add API key when flutter_dotenv is added
+  String get _apiKey {
+    try {
+      return dotenv.env['GOOGLE_PLACES_API_KEY'] ?? '';
+    } catch (e) {
+      // dotenv not initialized or .env file not found
+      print('Warning: dotenv not properly initialized - $e');
+      return '';
+    }
+  }
   
   bool get hasValidApiKey => _apiKey.isNotEmpty;
 
@@ -87,45 +95,73 @@ class PlacesService {
       throw Exception('Daily API quota exceeded');
     }
 
-    final url = Uri.parse(
-      '$_baseUrl/nearbysearch/json?'
-      'location=$latitude,$longitude&'
-      'radius=$radius&'
-      'type=$type&'
-      'key=$_apiKey'
-    );
+    final url = Uri.parse('$_baseUrl:searchNearby');
+
+    final requestBody = {
+      'includedTypes': [type],
+      'maxResultCount': 3,
+      'locationRestriction': {
+        'circle': {
+          'center': {
+            'latitude': latitude,
+            'longitude': longitude,
+          },
+          'radius': radius.toDouble(),
+        }
+      }
+    };
 
     try {
-      final response = await http.get(url);
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': _apiKey,
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.rating,places.userRatingCount,places.formattedAddress,places.photos,places.primaryType,places.currentOpeningHours',
+        },
+        body: json.encode(requestBody),
+      );
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         
-        if (data['status'] == 'OK') {
-          await _incrementQuotaUsage();
-          
-          final List<dynamic> results = data['results'] ?? [];
-          return results
-              .map((json) => Restaurant.fromJson(json))
-              .take(3) // Limit to 3 suggestions
-              .toList();
-        } else {
-          throw Exception('Places API Error: ${data['status']}');
-        }
+        await _incrementQuotaUsage();
+        
+        final List<dynamic> places = data['places'] ?? [];
+        return places
+            .map((placeJson) => _convertNewApiResponse(placeJson))
+            .toList();
       } else {
-        throw Exception('HTTP Error: ${response.statusCode}');
+        final errorData = json.decode(response.body);
+        throw Exception('Places API Error: ${response.statusCode} - ${errorData['error']?['message'] ?? 'Unknown error'}');
       }
     } catch (e) {
       throw Exception('Network Error: $e');
     }
   }
 
+  Restaurant _convertNewApiResponse(Map<String, dynamic> place) {
+    return Restaurant(
+      id: place['id'] ?? '',
+      name: place['displayName']?['text'] ?? '',
+      description: place['editorialSummary']?['text'] ?? '',
+      rating: (place['rating'] ?? 0.0).toDouble(),
+      userRatingsTotal: place['userRatingCount'] ?? 0,
+      vicinity: place['formattedAddress'] ?? '',
+      types: [place['primaryType'] ?? 'restaurant'],
+      isOpen: place['currentOpeningHours']?['openNow'] ?? true,
+      photoReference: place['photos']?[0]?['name'],
+      lat: place['location']?['latitude']?.toDouble(),
+      lng: place['location']?['longitude']?.toDouble(),
+    );
+  }
+
   String? getPhotoUrl(String? photoReference, {int maxWidth = 400}) {
     if (!hasValidApiKey || photoReference == null) return null;
     
-    return '$_baseUrl/photo?'
-        'maxwidth=$maxWidth&'
-        'photo_reference=$photoReference&'
+    // New API uses photo name format: places/{place_id}/photos/{photo_id}
+    return 'https://places.googleapis.com/v1/$photoReference/media?'
+        'maxWidthPx=$maxWidth&'
         'key=$_apiKey';
   }
 
