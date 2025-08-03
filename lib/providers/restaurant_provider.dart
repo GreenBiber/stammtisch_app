@@ -72,6 +72,15 @@ class RestaurantProvider with ChangeNotifier {
       return false;
     }
   }
+
+  Future<ApiKeyStatus> getApiKeyStatus() async {
+    try {
+      return await placesService.validateApiKey();
+    } catch (e) {
+      print('⚠️ Error validating API key: $e');
+      return ApiKeyStatus.invalid;
+    }
+  }
   WeatherData? get currentWeather => _currentWeather;
   String? get weatherRecommendation => _weatherRecommendation;
 
@@ -131,8 +140,23 @@ class RestaurantProvider with ChangeNotifier {
 
           // Update quota after successful request
           await _updateQuotaStatus();
+        } on ApiKeyException catch (e) {
+          print('🔑 API Key Error: ${e.message}');
+          _error = 'API configuration error: ${e.message}';
+          _loadFallbackRestaurants();
+        } on QuotaExceededException catch (e) {
+          print('📊 Quota Error: ${e.message}');
+          _error = 'Daily quota exceeded. Using saved locations.';
+          _hasApiQuota = false;
+          _remainingQuota = 0;
+          _loadFallbackRestaurants();
+        } on NetworkException catch (e) {
+          print('🌐 Network Error: ${e.message}');
+          _error = 'Network error. Using cached locations.';
+          _loadFallbackRestaurants();
         } catch (apiError) {
-          print('⚠️ API Error, falling back to demo data: $apiError');
+          print('⚠️ Unexpected API Error, falling back to demo data: $apiError');
+          _error = 'Service temporarily unavailable. Using saved locations.';
           _loadFallbackRestaurants();
         }
       } else {
@@ -152,16 +176,26 @@ class RestaurantProvider with ChangeNotifier {
   }
 
   void _loadFallbackRestaurants() {
-    _suggestions =
-        _fallbackRestaurants.map((data) => Restaurant.fromJson(data)).toList();
+    // Load fallback restaurants with some randomization for variety
+    final allFallbacks = List<Map<String, dynamic>>.from(_fallbackRestaurants);
+    
+    // Shuffle for variety if we have weather context
+    if (_currentWeather != null) {
+      allFallbacks.shuffle();
+    }
+    
+    // Always provide at least 3 suggestions
+    final selectedFallbacks = allFallbacks.take(3).toList();
+    
+    _suggestions = selectedFallbacks.map((data) => Restaurant.fromJson(data)).toList();
+    
+    print('📱 Loaded ${_suggestions.length} fallback restaurants');
   }
 
   Future<void> _updateQuotaStatus() async {
     try {
       _remainingQuota = await placesService.getRemainingQuota();
-      debugPrint("********************************");
-      debugPrint(_remainingQuota.toString());
-      debugPrint("********************************");
+      // Debug: Remaining quota = $_remainingQuota
       _hasApiQuota = _remainingQuota > 0;
       notifyListeners();
     } catch (e) {

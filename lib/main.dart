@@ -32,10 +32,15 @@ void main() async {
 
   // Initialize Firebase
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    print('✅ Firebase initialized successfully');
+    // Check if Firebase is already initialized
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      print('✅ Firebase initialized successfully');
+    } else {
+      print('✅ Firebase already initialized, skipping');
+    }
     
     // Initialize Firebase Service
     await FirebaseService().initialize();
