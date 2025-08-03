@@ -249,6 +249,9 @@
   "fallbackList": "Fallback Restaurants",
   "noSuggestions": "No suggestions available",
   "typeMessage": "Type a message...",
+  "noChatMessages": "No messages yet",
+  "initializing": "Initializing...",
+  "noGroupSelected": "No group selected",
   "sendMessage": "Send Message",
   "chatPlaceholder": "Chat will be available soon",
   "language": "Language",
@@ -276,5 +279,56 @@
   "joiningGroup": "Joining group...",
   "joinedGroup": "Joined group successfully",
   "loginRequired": "Login required",
-  "invalidQRCode": "Invalid QR Code"
+  "invalidQRCode": "Invalid QR Code",
+  "locationPermissionTitle": "Location Access",
+  "locationPermissionMessage": "To provide you with the best restaurant suggestions, we would like to access your location.",
+  "locationBenefitRestaurants": "Find nearby restaurants",
+  "locationBenefitWeather": "Weather-based recommendations",
+  "locationBenefitRecommendations": "Personalized suggestions",
+  "locationPrivacyNote": "Your location is only used for suggestions and is not stored or shared.",
+  "allowLocation": "Allow Location",
+  "deny": "Deny",
+  "locationPermissionDenied": "Location permission denied",
+  "locationServicesDisabled": "Location services are disabled",
+  "locationPermissionPermanentlyDenied": "Location permission permanently denied. Please enable in device settings.",
+  "enableLocationServices": "Enable Location Services",
+  "openSettings": "Open Settings",
+  "locationNotAvailable": "Location not available",
+  "locationPermissionRequired": "Location permission required for this feature",
+  "reminderDescription": "Configure your notifications and reminders",
+  "eventReminders": "Event Reminders",
+  "eventRemindersDescription": "Remind me about upcoming Stammtisch events",
+  "chatNotifications": "Chat Notifications",
+  "chatNotificationsDescription": "Notify me about new messages",
+  "weeklyDigest": "Weekly Digest",
+  "weeklyDigestDescription": "Receive a weekly summary via email",
+  "reminderTiming": "Reminder Timing",
+  "digestTime": "Delivery Time",
+  "sundayAt": "Sundays at",
+  "testNotification": "Test Notification",
+  "testNotificationDescription": "Send a test notification",
+  "notificationInfo": "Notice",
+  "notificationInfoDescription": "Notifications are managed locally. Push notifications require cloud integration.",
+  "selectReminderTime": "Select Reminder Time",
+  "selectDigestTime": "Select Delivery Time",
+  "oneHourBefore": "1 hour before",
+  "hoursBeforeEvent": "{hours} hours before event",
+  "@hoursBeforeEvent": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "oneDayBefore": "1 day before",
+  "daysBeforeEvent": "{days} days before event",
+  "@daysBeforeEvent": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "testNotificationSent": "Test notification sent!",
+  "settingsSaved": "Settings saved"
 }

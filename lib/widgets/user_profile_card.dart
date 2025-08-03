@@ -233,18 +233,26 @@ class UserProfileCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Level ${userPoints.currentLevel} → ${userPoints.currentLevel + 1}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Text(
+                      'Level ${userPoints.currentLevel} → ${userPoints.currentLevel + 1}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Text(
-                    '${userPoints.xpNeededForNext} XP bis Level-Up',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      '${userPoints.xpNeededForNext} XP bis Level-Up',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
                     ),
                   ),
                 ],

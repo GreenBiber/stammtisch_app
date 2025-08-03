@@ -18,7 +18,7 @@ import 'screens/auth/auth_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables (with error handling)
+  // Load environment variables from root directory (with error handling)
   try {
     await dotenv.load(fileName: ".env");
     print('✅ Environment variables loaded successfully');
@@ -45,7 +45,18 @@ void main() async {
     // Initialize Firebase Service
     await FirebaseService().initialize();
   } catch (e) {
-    print('❌ Firebase initialization failed: $e');
+    // Check for specific duplicate app error
+    if (e.toString().contains('duplicate-app') || e.toString().contains('already exists')) {
+      print('✅ Firebase already initialized, continuing...');
+      // Try to initialize Firebase Service anyway
+      try {
+        await FirebaseService().initialize();
+      } catch (serviceError) {
+        print('⚠️ Firebase Service initialization skipped: $serviceError');
+      }
+    } else {
+      print('❌ Firebase initialization failed: $e');
+    }
     // Continue without Firebase for now
   }
 

@@ -173,6 +173,9 @@
   "fallbackList": "Fallback-Restaurants",
   "noSuggestions": "Keine Vorschläge verfügbar",
   "typeMessage": "Nachricht eingeben...",
+  "noChatMessages": "Noch keine Nachrichten",
+  "initializing": "Wird initialisiert...",
+  "noGroupSelected": "Keine Gruppe ausgewählt",
   "sendMessage": "Nachricht senden",
   "chatPlaceholder": "Chat wird bald verfügbar sein",
   "language": "Sprache",
@@ -200,5 +203,56 @@
   "joiningGroup": "Trete Gruppe bei...",
   "joinedGroup": "Gruppe erfolgreich beigetreten",
   "loginRequired": "Anmeldung erforderlich",
-  "invalidQRCode": "Ungültiger QR-Code"
+  "invalidQRCode": "Ungültiger QR-Code",
+  "locationPermissionTitle": "Standortzugriff",
+  "locationPermissionMessage": "Um Ihnen die besten Restaurantvorschläge zu bieten, möchten wir auf Ihren Standort zugreifen.",
+  "locationBenefitRestaurants": "Restaurants in der Nähe finden",
+  "locationBenefitWeather": "Wetterbasierte Empfehlungen",
+  "locationBenefitRecommendations": "Personalisierte Vorschläge",
+  "locationPrivacyNote": "Ihr Standort wird nur für Vorschläge verwendet und nicht gespeichert oder geteilt.",
+  "allowLocation": "Standort erlauben",
+  "deny": "Ablehnen",
+  "locationPermissionDenied": "Standortberechtigung verweigert",
+  "locationServicesDisabled": "Standortdienste sind deaktiviert",
+  "locationPermissionPermanentlyDenied": "Standortberechtigung dauerhaft verweigert. Bitte in den Geräteeinstellungen aktivieren.",
+  "enableLocationServices": "Standortdienste aktivieren",
+  "openSettings": "Einstellungen öffnen",
+  "locationNotAvailable": "Standort nicht verfügbar",
+  "locationPermissionRequired": "Standortberechtigung für diese Funktion erforderlich",
+  "reminderDescription": "Konfiguriere deine Benachrichtigungen und Erinnerungen",
+  "eventReminders": "Event-Erinnerungen",
+  "eventRemindersDescription": "Erinnere mich an kommende Stammtisch-Events",
+  "chatNotifications": "Chat-Benachrichtigungen",
+  "chatNotificationsDescription": "Benachrichtige mich bei neuen Nachrichten",
+  "weeklyDigest": "Wöchentliche Zusammenfassung",
+  "weeklyDigestDescription": "Erhalte eine wöchentliche Übersicht per E-Mail",
+  "reminderTiming": "Erinnerungszeitpunkt",
+  "digestTime": "Versandzeit",
+  "sundayAt": "Sonntags um",
+  "testNotification": "Test-Benachrichtigung",
+  "testNotificationDescription": "Sende eine Test-Benachrichtigung",
+  "notificationInfo": "Hinweis",
+  "notificationInfoDescription": "Benachrichtigungen werden lokal verwaltet. Push-Benachrichtigungen erfordern eine Cloud-Anbindung.",
+  "selectReminderTime": "Erinnerungszeit auswählen",
+  "selectDigestTime": "Versandzeit auswählen",
+  "oneHourBefore": "1 Stunde vorher",
+  "hoursBeforeEvent": "{hours} Stunden vor dem Event",
+  "@hoursBeforeEvent": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "oneDayBefore": "1 Tag vorher",
+  "daysBeforeEvent": "{days} Tage vor dem Event",
+  "@daysBeforeEvent": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "testNotificationSent": "Test-Benachrichtigung gesendet!",
+  "settingsSaved": "Einstellungen gespeichert"
 }

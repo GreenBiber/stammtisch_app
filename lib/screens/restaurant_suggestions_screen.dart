@@ -8,6 +8,7 @@ import '../providers/restaurant_provider.dart';
 import '../services/location_service.dart';
 import '../widgets/xp_animation.dart';
 import '../widgets/user_profile_card.dart';
+import '../widgets/location_permission_dialog.dart';
 import '../l10n/l10n.dart';
 
 class RestaurantSuggestionsScreen extends StatefulWidget {
@@ -32,28 +33,69 @@ class _RestaurantSuggestionsScreenState
   Future<void> _loadRestaurants() async {
     final restaurantProvider =
         Provider.of<RestaurantProvider>(context, listen: false);
+    final locationService = LocationService();
 
-    // Debug: Location Status
-
-    final location = await LocationService().getCurrentLocation();
-
-    if (location == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Standort nicht verfügbar - verwende Demo-Daten'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+    // Check location permission state
+    final permissionState = await locationService.getPermissionState();
+    
+    LocationData? location;
+    
+    if (permissionState == LocationPermissionState.notAsked ||
+        permissionState == LocationPermissionState.userDenied) {
+      // Show permission dialog if user hasn't been asked yet or denied before
+      await _showLocationPermissionDialog();
+      
+      // Check if user granted permission and get location
+      final hasConsent = await locationService.hasUserConsent();
+      if (hasConsent) {
+        final result = await locationService.getCurrentLocationWithConsent();
+        if (result.state == LocationPermissionState.granted) {
+          location = result.locationData;
+        }
       }
-    } else {}
+    } else if (permissionState == LocationPermissionState.granted) {
+      // User has granted permission, get location
+      final result = await locationService.getCurrentLocationWithConsent();
+      if (result.state == LocationPermissionState.granted) {
+        location = result.locationData;
+      }
+    }
 
+    // Load restaurants with location if available
     await restaurantProvider.loadRestaurantSuggestions(
       latitude: location?.latitude,
       longitude: location?.longitude,
     );
+  }
 
-    // Restaurant suggestions loaded successfully
+  Future<void> _showLocationPermissionDialog() async {
+    final l10n = context.l10n;
+    
+    await LocationPermissionDialog.show(
+      context,
+      onPermissionGranted: () {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.allowLocation),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+      onPermissionDenied: () {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.locationPermissionDenied),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+    );
   }
 
   @override
@@ -84,7 +126,7 @@ class _RestaurantSuggestionsScreenState
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.2),
+                          color: Colors.orange.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -125,9 +167,9 @@ class _RestaurantSuggestionsScreenState
                     margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.1),
+                      color: Colors.blue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
                     ),
                     child: Row(
                       children: [
@@ -155,14 +197,14 @@ class _RestaurantSuggestionsScreenState
                   decoration: BoxDecoration(
                     color: restaurantProvider.hasValidApiKey &&
                             restaurantProvider.hasApiQuota
-                        ? Colors.green.withValues(alpha: 0.1)
-                        : Colors.orange.withValues(alpha: 0.1),
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: restaurantProvider.hasValidApiKey &&
                               restaurantProvider.hasApiQuota
-                          ? Colors.green.withValues(alpha: 0.3)
-                          : Colors.orange.withValues(alpha: 0.3),
+                          ? Colors.green.withOpacity(0.3)
+                          : Colors.orange.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
@@ -265,6 +307,23 @@ class _RestaurantSuggestionsScreenState
                 ),
               ],
             ),
+            floatingActionButton: FutureBuilder<LocationPermissionState>(
+              future: LocationService().getPermissionState(),
+              builder: (context, snapshot) {
+                final state = snapshot.data ?? LocationPermissionState.notAsked;
+                final color = _getLocationStateColor(state);
+                
+                return FloatingActionButton.extended(
+                  onPressed: () => _showLocationSettingsDialog(),
+                  icon: Icon(_getLocationStateIcon(state)),
+                  label: Text(
+                    context.isGerman ? 'Standort' : 'Location',
+                  ),
+                  backgroundColor: color,
+                  foregroundColor: Colors.white,
+                );
+              },
+            ),
           ),
         );
       },
@@ -273,52 +332,173 @@ class _RestaurantSuggestionsScreenState
 
   Widget _buildErrorState(String error) {
     final l10n = context.l10n;
+    
+    // Determine error type and provide user-friendly messages
+    String title;
+    String description;
+    IconData icon;
+    Color iconColor;
+    
+    if (error.toLowerCase().contains('location') || error.toLowerCase().contains('standort')) {
+      // Location-related error
+      title = context.isGerman
+          ? 'Standortdienste erforderlich'
+          : 'Location Services Required';
+      description = context.isGerman
+          ? 'Die Standortdienste sind nicht aktiviert. Um Restaurantvorschläge in Ihrer Nähe zu erhalten, aktivieren Sie bitte die Standortdienste auf Ihrem Gerät und erteilen Sie der App die Berechtigung.'
+          : 'Location services are not enabled. To receive restaurant suggestions near you, please enable location services on your device and grant the app permission.';
+      icon = Icons.location_off;
+      iconColor = Colors.orange;
+    } else if (error.toLowerCase().contains('api') || error.toLowerCase().contains('quota')) {
+      // API-related error
+      title = context.isGerman
+          ? 'Service temporär nicht verfügbar'
+          : 'Service Temporarily Unavailable';
+      description = context.isGerman
+          ? 'Die Restaurant-API ist momentan nicht verfügbar. Bitte versuchen Sie es später erneut.'
+          : 'The restaurant API is currently unavailable. Please try again later.';
+      icon = Icons.cloud_off;
+      iconColor = Colors.orange;
+    } else {
+      // Generic error
+      title = context.isGerman
+          ? 'Fehler beim Laden der Restaurants'
+          : 'Error Loading Restaurants';
+      description = context.isGerman
+          ? 'Es gab ein Problem beim Laden der Restaurantvorschläge. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.'
+          : 'There was a problem loading restaurant suggestions. Please check your internet connection and try again.';
+      icon = Icons.error_outline;
+      iconColor = Colors.red;
+    }
+    
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            context.isGerman
-                ? 'Fehler beim Laden'
-                : 'Loading Error',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 64, color: iconColor),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[300],
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: _loadRestaurants,
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n.refresh),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              ),
+              // Show technical error details in debug mode
+              if (!const bool.fromEnvironment('dart.vm.product')) ...[
+                const SizedBox(height: 16),
+                ExpansionTile(
+                  title: const Text(
+                    '🔧 Debug Info',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        error,
+                        style: const TextStyle(fontSize: 10, fontFamily: 'monospace'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(error, textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadRestaurants,
-            child: Text(l10n.refresh),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildRestaurantList(List<dynamic> restaurants) {
     final l10n = context.l10n;
+    final restaurantProvider = Provider.of<RestaurantProvider>(context, listen: false);
 
     if (restaurants.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.restaurant, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              context.isGerman
-                  ? 'Keine Restaurants gefunden'
-                  : 'No restaurants found',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      // Check if it's due to missing location
+      bool isLocationError = restaurantProvider.error?.contains('Location access required') ?? false;
+      
+      return SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isLocationError ? Icons.location_off : Icons.restaurant, 
+                  size: 64, 
+                  color: Colors.grey
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  isLocationError
+                      ? (context.isGerman
+                          ? 'Standort benötigt'
+                          : 'Location Required')
+                      : (context.isGerman
+                          ? 'Keine Restaurants gefunden'
+                          : 'No restaurants found'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                if (isLocationError)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      context.isGerman
+                          ? 'Erlaube den Standortzugriff, um Restaurantvorschläge in deiner Nähe zu erhalten.'
+                          : 'Allow location access to receive restaurant suggestions near you.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[400]),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () => _handleLocationRequest(),
+                  icon: Icon(isLocationError ? Icons.location_on : Icons.refresh),
+                  label: Text(isLocationError 
+                      ? (context.isGerman ? 'Standort aktivieren' : 'Enable Location')
+                      : l10n.refresh),
+                ),
+                if (isLocationError) ...[
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    onPressed: () => _showLocationManualSetupDialog(),
+                    icon: const Icon(Icons.settings, size: 16),
+                    label: Text(
+                      context.isGerman
+                          ? 'Standort manuell aktivieren'
+                          : 'Enable location manually',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadRestaurants,
-              child: Text(l10n.refresh),
-            ),
-          ],
+          ),
         ),
       );
     }
@@ -401,7 +581,7 @@ class _RestaurantSuggestionsScreenState
                           style: hasVoted
                               ? ButtonStyle(
                                   backgroundColor: WidgetStateProperty.all(
-                                      Colors.green.withValues(alpha: 0.7)),
+                                      Colors.green.withOpacity(0.7)),
                                 )
                               : null,
                         ),
@@ -485,7 +665,7 @@ class _RestaurantSuggestionsScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.amber.withValues(alpha: 0.2),
+        color: Colors.amber.withOpacity(0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -515,5 +695,306 @@ class _RestaurantSuggestionsScreenState
         backgroundColor: Colors.green,
       ),
     );
+  }
+
+  Future<void> _handleLocationRequest() async {
+    final locationService = LocationService();
+    final permissionState = await locationService.getPermissionState();
+    
+    if (permissionState == LocationPermissionState.systemDenied) {
+      await _showLocationManualSetupDialog();
+    } else {
+      await _loadRestaurants();
+    }
+  }
+
+  Future<void> _showLocationManualSetupDialog() async {
+    final l10n = context.l10n;
+    
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.settings, color: Colors.orange),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.isGerman
+                    ? 'Standort aktivieren'
+                    : 'Enable Location',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.isGerman
+                  ? 'Um Restaurantvorschläge zu erhalten, musst du den Standortzugriff in den Geräteeinstellungen aktivieren:'
+                  : 'To receive restaurant suggestions, you need to enable location access in your device settings:',
+              style: const TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStepItem('1.', context.isGerman 
+                      ? 'Öffne die Geräteeinstellungen'
+                      : 'Open device settings'),
+                  const SizedBox(height: 4),
+                  _buildStepItem('2.', context.isGerman 
+                      ? 'Gehe zu "Apps" oder "Anwendungen"'
+                      : 'Go to "Apps" or "Applications"'),
+                  const SizedBox(height: 4),
+                  _buildStepItem('3.', context.isGerman 
+                      ? 'Finde "Stammtisch App"'
+                      : 'Find "Stammtisch App"'),
+                  const SizedBox(height: 4),
+                  _buildStepItem('4.', context.isGerman 
+                      ? 'Aktiviere "Standort" Berechtigung'
+                      : 'Enable "Location" permission'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _loadRestaurants();
+            },
+            child: Text(context.isGerman ? 'Erneut versuchen' : 'Try again'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepItem(String number, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          number,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.orange,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showLocationSettingsDialog() async {
+    final locationService = LocationService();
+    final permissionState = await locationService.getPermissionState();
+    final l10n = context.l10n;
+    
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              _getLocationStateIcon(permissionState),
+              color: _getLocationStateColor(permissionState),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.isGerman ? 'Standort-Einstellungen' : 'Location Settings',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _getLocationStateColor(permissionState).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _getLocationStateColor(permissionState).withOpacity(0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _getLocationStateTitle(permissionState),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: _getLocationStateColor(permissionState),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _getLocationStateDescription(permissionState),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            if (permissionState == LocationPermissionState.systemDenied) ...[
+              const SizedBox(height: 16),
+              Text(
+                context.isGerman
+                    ? 'Um die Standortberechtigung zu aktivieren:'
+                    : 'To enable location permission:',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: [
+                    _buildStepItem('1.', context.isGerman ? 'Geräteeinstellungen öffnen' : 'Open device settings'),
+                    _buildStepItem('2.', context.isGerman ? 'Apps → Stammtisch App' : 'Apps → Stammtisch App'),
+                    _buildStepItem('3.', context.isGerman ? 'Berechtigung → Standort aktivieren' : 'Permissions → Enable Location'),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          if (permissionState == LocationPermissionState.notAsked ||
+              permissionState == LocationPermissionState.userDenied)
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _showLocationPermissionDialog();
+                await _loadRestaurants();
+              },
+              child: Text(context.isGerman ? 'Aktivieren' : 'Enable'),
+            )
+          else
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _loadRestaurants();
+              },
+              child: Text(context.isGerman ? 'Erneut versuchen' : 'Try again'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getLocationStateIcon(LocationPermissionState state) {
+    switch (state) {
+      case LocationPermissionState.granted:
+        return Icons.location_on;
+      case LocationPermissionState.notAsked:
+      case LocationPermissionState.userDenied:
+        return Icons.location_off;
+      case LocationPermissionState.systemDenied:
+      case LocationPermissionState.disabled:
+        return Icons.location_disabled;
+      case LocationPermissionState.userGranted:
+        return Icons.location_on;
+    }
+  }
+
+  Color _getLocationStateColor(LocationPermissionState state) {
+    switch (state) {
+      case LocationPermissionState.granted:
+        return Colors.green;
+      case LocationPermissionState.notAsked:
+      case LocationPermissionState.userDenied:
+        return Colors.orange;
+      case LocationPermissionState.systemDenied:
+      case LocationPermissionState.disabled:
+        return Colors.red;
+      case LocationPermissionState.userGranted:
+        return Colors.green;
+    }
+  }
+
+  String _getLocationStateTitle(LocationPermissionState state) {
+    switch (state) {
+      case LocationPermissionState.granted:
+        return context.isGerman ? 'Standort aktiviert' : 'Location enabled';
+      case LocationPermissionState.notAsked:
+        return context.isGerman ? 'Standort nicht konfiguriert' : 'Location not configured';
+      case LocationPermissionState.userDenied:
+        return context.isGerman ? 'Standort abgelehnt' : 'Location denied';
+      case LocationPermissionState.systemDenied:
+        return context.isGerman ? 'Berechtigung verweigert' : 'Permission denied';
+      case LocationPermissionState.disabled:
+        return context.isGerman ? 'Standortdienste deaktiviert' : 'Location services disabled';
+      case LocationPermissionState.userGranted:
+        return context.isGerman ? 'Standort aktiviert' : 'Location enabled';
+    }
+  }
+
+  String _getLocationStateDescription(LocationPermissionState state) {
+    switch (state) {
+      case LocationPermissionState.granted:
+        return context.isGerman 
+            ? 'Die App kann deinen Standort für Restaurantvorschläge nutzen.'
+            : 'The app can use your location for restaurant suggestions.';
+      case LocationPermissionState.notAsked:
+        return context.isGerman 
+            ? 'Du wurdest noch nicht nach der Standortberechtigung gefragt.'
+            : 'You haven\'t been asked for location permission yet.';
+      case LocationPermissionState.userDenied:
+        return context.isGerman 
+            ? 'Du hast die Standortberechtigung abgelehnt.'
+            : 'You have denied location permission.';
+      case LocationPermissionState.systemDenied:
+        return context.isGerman 
+            ? 'Die Standortberechtigung wurde in den Geräteeinstellungen verweigert.'
+            : 'Location permission was denied in device settings.';
+      case LocationPermissionState.disabled:
+        return context.isGerman 
+            ? 'Die Standortdienste sind auf diesem Gerät deaktiviert.'
+            : 'Location services are disabled on this device.';
+      case LocationPermissionState.userGranted:
+        return context.isGerman 
+            ? 'Die App kann deinen Standort für Restaurantvorschläge nutzen.'
+            : 'The app can use your location for restaurant suggestions.';
+    }
   }
 }

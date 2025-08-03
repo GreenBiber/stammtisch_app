@@ -242,71 +242,76 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     final colors = [Colors.amber, Colors.grey, Colors.orange];
     final icons = ['👑', '🥈', '🥉'];
     
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(
-          icons[place - 1],
-          style: const TextStyle(fontSize: 24),
-        ),
-        const SizedBox(height: 4),
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: _getLevelColor(userPoints.currentLevel),
-          child: Text(
-            userPoints.levelIcon,
-            style: const TextStyle(fontSize: 20),
+    return Flexible(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            icons[place - 1],
+            style: const TextStyle(fontSize: 18),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          userPoints.userId == Provider.of<AuthProvider>(context, listen: false).currentUserId
-              ? (context.isGerman ? 'Du' : 'You')
-              : userPoints.userId, // TODO: Echte Namen
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: 1),
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: _getLevelColor(userPoints.currentLevel),
+            child: Text(
+              userPoints.levelIcon,
+              style: const TextStyle(fontSize: 16),
+            ),
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: 80,
-          height: height,
-          decoration: BoxDecoration(
-            color: colors[place - 1],
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+          const SizedBox(height: 2),
+          Text(
+            userPoints.userId == Provider.of<AuthProvider>(context, listen: false).currentUserId
+                ? (context.isGerman ? 'Du' : 'You')
+                : userPoints.userId,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '#$place',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          const SizedBox(height: 1),
+          Container(
+            width: 70,
+            height: height * 0.8,
+            decoration: BoxDecoration(
+              color: colors[place - 1],
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '#$place',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Text(
-                '${userPoints.totalXP}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                Text(
+                  '${userPoints.totalXP}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const Text(
-                'XP',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
+                const Text(
+                  'XP',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 10,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

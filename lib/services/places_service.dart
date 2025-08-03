@@ -238,6 +238,9 @@ class PlacesService {
 
     final url = Uri.parse('$_baseUrl:searchNearby');
 
+    // Debug: Print actual coordinates being used
+    print('🔍 Searching restaurants at coordinates: lat=$latitude, lng=$longitude, radius=${radius}m');
+    
     final requestBody = {
       'includedTypes': [type],
       'maxResultCount': 3,
@@ -258,7 +261,7 @@ class PlacesService {
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': _apiKey,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.rating,places.userRatingCount,places.formattedAddress,places.photos,places.primaryType,places.currentOpeningHours',
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.rating,places.userRatingCount,places.formattedAddress,places.photos,places.primaryType,places.currentOpeningHours,places.location',
         },
         body: json.encode(requestBody),
       );
@@ -315,6 +318,9 @@ class PlacesService {
   }
 
   Restaurant _convertNewApiResponse(Map<String, dynamic> place) {
+    final photoRef = place['photos']?[0]?['name'];
+    print('📸 Photo reference for ${place['displayName']?['text']}: $photoRef');
+    
     return Restaurant(
       id: place['id'] ?? '',
       name: place['displayName']?['text'] ?? '',
@@ -324,7 +330,7 @@ class PlacesService {
       vicinity: place['formattedAddress'] ?? '',
       types: [place['primaryType'] ?? 'restaurant'],
       isOpen: place['currentOpeningHours']?['openNow'] ?? true,
-      photoReference: place['photos']?[0]?['name'],
+      photoReference: photoRef,
       lat: place['location']?['latitude']?.toDouble(),
       lng: place['location']?['longitude']?.toDouble(),
     );
@@ -334,9 +340,17 @@ class PlacesService {
     if (!hasValidApiKey || photoReference == null) return null;
     
     // New API uses photo name format: places/{place_id}/photos/{photo_id}
-    return 'https://places.googleapis.com/v1/$photoReference/media?'
-        'maxWidthPx=$maxWidth&'
-        'key=$_apiKey';
+    // photoReference should be like "places/ChIJ.../photos/..."
+    if (photoReference.startsWith('places/')) {
+      return 'https://places.googleapis.com/v1/$photoReference/media?'
+          'maxWidthPx=$maxWidth&'
+          'key=$_apiKey';
+    } else {
+      // Legacy format fallback
+      return 'https://places.googleapis.com/v1/places/photos/$photoReference/media?'
+          'maxWidthPx=$maxWidth&'
+          'key=$_apiKey';
+    }
   }
 
   Future<int> getRemainingQuota() async {

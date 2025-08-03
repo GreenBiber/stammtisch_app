@@ -512,10 +512,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minutesBefore => '30 Minutes Before';
 
   @override
-  String get testNotification => 'Send Test Notification';
+  String get testNotification => 'Test Notification';
 
   @override
-  String get testNotificationSent => 'Test notification sent';
+  String get testNotificationSent => 'Test notification sent!';
 
   @override
   String get notificationTypes => 'Notification Types';
@@ -546,6 +546,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get typeMessage => 'Type a message...';
+
+  @override
+  String get noChatMessages => 'No messages yet';
+
+  @override
+  String get initializing => 'Initializing...';
 
   @override
   String get sendMessage => 'Send Message';
@@ -630,4 +636,114 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidQRCode => 'Invalid QR Code';
+
+  @override
+  String get locationPermissionTitle => 'Location Access';
+
+  @override
+  String get locationPermissionMessage =>
+      'To provide you with the best restaurant suggestions, we would like to access your location.';
+
+  @override
+  String get locationBenefitRestaurants => 'Find nearby restaurants';
+
+  @override
+  String get locationBenefitWeather => 'Weather-based recommendations';
+
+  @override
+  String get locationBenefitRecommendations => 'Personalized suggestions';
+
+  @override
+  String get locationPrivacyNote =>
+      'Your location is only used for suggestions and is not stored or shared.';
+
+  @override
+  String get allowLocation => 'Allow Location';
+
+  @override
+  String get deny => 'Deny';
+
+  @override
+  String get locationPermissionDenied => 'Location permission denied';
+
+  @override
+  String get locationServicesDisabled => 'Location services are disabled';
+
+  @override
+  String get locationPermissionPermanentlyDenied =>
+      'Location permission permanently denied. Please enable in device settings.';
+
+  @override
+  String get enableLocationServices => 'Enable Location Services';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get locationNotAvailable => 'Location not available';
+
+  @override
+  String get locationPermissionRequired =>
+      'Location permission required for this feature';
+
+  @override
+  String get reminderDescription =>
+      'Configure your notifications and reminders';
+
+  @override
+  String get eventRemindersDescription =>
+      'Remind me about upcoming Stammtisch events';
+
+  @override
+  String get chatNotificationsDescription => 'Notify me about new messages';
+
+  @override
+  String get weeklyDigest => 'Weekly Digest';
+
+  @override
+  String get weeklyDigestDescription => 'Receive a weekly summary via email';
+
+  @override
+  String get reminderTiming => 'Reminder Timing';
+
+  @override
+  String get digestTime => 'Delivery Time';
+
+  @override
+  String get sundayAt => 'Sundays at';
+
+  @override
+  String get testNotificationDescription => 'Send a test notification';
+
+  @override
+  String get notificationInfo => 'Notice';
+
+  @override
+  String get notificationInfoDescription =>
+      'Notifications are managed locally. Push notifications require cloud integration.';
+
+  @override
+  String get selectReminderTime => 'Select Reminder Time';
+
+  @override
+  String get selectDigestTime => 'Select Delivery Time';
+
+  @override
+  String get oneHourBefore => '1 hour before';
+
+  @override
+  String hoursBeforeEvent(int hours) {
+    return '$hours hours before event';
+  }
+
+  @override
+  String get oneDayBefore => '1 day before';
+
+  @override
+  String daysBeforeEvent(int days) {
+    return '$days days before event';
+  }
+
+  @override
+  String get settingsSaved => 'Settings saved';
 }

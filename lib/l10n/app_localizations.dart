@@ -1067,13 +1067,13 @@ abstract class AppLocalizations {
   /// No description provided for @testNotification.
   ///
   /// In en, this message translates to:
-  /// **'Send Test Notification'**
+  /// **'Test Notification'**
   String get testNotification;
 
   /// No description provided for @testNotificationSent.
   ///
   /// In en, this message translates to:
-  /// **'Test notification sent'**
+  /// **'Test notification sent!'**
   String get testNotificationSent;
 
   /// No description provided for @notificationTypes.
@@ -1135,6 +1135,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Type a message...'**
   String get typeMessage;
+
+  /// No description provided for @noChatMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get noChatMessages;
+
+  /// No description provided for @initializing.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing...'**
+  String get initializing;
 
   /// No description provided for @sendMessage.
   ///
@@ -1303,6 +1315,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid QR Code'**
   String get invalidQRCode;
+
+  /// No description provided for @locationPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Access'**
+  String get locationPermissionTitle;
+
+  /// No description provided for @locationPermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'To provide you with the best restaurant suggestions, we would like to access your location.'**
+  String get locationPermissionMessage;
+
+  /// No description provided for @locationBenefitRestaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Find nearby restaurants'**
+  String get locationBenefitRestaurants;
+
+  /// No description provided for @locationBenefitWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather-based recommendations'**
+  String get locationBenefitWeather;
+
+  /// No description provided for @locationBenefitRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalized suggestions'**
+  String get locationBenefitRecommendations;
+
+  /// No description provided for @locationPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location is only used for suggestions and is not stored or shared.'**
+  String get locationPrivacyNote;
+
+  /// No description provided for @allowLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Location'**
+  String get allowLocation;
+
+  /// No description provided for @deny.
+  ///
+  /// In en, this message translates to:
+  /// **'Deny'**
+  String get deny;
+
+  /// No description provided for @locationPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission denied'**
+  String get locationPermissionDenied;
+
+  /// No description provided for @locationServicesDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are disabled'**
+  String get locationServicesDisabled;
+
+  /// No description provided for @locationPermissionPermanentlyDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission permanently denied. Please enable in device settings.'**
+  String get locationPermissionPermanentlyDenied;
+
+  /// No description provided for @enableLocationServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Location Services'**
+  String get enableLocationServices;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @locationNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not available'**
+  String get locationNotAvailable;
+
+  /// No description provided for @locationPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission required for this feature'**
+  String get locationPermissionRequired;
+
+  /// No description provided for @reminderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure your notifications and reminders'**
+  String get reminderDescription;
+
+  /// No description provided for @eventRemindersDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me about upcoming Stammtisch events'**
+  String get eventRemindersDescription;
+
+  /// No description provided for @chatNotificationsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me about new messages'**
+  String get chatNotificationsDescription;
+
+  /// No description provided for @weeklyDigest.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Digest'**
+  String get weeklyDigest;
+
+  /// No description provided for @weeklyDigestDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive a weekly summary via email'**
+  String get weeklyDigestDescription;
+
+  /// No description provided for @reminderTiming.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder Timing'**
+  String get reminderTiming;
+
+  /// No description provided for @digestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Time'**
+  String get digestTime;
+
+  /// No description provided for @sundayAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sundays at'**
+  String get sundayAt;
+
+  /// No description provided for @testNotificationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a test notification'**
+  String get testNotificationDescription;
+
+  /// No description provided for @notificationInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice'**
+  String get notificationInfo;
+
+  /// No description provided for @notificationInfoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are managed locally. Push notifications require cloud integration.'**
+  String get notificationInfoDescription;
+
+  /// No description provided for @selectReminderTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Reminder Time'**
+  String get selectReminderTime;
+
+  /// No description provided for @selectDigestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Delivery Time'**
+  String get selectDigestTime;
+
+  /// No description provided for @oneHourBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour before'**
+  String get oneHourBefore;
+
+  /// No description provided for @hoursBeforeEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours before event'**
+  String hoursBeforeEvent(int hours);
+
+  /// No description provided for @oneDayBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day before'**
+  String get oneDayBefore;
+
+  /// No description provided for @daysBeforeEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days before event'**
+  String daysBeforeEvent(int days);
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved'**
+  String get settingsSaved;
 }
 
 class _AppLocalizationsDelegate

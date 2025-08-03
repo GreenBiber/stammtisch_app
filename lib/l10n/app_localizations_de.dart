@@ -514,10 +514,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get minutesBefore => '30 Minuten vorher';
 
   @override
-  String get testNotification => 'Test-Benachrichtigung senden';
+  String get testNotification => 'Test-Benachrichtigung';
 
   @override
-  String get testNotificationSent => 'Test-Benachrichtigung gesendet';
+  String get testNotificationSent => 'Test-Benachrichtigung gesendet!';
 
   @override
   String get notificationTypes => 'Benachrichtigungstypen';
@@ -548,6 +548,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get typeMessage => 'Nachricht eingeben...';
+
+  @override
+  String get noChatMessages => 'Noch keine Nachrichten';
+
+  @override
+  String get initializing => 'Wird initialisiert...';
 
   @override
   String get sendMessage => 'Nachricht senden';
@@ -632,4 +638,116 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get invalidQRCode => 'Ungültiger QR-Code';
+
+  @override
+  String get locationPermissionTitle => 'Standortzugriff';
+
+  @override
+  String get locationPermissionMessage =>
+      'Um Ihnen die besten Restaurantvorschläge zu bieten, möchten wir auf Ihren Standort zugreifen.';
+
+  @override
+  String get locationBenefitRestaurants => 'Restaurants in der Nähe finden';
+
+  @override
+  String get locationBenefitWeather => 'Wetterbasierte Empfehlungen';
+
+  @override
+  String get locationBenefitRecommendations => 'Personalisierte Vorschläge';
+
+  @override
+  String get locationPrivacyNote =>
+      'Ihr Standort wird nur für Vorschläge verwendet und nicht gespeichert oder geteilt.';
+
+  @override
+  String get allowLocation => 'Standort erlauben';
+
+  @override
+  String get deny => 'Ablehnen';
+
+  @override
+  String get locationPermissionDenied => 'Standortberechtigung verweigert';
+
+  @override
+  String get locationServicesDisabled => 'Standortdienste sind deaktiviert';
+
+  @override
+  String get locationPermissionPermanentlyDenied =>
+      'Standortberechtigung dauerhaft verweigert. Bitte in den Geräteeinstellungen aktivieren.';
+
+  @override
+  String get enableLocationServices => 'Standortdienste aktivieren';
+
+  @override
+  String get openSettings => 'Einstellungen öffnen';
+
+  @override
+  String get locationNotAvailable => 'Standort nicht verfügbar';
+
+  @override
+  String get locationPermissionRequired =>
+      'Standortberechtigung für diese Funktion erforderlich';
+
+  @override
+  String get reminderDescription =>
+      'Konfiguriere deine Benachrichtigungen und Erinnerungen';
+
+  @override
+  String get eventRemindersDescription =>
+      'Erinnere mich an kommende Stammtisch-Events';
+
+  @override
+  String get chatNotificationsDescription =>
+      'Benachrichtige mich bei neuen Nachrichten';
+
+  @override
+  String get weeklyDigest => 'Wöchentliche Zusammenfassung';
+
+  @override
+  String get weeklyDigestDescription =>
+      'Erhalte eine wöchentliche Übersicht per E-Mail';
+
+  @override
+  String get reminderTiming => 'Erinnerungszeitpunkt';
+
+  @override
+  String get digestTime => 'Versandzeit';
+
+  @override
+  String get sundayAt => 'Sonntags um';
+
+  @override
+  String get testNotificationDescription => 'Sende eine Test-Benachrichtigung';
+
+  @override
+  String get notificationInfo => 'Hinweis';
+
+  @override
+  String get notificationInfoDescription =>
+      'Benachrichtigungen werden lokal verwaltet. Push-Benachrichtigungen erfordern eine Cloud-Anbindung.';
+
+  @override
+  String get selectReminderTime => 'Erinnerungszeit auswählen';
+
+  @override
+  String get selectDigestTime => 'Versandzeit auswählen';
+
+  @override
+  String get oneHourBefore => '1 Stunde vorher';
+
+  @override
+  String hoursBeforeEvent(int hours) {
+    return '$hours Stunden vor dem Event';
+  }
+
+  @override
+  String get oneDayBefore => '1 Tag vorher';
+
+  @override
+  String daysBeforeEvent(int days) {
+    return '$days Tage vor dem Event';
+  }
+
+  @override
+  String get settingsSaved => 'Einstellungen gespeichert';
 }

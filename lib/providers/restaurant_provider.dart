@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/places_service.dart';
 import '../services/weather_service.dart';
+import '../services/location_service.dart';
 
 class RestaurantProvider with ChangeNotifier {
   PlacesService? _placesService;
@@ -101,6 +102,34 @@ class RestaurantProvider with ChangeNotifier {
         _remainingQuota = 0;
       }
 
+      // Try to get location if not provided
+      LocationData? locationData;
+      if (latitude == null || longitude == null) {
+        try {
+          final locationService = LocationService();
+          final result = await locationService.getCurrentLocationWithConsent();
+          
+          if (result.state == LocationPermissionState.granted && result.locationData != null) {
+            locationData = result.locationData!;
+            latitude = locationData.latitude;
+            longitude = locationData.longitude;
+            print('📍 Location obtained: $latitude, $longitude');
+            
+            // Validate coordinates but don't use fallback location
+            if (latitude < 47.0 || latitude > 55.0 || longitude < 5.0 || longitude > 15.0) {
+              print('⚠️ GPS coordinates seem incorrect: $latitude, $longitude');
+              print('📍 Ignoring invalid coordinates - no location available');
+              latitude = null;
+              longitude = null;
+            }
+          } else {
+            print('📍 Location not available: ${result.message}');
+          }
+        } catch (locationError) {
+          print('⚠️ Location Error: $locationError');
+        }
+      }
+
       // Load weather data first
       if (latitude != null && longitude != null) {
         try {
@@ -160,16 +189,28 @@ class RestaurantProvider with ChangeNotifier {
           _loadFallbackRestaurants();
         }
       } else {
-        // Use fallback data
-        print(
-            '📱 Using fallback restaurants (API key: ${hasValidApiKey ? "valid" : "invalid"}, Quota: $_hasApiQuota, Location: ${latitude != null ? "available" : "missing"})');
-        _loadFallbackRestaurants();
+        // No valid API or location available
+        if (latitude == null || longitude == null) {
+          print('📍 No location available - showing empty restaurant list');
+          _suggestions = [];
+          _error = 'Location access required to show restaurant suggestions';
+        } else {
+          // Use fallback data when API is not available but location exists
+          print(
+              '📱 Using fallback restaurants (API key: ${hasValidApiKey ? "valid" : "invalid"}, Quota: $_hasApiQuota)');
+          _loadFallbackRestaurants();
+        }
       }
     } catch (e) {
       _error = e.toString();
       print('❌ Error loading restaurants: $e');
-      // Use fallback on error
-      _loadFallbackRestaurants();
+      // Only use fallback if we have location data
+      if (latitude != null && longitude != null) {
+        _loadFallbackRestaurants();
+      } else {
+        _suggestions = [];
+        _error = 'Location access required to show restaurant suggestions';
+      }
     } finally {
       _setLoading(false);
     }

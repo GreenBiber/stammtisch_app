@@ -306,9 +306,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             margin: const EdgeInsets.only(left: 8, right: 16),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                   Text(
                                     context.isGerman 
                                         ? "Deine Stats"
@@ -382,6 +383,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     ),
                                   ),
                                 ],
+                                ),
                               ),
                             ),
                           ),
