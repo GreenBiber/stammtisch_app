@@ -4,11 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/group.dart';
+import '../services/sync_service.dart';
 import 'auth_provider.dart';
 
 class GroupProvider with ChangeNotifier {
   List<Group> _groups = [];
   Group? _activeGroup;
+  final SyncService _syncService = SyncService();
 
   // Dynamically get current user ID from AuthProvider
   String getCurrentUserId(BuildContext context) {
@@ -33,6 +35,24 @@ class GroupProvider with ChangeNotifier {
   Group? get activeGroup => _activeGroup;
 
   Future<void> loadGroups() async {
+    try {
+      // Try to load from sync service (cloud-preferred)
+      final currentUserId = await _getCurrentUserId();
+      if (currentUserId != null) {
+        final cloudGroups = await _syncService.getUserGroups(currentUserId);
+        if (cloudGroups.isNotEmpty) {
+          _groups = cloudGroups;
+          await _saveGroupsLocally(); // Cache locally
+          _setActiveGroupFromStored();
+          notifyListeners();
+          return;
+        }
+      }
+    } catch (e) {
+      print('Failed to load groups from cloud, using local: $e');
+    }
+
+    // Fallback to local storage
     final prefs = await SharedPreferences.getInstance();
     final storedGroups = prefs.getString('groups');
     final storedActiveId = prefs.getString('activeGroupId');
@@ -74,6 +94,20 @@ class GroupProvider with ChangeNotifier {
   }
 
   Future<void> saveGroups() async {
+    // Save all groups to sync service (hybrid approach)
+    for (final group in _groups) {
+      try {
+        await _syncService.saveGroup(group);
+      } catch (e) {
+        print('Failed to sync group ${group.id}: $e');
+      }
+    }
+    
+    // Always save locally as backup
+    await _saveGroupsLocally();
+  }
+  
+  Future<void> _saveGroupsLocally() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = _groups.map((g) => g.toJson()).toList();
     await prefs.setString('groups', json.encode(jsonList));
@@ -151,6 +185,36 @@ class GroupProvider with ChangeNotifier {
       }
     } catch (e) {
       // Group not found - handle gracefully
+    }
+  }
+
+  // Helper methods for hybrid storage
+  Future<String?> _getCurrentUserId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final currentUserJson = prefs.getString('currentUser');
+      if (currentUserJson != null) {
+        final userData = json.decode(currentUserJson);
+        return userData['id'];
+      }
+    } catch (e) {
+      print('Failed to get current user ID: $e');
+    }
+    return null;
+  }
+
+  void _setActiveGroupFromStored() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedActiveId = prefs.getString('activeGroupId');
+    
+    if (storedActiveId != null) {
+      try {
+        _activeGroup = _groups.firstWhere((g) => g.id == storedActiveId);
+      } catch (e) {
+        _activeGroup = _groups.isNotEmpty ? _groups.first : null;
+      }
+    } else if (_groups.isNotEmpty) {
+      _activeGroup = _groups.first;
     }
   }
 

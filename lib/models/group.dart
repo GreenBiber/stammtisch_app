@@ -18,11 +18,15 @@ class Group {
 
   factory Group.fromJson(Map<String, dynamic> json) {
     return Group(
-      id: json['id'],
-      name: json['name'],
-      avatarUrl: json['avatarUrl'],
-      members: List<String>.from(json['members']),
-      admins: List<String>.from(json['admins']),
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      avatarUrl: json['avatarUrl'] ?? '',
+      members: json['members'] != null 
+          ? List<String>.from(json['members']) 
+          : <String>[],
+      admins: json['admins'] != null 
+          ? List<String>.from(json['admins']) 
+          : <String>[],
     );
   }
 

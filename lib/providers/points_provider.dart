@@ -3,11 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/points.dart';
+import '../services/sync_service.dart';
 
 class PointsProvider with ChangeNotifier {
   // Map: "userId_groupId" -> UserPoints
   final Map<String, UserPoints> _userPoints = {};
   final List<String> _recentXPGains = []; // Für Animations-Queue
+  final SyncService _syncService = SyncService();
+  
+  /// Zeigt an, ob Punkte mit der Cloud synchronisiert werden
+  bool get isCloudSynced => _syncService.status == SyncStatus.online;
+  
+  /// Aktueller Sync-Status
+  SyncStatus get syncStatus => _syncService.status;
 
   // Getters
   UserPoints? getUserPoints(String userId, String groupId) {
@@ -95,7 +103,8 @@ class PointsProvider with ChangeNotifier {
       _recentXPGains.removeAt(0);
     }
 
-    await savePoints();
+    // Hybrid-Speicherung: Lokal + Cloud
+    await _saveUserPointsHybrid(_userPoints[key]!);
     notifyListeners();
 
     // Return Liste der Events für UI-Feedback
@@ -151,7 +160,7 @@ class PointsProvider with ChangeNotifier {
     final currentPoints = _userPoints[key];
     if (currentPoints != null && currentPoints.streakCount > 0) {
       _userPoints[key] = currentPoints.copyWith(streakCount: 0);
-      await savePoints();
+      await _saveUserPointsHybrid(_userPoints[key]!);
       notifyListeners();
     }
   }
@@ -259,6 +268,7 @@ class PointsProvider with ChangeNotifier {
   }
 
   // Speichern/Laden
+  /// Speichert alle Punkte (Legacy-Fallback)
   Future<void> savePoints() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -268,8 +278,38 @@ class PointsProvider with ChangeNotifier {
       debugPrint('Error saving points: $e');
     }
   }
+  
+  /// Speichert UserPoints hybrid (lokal + Cloud via SyncService)
+  Future<void> _saveUserPointsHybrid(UserPoints userPoints) async {
+    try {
+      await _syncService.saveUserPoints(userPoints);
+      debugPrint('✅ UserPoints gespeichert (hybrid): ${userPoints.userId}_${userPoints.groupId}');
+    } catch (e) {
+      debugPrint('❌ Hybrid Points-Speicherung fehlgeschlagen: $e');
+      // Fallback: Nur lokal speichern
+      await savePoints();
+    }
+  }
 
+  /// Lädt Punkte hybrid (Cloud + lokaler Fallback)
   Future<void> loadPoints() async {
+    try {
+      await _syncService.initialize();
+      
+      // Zuerst lokale Punkte laden
+      await _loadPointsLocal();
+      
+      debugPrint('📥 Punkte geladen: ${_userPoints.length} Einträge');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading points: $e');
+      // Fallback zu alter Methode
+      await _loadPointsLocal();
+    }
+  }
+  
+  /// Lädt Punkte aus lokaler Speicherung (Legacy-Fallback)
+  Future<void> _loadPointsLocal() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final jsonString = prefs.getString('user_points');
@@ -284,17 +324,34 @@ class PointsProvider with ChangeNotifier {
           debugPrint('Error loading points for $key: $e');
         }
       });
-
-      notifyListeners();
     } catch (e) {
-      debugPrint('Error loading points: $e');
+      debugPrint('Error loading local points: $e');
+    }
+  }
+  
+  /// Lädt Punkte für einen spezifischen Benutzer in einer Gruppe (hybrid)
+  Future<UserPoints?> loadUserPointsHybrid(String userId, String groupId) async {
+    try {
+      final userPoints = await _syncService.getUserPoints(userId, groupId);
+      
+      if (userPoints != null) {
+        final key = '${userId}_$groupId';
+        _userPoints[key] = userPoints;
+        notifyListeners();
+        debugPrint('📥 UserPoints geladen (hybrid): $key');
+      }
+      
+      return userPoints;
+    } catch (e) {
+      debugPrint('❌ Fehler beim Laden der UserPoints für $userId in $groupId: $e');
+      return getUserPoints(userId, groupId);
     }
   }
 
   // Debug-Funktionen
-  void resetAllPoints() {
+  Future<void> resetAllPoints() async {
     _userPoints.clear();
-    savePoints();
+    await savePoints();
     notifyListeners();
   }
 
@@ -307,5 +364,26 @@ class PointsProvider with ChangeNotifier {
     Future.delayed(const Duration(milliseconds: 1000), () {
       awardXP(userId, groupId, XPAction.suggestRestaurant);
     });
+  }
+  
+  /// Manueller Sync mit Cloud erzwingen
+  Future<void> forceSyncToCloud() async {
+    try {
+      await _syncService.forceSyncToCloud();
+      debugPrint('✅ Punkte erfolgreich in Cloud synchronisiert');
+    } catch (e) {
+      debugPrint('❌ Cloud-Sync fehlgeschlagen: $e');
+      rethrow;
+    }
+  }
+  
+  /// Sync-Status Stream für UI-Updates
+  Stream<SyncStatus> get syncStatusStream => _syncService.statusStream;
+  
+  /// Cleanup beim Provider-Dispose
+  @override
+  void dispose() {
+    // SyncService wird global verwendet, nicht hier disposed
+    super.dispose();
   }
 }

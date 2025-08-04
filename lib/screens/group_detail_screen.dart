@@ -26,9 +26,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future.microtask(() async {
       if (mounted) {
-        Provider.of<EventProvider>(context, listen: false)
+        await Provider.of<EventProvider>(context, listen: false)
             .generateEventForGroup(widget.group.id);
       }
     });

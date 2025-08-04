@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/points_provider.dart';
 import '../models/group.dart';
 import '../widgets/user_profile_card.dart';
+import '../widgets/sync_status_indicator.dart';
 import '../l10n/app_localizations.dart';
 import 'chat_screen.dart';
 import 'calendar_screen.dart';
@@ -153,6 +154,12 @@ class _GroupTabScreenState extends State<GroupTabScreen>
               ],
             ),
             actions: [
+              // Sync Status Indicator
+              const Padding(
+                padding: EdgeInsets.only(right: 8),
+                child: SyncStatusIndicator(showLabel: false, iconSize: 16),
+              ),
+              
               // User Profile Mini-Card (ähnlich wie in event_screen.dart)
               if (userPoints != null)
                 Padding(

@@ -99,8 +99,8 @@ class _EventScreenState extends State<EventScreen> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      eventProvider.generateEventForGroup(activeGroup.id);
+                    onPressed: () async {
+                      await eventProvider.generateEventForGroup(activeGroup.id);
                     },
                     icon: const Icon(Icons.add_circle),
                     label: Text(
@@ -659,7 +659,7 @@ class _EventScreenState extends State<EventScreen> {
 
     try {
       // Setze Teilnahme
-      eventProvider.setParticipation(groupId, userId, choice);
+      await eventProvider.setParticipation(groupId, userId, choice);
 
       // Vergib XP bei Zusage
       if (choice == 'yes') {

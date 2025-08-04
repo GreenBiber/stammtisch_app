@@ -14,6 +14,7 @@ import 'providers/restaurant_provider.dart';
 import 'providers/notification_provider.dart';
 // import 'providers/chat_provider.dart';
 import 'services/firebase_service.dart';
+import 'services/sync_service.dart';
 import 'screens/auth/auth_wrapper.dart';
 
 // Background message handler (must be top-level function)
@@ -67,6 +68,14 @@ void main() async {
       debugPrint('❌ Firebase initialization failed: $e');
     }
     // Continue without Firebase for now
+  }
+
+  // Initialize SyncService first
+  try {
+    await SyncService().initialize();
+    debugPrint('✅ SyncService initialized successfully');
+  } catch (e) {
+    debugPrint('⚠️ SyncService initialization failed: $e');
   }
 
   // Initialize providers

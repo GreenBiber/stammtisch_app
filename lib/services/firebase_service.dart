@@ -117,7 +117,7 @@ class FirebaseService {
     try {
       final querySnapshot = await _firestore
           .collection('groups')
-          .where('memberIds', arrayContains: userId)
+          .where('members', arrayContains: userId)
           .get();
 
       return querySnapshot.docs
@@ -245,7 +245,7 @@ class FirebaseService {
   Future<void> addUserToGroup(String userId, String groupId) async {
     try {
       await _firestore.collection('groups').doc(groupId).update({
-        'memberIds': FieldValue.arrayUnion([userId])
+        'members': FieldValue.arrayUnion([userId])
       });
     } catch (e) {
       throw Exception('Benutzer konnte nicht zur Gruppe hinzugefügt werden: $e');

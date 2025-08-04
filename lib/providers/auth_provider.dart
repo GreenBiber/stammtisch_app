@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../models/user.dart';
+import '../services/sync_service.dart';
+import '../services/firebase_service.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated }
 
@@ -11,6 +13,8 @@ class AuthProvider with ChangeNotifier {
   final Uuid _uuid = const Uuid();
   final Map<String, int> _failedLoginAttempts = {};
   final Map<String, DateTime> _lockoutUntil = {};
+  final SyncService _syncService = SyncService();
+  final FirebaseService _firebaseService = FirebaseService();
 
   AuthStatus _status = AuthStatus.initial;
   User? _currentUser;
@@ -28,6 +32,20 @@ class AuthProvider with ChangeNotifier {
   Future<void> initialize() async {
     _setStatus(AuthStatus.loading);
     try {
+      // Initialize SyncService first
+      await _syncService.initialize();
+      
+      // Check for Firebase user first (priority)
+      if (_firebaseService.currentFirebaseUser != null) {
+        final firebaseUser = await _syncService.getUser(_firebaseService.currentUserId!);
+        if (firebaseUser != null) {
+          _currentUser = firebaseUser;
+          _setStatus(AuthStatus.authenticated);
+          return;
+        }
+      }
+      
+      // Fallback to local stored user
       await _loadStoredUser();
       if (_currentUser != null) {
         _setStatus(AuthStatus.authenticated);
@@ -70,7 +88,27 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
-      // Prüfe ob E-Mail bereits existiert
+      // Try Firebase registration first if available
+      if (_syncService.status == SyncStatus.online) {
+        try {
+          final firebaseUser = await _firebaseService.createUserWithEmailAndPassword(
+            email.trim().toLowerCase(),
+            password,
+            displayName.trim(),
+          );
+          if (firebaseUser != null) {
+            _currentUser = firebaseUser;
+            await _saveUserLocally(_currentUser!, password); // Cache locally
+            _setStatus(AuthStatus.authenticated);
+            return true;
+          }
+        } catch (e) {
+          print('Firebase registration failed, falling back to local: $e');
+        }
+      }
+
+      // Fallback to local registration
+      // Prüfe ob E-Mail bereits existiert (lokal)
       if (await _emailExists(email)) {
         _setError('E-Mail-Adresse bereits registriert');
         _setStatus(AuthStatus.unauthenticated);
@@ -86,8 +124,9 @@ class AuthProvider with ChangeNotifier {
         lastLoginAt: DateTime.now(),
       );
 
-      // Speichere User mit gehashtem Passwort
-      await _saveUser(user, password);
+      // Speichere User hybrid (lokal + queue für Cloud)
+      await _syncService.saveUser(user);
+      await _saveUserLocally(user, password);
       _currentUser = user;
       _setStatus(AuthStatus.authenticated);
 
@@ -123,12 +162,34 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
+      // Try Firebase login first if available
+      if (_syncService.status == SyncStatus.online) {
+        try {
+          final firebaseUser = await _firebaseService.signInWithEmailAndPassword(
+            normalizedEmail,
+            password,
+          );
+          if (firebaseUser != null) {
+            _currentUser = firebaseUser.copyWith(lastLoginAt: DateTime.now());
+            await _syncService.saveUser(_currentUser!); // Update last login
+            await _saveCurrentUserLocally(); // Cache locally
+            _clearFailedLogins(normalizedEmail);
+            _setStatus(AuthStatus.authenticated);
+            return true;
+          }
+        } catch (e) {
+          print('Firebase login failed, trying local: $e');
+        }
+      }
+
+      // Fallback to local login
       // Lade gespeicherte Credentials
       final prefs = await SharedPreferences.getInstance();
       final usersJson = prefs.getString('users') ?? '{}';
       final users = Map<String, dynamic>.from(json.decode(usersJson));
 
       if (!users.containsKey(normalizedEmail)) {
+        _recordFailedLogin(normalizedEmail);
         _setError('E-Mail-Adresse nicht gefunden');
         _setStatus(AuthStatus.unauthenticated);
         return false;
@@ -154,10 +215,9 @@ class AuthProvider with ChangeNotifier {
         lastLoginAt: DateTime.now(),
       );
 
-      // Speichere aktualisierte Login-Zeit
-      userData['user'] = user.toJson();
-      users[normalizedEmail] = userData;
-      await prefs.setString('users', json.encode(users));
+      // Speichere aktualisierte Login-Zeit hybrid
+      await _syncService.saveUser(user);
+      await _saveUserLocally(user, password);
       await prefs.setString('currentUser', json.encode(user.toJson()));
 
       _currentUser = user;
@@ -175,6 +235,16 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     _setStatus(AuthStatus.loading);
     try {
+      // Sign out from Firebase if available
+      if (_syncService.status == SyncStatus.online) {
+        try {
+          await _firebaseService.signOut();
+        } catch (e) {
+          print('Firebase signout failed: $e');
+        }
+      }
+      
+      // Clear local session
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('currentUser');
       _currentUser = null;
@@ -217,6 +287,31 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _setError('Profil-Update fehlgeschlagen: $e');
       return false;
+    }
+  }
+
+  // Hybrid Storage Helper Methods
+  Future<void> _saveUserLocally(User user, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    final salt = _generateSalt();
+    final passwordHash = _hashPassword(password, salt);
+
+    final usersJson = prefs.getString('users') ?? '{}';
+    final users = Map<String, dynamic>.from(json.decode(usersJson));
+
+    users[user.email] = {
+      'user': user.toJson(),
+      'passwordHash': passwordHash,
+      'salt': salt,
+    };
+
+    await prefs.setString('users', json.encode(users));
+  }
+
+  Future<void> _saveCurrentUserLocally() async {
+    if (_currentUser != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('currentUser', json.encode(_currentUser!.toJson()));
     }
   }
 

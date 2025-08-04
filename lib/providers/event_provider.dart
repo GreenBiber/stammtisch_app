@@ -3,13 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/event.dart';
+import '../services/sync_service.dart';
 
 class EventProvider with ChangeNotifier {
   final Map<String, Event> _events = {};
+  final SyncService _syncService = SyncService();
+  
+  /// Zeigt an, ob Events mit der Cloud synchronisiert werden
+  bool get isCloudSynced => _syncService.status == SyncStatus.online;
+  
+  /// Aktueller Sync-Status
+  SyncStatus get syncStatus => _syncService.status;
 
   Event? getEventForGroup(String groupId) => _events[groupId];
 
-  void generateEventForGroup(String groupId) {
+  Future<void> generateEventForGroup(String groupId) async {
     final now = DateTime.now();
     final firstTuesday = _nextFirstTuesday(now);
     final existing = _events[groupId];
@@ -27,18 +35,20 @@ class EventProvider with ChangeNotifier {
     );
 
     _events[groupId] = newEvent;
-    saveEvents();
+    
+    // Hybrid-Speicherung: Lokal + Cloud
+    await _saveEventHybrid(newEvent, '${groupId}_${firstTuesday.year}_${firstTuesday.month}');
     notifyListeners();
   }
 
-  void setParticipation(String groupId, String userId, String choice) {
+  Future<void> setParticipation(String groupId, String userId, String choice) async {
     final event = _events[groupId];
     if (event != null) {
       final previousChoice = event.participation[userId];
       event.participation[userId] = choice;
       
-      // Trigger callback for XP processing (will be handled in UI)
-      saveEvents();
+      // Hybrid-Speicherung: Lokal + Cloud
+      await _saveEventHybrid(event, '${groupId}_${event.date.year}_${event.date.month}');
       notifyListeners();
       
       // Debug info
@@ -47,20 +57,20 @@ class EventProvider with ChangeNotifier {
   }
 
   // Remove participation (when user leaves group)
-  void removeUserParticipation(String groupId, String userId) {
+  Future<void> removeUserParticipation(String groupId, String userId) async {
     final event = _events[groupId];
     if (event != null && event.participation.containsKey(userId)) {
       event.participation.remove(userId);
-      saveEvents();
+      await _saveEventHybrid(event, '${groupId}_${event.date.year}_${event.date.month}');
       notifyListeners();
     }
   }
 
   // Remove all events for a group (when group is deleted)
-  void removeEventsForGroup(String groupId) {
+  Future<void> removeEventsForGroup(String groupId) async {
     if (_events.containsKey(groupId)) {
       _events.remove(groupId);
-      saveEvents();
+      await saveEvents();
       notifyListeners();
     }
   }
@@ -87,15 +97,15 @@ class EventProvider with ChangeNotifier {
   }
 
   // Force regenerate event for group (admin function)
-  void regenerateEventForGroup(String groupId) {
+  Future<void> regenerateEventForGroup(String groupId) async {
     if (_events.containsKey(groupId)) {
       _events.remove(groupId);
     }
-    generateEventForGroup(groupId);
+    await generateEventForGroup(groupId);
   }
 
   // Update event date (admin function)
-  void updateEventDate(String groupId, DateTime newDate) {
+  Future<void> updateEventDate(String groupId, DateTime newDate) async {
     final event = _events[groupId];
     if (event != null) {
       final updatedEvent = Event(
@@ -104,7 +114,7 @@ class EventProvider with ChangeNotifier {
         participation: event.participation,
       );
       _events[groupId] = updatedEvent;
-      saveEvents();
+      await _saveEventHybrid(updatedEvent, '${groupId}_${newDate.year}_${newDate.month}');
       notifyListeners();
     }
   }
@@ -136,7 +146,26 @@ class EventProvider with ChangeNotifier {
     }
   }
 
+  /// Lädt Events hybrid (Cloud + lokaler Fallback)
   Future<void> loadEvents() async {
+    try {
+      await _syncService.initialize();
+      
+      // Events für alle bekannten Gruppen laden
+      // Da wir nicht alle Gruppen kennen, laden wir zuerst lokal
+      await _loadEventsLocal();
+      
+      debugPrint('📥 Events geladen: ${_events.length} Events');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading events: $e');
+      // Fallback zu alter Methode
+      await _loadEventsLocal();
+    }
+  }
+  
+  /// Lädt Events aus lokaler Speicherung (Legacy-Fallback)
+  Future<void> _loadEventsLocal() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final jsonString = prefs.getString('events');
@@ -151,10 +180,8 @@ class EventProvider with ChangeNotifier {
           debugPrint('Error loading event for group $key: $e');
         }
       });
-
-      notifyListeners();
     } catch (e) {
-      debugPrint('Error loading events: $e');
+      debugPrint('Error loading local events: $e');
     }
   }
 
@@ -175,5 +202,55 @@ class EventProvider with ChangeNotifier {
       }
     }
     return count;
+  }
+  
+  /// Manueller Sync mit Cloud erzwingen
+  Future<void> forceSyncToCloud() async {
+    try {
+      await _syncService.forceSyncToCloud();
+      debugPrint('✅ Events erfolgreich in Cloud synchronisiert');
+    } catch (e) {
+      debugPrint('❌ Cloud-Sync fehlgeschlagen: $e');
+      rethrow;
+    }
+  }
+  
+  /// Sync-Status Stream für UI-Updates
+  Stream<SyncStatus> get syncStatusStream => _syncService.statusStream;
+  
+  /// Cleanup beim Provider-Dispose
+  @override
+  void dispose() {
+    // SyncService wird global verwendet, nicht hier disposed
+    super.dispose();
+  }
+
+  /// Speichert ein Event hybrid (lokal + Cloud via SyncService)
+  Future<void> _saveEventHybrid(Event event, String eventId) async {
+    try {
+      await _syncService.saveEvent(event, eventId: eventId);
+      debugPrint('✅ Event gespeichert (hybrid): $eventId');
+    } catch (e) {
+      debugPrint('❌ Hybrid Event-Speicherung fehlgeschlagen: $e');
+      // Fallback: Nur lokal speichern
+      await saveEvents();
+    }
+  }
+
+  /// Lädt Events für eine spezifische Gruppe (hybrid)
+  Future<void> loadEventsForGroup(String groupId) async {
+    try {
+      final groupEvents = await _syncService.getGroupEvents(groupId);
+      
+      // Events in lokalen Cache laden
+      for (final event in groupEvents) {
+        _events[event.groupId] = event;
+      }
+      
+      notifyListeners();
+      debugPrint('📥 Events für Gruppe $groupId geladen: ${groupEvents.length} Events');
+    } catch (e) {
+      debugPrint('❌ Fehler beim Laden der Events für Gruppe $groupId: $e');
+    }
   }
 }
