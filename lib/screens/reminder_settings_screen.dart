@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/group_provider.dart';
+import '../providers/notification_provider.dart';
 
 class ReminderSettingsScreen extends StatefulWidget {
   const ReminderSettingsScreen({super.key});
@@ -12,43 +13,12 @@ class ReminderSettingsScreen extends StatefulWidget {
 }
 
 class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
-  bool _eventReminders = true;
-  bool _chatNotifications = true;
-  bool _weeklyDigest = false;
-  
-  // Reminder timing options
-  int _eventReminderTime = 24; // hours before event
-  int _dailyReminderTime = 18; // hour of day (6 PM)
-
   final List<int> _reminderTimeOptions = [1, 2, 6, 12, 24, 48]; // hours
   final List<int> _dailyTimeOptions = [8, 10, 12, 14, 16, 18, 20]; // hours
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
-  }
-
-  void _loadSettings() {
-    // In a real app, load these from SharedPreferences or user profile
-    // For now, using default values
-    setState(() {
-      _eventReminders = true;
-      _chatNotifications = true;
-      _weeklyDigest = false;
-      _eventReminderTime = 24;
-      _dailyReminderTime = 18;
-    });
-  }
-
-  void _saveSettings() {
-    // In a real app, save to SharedPreferences or user profile
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.settingsSaved),
-        backgroundColor: Colors.green,
-      ),
-    );
   }
 
   String _formatReminderTime(int hours) {
@@ -71,8 +41,8 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     
-    return Consumer2<AuthProvider, GroupProvider>(
-      builder: (context, authProvider, groupProvider, child) {
+    return Consumer3<AuthProvider, GroupProvider, NotificationProvider>(
+      builder: (context, authProvider, groupProvider, notificationProvider, child) {
         final activeGroup = groupProvider.getActiveGroup(context);
         final currentUser = authProvider.currentUser;
         
@@ -128,23 +98,20 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                     SwitchListTile(
                       title: Text(l10n.eventReminders),
                       subtitle: Text(l10n.eventRemindersDescription),
-                      value: _eventReminders,
+                      value: notificationProvider.eventReminders,
                       onChanged: (bool value) {
-                        setState(() {
-                          _eventReminders = value;
-                        });
-                        _saveSettings();
+                        notificationProvider.toggleEventReminders(value);
                       },
                       secondary: const Icon(Icons.event),
                     ),
                     
-                    if (_eventReminders) ...[
+                    if (notificationProvider.eventReminders) ...[
                       const Divider(height: 1),
                       ListTile(
                         title: Text(l10n.reminderTiming),
-                        subtitle: Text(_formatReminderTime(_eventReminderTime)),
+                        subtitle: Text(_formatReminderTime(notificationProvider.eventReminderTime)),
                         trailing: const Icon(Icons.access_time),
-                        onTap: () => _showReminderTimeDialog(),
+                        onTap: () => _showReminderTimeDialog(notificationProvider),
                       ),
                     ],
                   ],
@@ -158,12 +125,9 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                 child: SwitchListTile(
                   title: Text(l10n.chatNotifications),
                   subtitle: Text(l10n.chatNotificationsDescription),
-                  value: _chatNotifications,
+                  value: notificationProvider.chatNotifications,
                   onChanged: (bool value) {
-                    setState(() {
-                      _chatNotifications = value;
-                    });
-                    _saveSettings();
+                    notificationProvider.toggleChatNotifications(value);
                   },
                   secondary: const Icon(Icons.chat),
                 ),
@@ -178,23 +142,20 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                     SwitchListTile(
                       title: Text(l10n.weeklyDigest),
                       subtitle: Text(l10n.weeklyDigestDescription),
-                      value: _weeklyDigest,
+                      value: notificationProvider.weeklyDigest,
                       onChanged: (bool value) {
-                        setState(() {
-                          _weeklyDigest = value;
-                        });
-                        _saveSettings();
+                        notificationProvider.toggleWeeklyDigest(value);
                       },
                       secondary: const Icon(Icons.email),
                     ),
                     
-                    if (_weeklyDigest) ...[
+                    if (notificationProvider.weeklyDigest) ...[
                       const Divider(height: 1),
                       ListTile(
                         title: Text(l10n.digestTime),
-                        subtitle: Text('${l10n.sundayAt} ${_formatDailyTime(_dailyReminderTime)}'),
+                        subtitle: Text('${l10n.sundayAt} ${_formatDailyTime(notificationProvider.dailyReminderTime)}'),
                         trailing: const Icon(Icons.schedule),
-                        onTap: () => _showDailyTimeDialog(),
+                        onTap: () => _showDailyTimeDialog(notificationProvider),
                       ),
                     ],
                   ],
@@ -210,7 +171,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
                   subtitle: Text(l10n.testNotificationDescription),
                   leading: const Icon(Icons.notifications_outlined),
                   trailing: const Icon(Icons.play_arrow),
-                  onTap: () => _sendTestNotification(),
+                  onTap: () => notificationProvider.sendTestNotification(),
                 ),
               ),
               
@@ -258,7 +219,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
     );
   }
 
-  void _showReminderTimeDialog() {
+  void _showReminderTimeDialog(NotificationProvider notificationProvider) {
     final l10n = AppLocalizations.of(context)!;
     
     showDialog(
@@ -271,13 +232,10 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
             return RadioListTile<int>(
               title: Text(_formatReminderTime(hours)),
               value: hours,
-              groupValue: _eventReminderTime,
+              groupValue: notificationProvider.eventReminderTime,
               onChanged: (int? value) {
                 if (value != null) {
-                  setState(() {
-                    _eventReminderTime = value;
-                  });
-                  _saveSettings();
+                  notificationProvider.setEventReminderTime(value);
                   Navigator.of(context).pop();
                 }
               },
@@ -294,7 +252,7 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
     );
   }
 
-  void _showDailyTimeDialog() {
+  void _showDailyTimeDialog(NotificationProvider notificationProvider) {
     final l10n = AppLocalizations.of(context)!;
     
     showDialog(
@@ -307,13 +265,10 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
             return RadioListTile<int>(
               title: Text(_formatDailyTime(hour)),
               value: hour,
-              groupValue: _dailyReminderTime,
+              groupValue: notificationProvider.dailyReminderTime,
               onChanged: (int? value) {
                 if (value != null) {
-                  setState(() {
-                    _dailyReminderTime = value;
-                  });
-                  _saveSettings();
+                  notificationProvider.setDailyReminderTime(value);
                   Navigator.of(context).pop();
                 }
               },
@@ -330,25 +285,4 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
     );
   }
 
-  void _sendTestNotification() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    // Simulate sending a test notification
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.notifications, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(child: Text(l10n.testNotificationSent)),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-    
-    // In a real app, this would trigger an actual notification
-    // using firebase_messaging or local_notifications
-  }
 }

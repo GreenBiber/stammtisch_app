@@ -50,5 +50,16 @@
 		<string>de</string>
 		<string>en</string>
 	</array>
+	<!-- Firebase Push Notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>background-fetch</string>
+	</array>
+	<!-- Location permissions for location-based notifications -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Diese App verwendet deinen Standort für standortbasierte Benachrichtigungen und Restaurant-Vorschläge.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Diese App verwendet deinen Standort für standortbasierte Benachrichtigungen und Restaurant-Vorschläge.</string>
 </dict>
 </plist>

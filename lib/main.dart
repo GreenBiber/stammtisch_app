@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'l10n/l10n.dart';
@@ -10,10 +11,17 @@ import 'providers/event_provider.dart';
 import 'providers/points_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/restaurant_provider.dart';
+import 'providers/notification_provider.dart';
 // import 'providers/chat_provider.dart';
 import 'services/firebase_service.dart';
-// import 'services/notification_service.dart';
 import 'screens/auth/auth_wrapper.dart';
+
+// Background message handler (must be top-level function)
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('📱 Background message received: ${message.notification?.title}');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +52,9 @@ void main() async {
     
     // Initialize Firebase Service
     await FirebaseService().initialize();
+    
+    // Setup background message handler for Firebase Messaging
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   } catch (e) {
     // Check for specific duplicate app error
     if (e.toString().contains('duplicate-app') || e.toString().contains('already exists')) {
@@ -67,11 +78,22 @@ void main() async {
   final pointsProvider = PointsProvider();
   final localeProvider = LocaleProvider();
   final restaurantProvider = RestaurantProvider();
+  final notificationProvider = NotificationProvider();
   // final chatProvider = ChatProvider(); // Temporarily disabled
 
   // Initialize providers
   await authProvider.initialize();
   await localeProvider.initialize();
+  
+  // Initialize notification provider with error handling
+  try {
+    await notificationProvider.initialize();
+    print('✅ Notification Provider initialized successfully');
+  } catch (e) {
+    print('⚠️ Notification Provider initialization failed: $e');
+    print('ℹ️ App will continue without push notifications');
+    // Continue app execution even if notifications fail
+  }
 
   // Load other data
   await groupProvider.loadGroups();
@@ -89,6 +111,8 @@ void main() async {
         ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
         ChangeNotifierProvider<RestaurantProvider>.value(
             value: restaurantProvider),
+        ChangeNotifierProvider<NotificationProvider>.value(
+            value: notificationProvider),
         // ChangeNotifierProvider<ChatProvider>.value(value: chatProvider), // Temporarily disabled
       ],
       child: const StammtischApp(),
