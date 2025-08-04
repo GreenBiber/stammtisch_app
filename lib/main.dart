@@ -20,7 +20,7 @@ import 'screens/auth/auth_wrapper.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print('📱 Background message received: ${message.notification?.title}');
+  debugPrint('📱 Background message received: ${message.notification?.title}');
 }
 
 void main() async {
@@ -29,11 +29,11 @@ void main() async {
   // Load environment variables from root directory (with error handling)
   try {
     await dotenv.load(fileName: ".env");
-    print('✅ Environment variables loaded successfully');
+    debugPrint('✅ Environment variables loaded successfully');
   } catch (e) {
-    print(
+    debugPrint(
         '⚠️ Warning: .env file not found or could not be loaded. Using default values.');
-    print('Error details: $e');
+    debugPrint('Error details: $e');
     // Initialize dotenv with empty content to prevent NotInitializedError
     dotenv.testLoad(fileInput: '');
   }
@@ -45,9 +45,8 @@ void main() async {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      print('✅ Firebase initialized successfully');
+      debugPrint('✅ Firebase initialized successfully');
     } else {
-      print('✅ Firebase already initialized, skipping');
     }
     
     // Initialize Firebase Service
@@ -58,15 +57,14 @@ void main() async {
   } catch (e) {
     // Check for specific duplicate app error
     if (e.toString().contains('duplicate-app') || e.toString().contains('already exists')) {
-      print('✅ Firebase already initialized, continuing...');
       // Try to initialize Firebase Service anyway
       try {
         await FirebaseService().initialize();
       } catch (serviceError) {
-        print('⚠️ Firebase Service initialization skipped: $serviceError');
+        debugPrint('⚠️ Firebase Service initialization skipped: $serviceError');
       }
     } else {
-      print('❌ Firebase initialization failed: $e');
+      debugPrint('❌ Firebase initialization failed: $e');
     }
     // Continue without Firebase for now
   }
@@ -88,10 +86,10 @@ void main() async {
   // Initialize notification provider with error handling
   try {
     await notificationProvider.initialize();
-    print('✅ Notification Provider initialized successfully');
+    debugPrint('✅ Notification Provider initialized successfully');
   } catch (e) {
-    print('⚠️ Notification Provider initialization failed: $e');
-    print('ℹ️ App will continue without push notifications');
+    debugPrint('⚠️ Notification Provider initialization failed: $e');
+    debugPrint('ℹ️ App will continue without push notifications');
     // Continue app execution even if notifications fail
   }
 

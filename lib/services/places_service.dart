@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,13 +109,13 @@ class PlacesService {
       
       // Basic format validation for Google API keys
       if (!_isValidApiKeyFormat(key)) {
-        print('Warning: API key has invalid format');
+        debugPrint('Warning: API key has invalid format');
         return '';
       }
       
       return key;
     } catch (e) {
-      print('Warning: dotenv not properly initialized - $e');
+      debugPrint('Warning: dotenv not properly initialized - $e');
       return '';
     }
   }
@@ -199,7 +200,7 @@ class PlacesService {
       return status;
       
     } catch (e) {
-      print('API key validation failed: $e');
+      debugPrint('API key validation failed: $e');
       return ApiKeyStatus.invalid;
     }
   }
@@ -239,7 +240,6 @@ class PlacesService {
     final url = Uri.parse('$_baseUrl:searchNearby');
 
     // Debug: Print actual coordinates being used
-    print('🔍 Searching restaurants at coordinates: lat=$latitude, lng=$longitude, radius=${radius}m');
     
     final requestBody = {
       'includedTypes': [type],
@@ -319,7 +319,6 @@ class PlacesService {
 
   Restaurant _convertNewApiResponse(Map<String, dynamic> place) {
     final photoRef = place['photos']?[0]?['name'];
-    print('📸 Photo reference for ${place['displayName']?['text']}: $photoRef');
     
     return Restaurant(
       id: place['id'] ?? '',

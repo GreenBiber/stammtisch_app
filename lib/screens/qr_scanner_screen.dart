@@ -187,8 +187,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       // Extract group ID from invite link
       final uri = Uri.parse(_scannedData!);
       if (uri.host == 'stammtisch-app.com' && uri.pathSegments.length >= 2) {
-        final groupId = uri.pathSegments.last;
-        
         // Join the group
         final groupProvider = Provider.of<GroupProvider>(context, listen: false);
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -196,6 +194,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
         if (currentUser != null) {
           // In a real app, this would make an API call to join the group
+          if (!mounted) return;
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n?.joiningGroup ?? 'Gruppe wird beigetreten...'),
@@ -216,6 +216,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             );
           }
         } else {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n?.loginRequired ?? 'Anmeldung erforderlich'),
@@ -224,6 +225,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           );
         }
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n?.invalidQRCode ?? 'Ungültiger QR-Code'),
@@ -232,6 +234,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n?.invalidQRCode ?? 'Ungültiger QR-Code'),

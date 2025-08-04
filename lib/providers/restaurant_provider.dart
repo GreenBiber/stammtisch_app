@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../services/places_service.dart';
 import '../services/weather_service.dart';
@@ -69,7 +70,7 @@ class RestaurantProvider with ChangeNotifier {
     try {
       return placesService.hasValidApiKey;
     } catch (e) {
-      print('⚠️ Error checking API key: $e');
+      debugPrint('⚠️ Error checking API key: $e');
       return false;
     }
   }
@@ -78,7 +79,7 @@ class RestaurantProvider with ChangeNotifier {
     try {
       return await placesService.validateApiKey();
     } catch (e) {
-      print('⚠️ Error validating API key: $e');
+      debugPrint('⚠️ Error validating API key: $e');
       return ApiKeyStatus.invalid;
     }
   }
@@ -97,7 +98,7 @@ class RestaurantProvider with ChangeNotifier {
       try {
         await _updateQuotaStatus();
       } catch (quotaError) {
-        print('⚠️ Error updating quota status: $quotaError');
+        debugPrint('⚠️ Error updating quota status: $quotaError');
         _hasApiQuota = false;
         _remainingQuota = 0;
       }
@@ -113,20 +114,19 @@ class RestaurantProvider with ChangeNotifier {
             locationData = result.locationData!;
             latitude = locationData.latitude;
             longitude = locationData.longitude;
-            print('📍 Location obtained: $latitude, $longitude');
             
             // Validate coordinates but don't use fallback location
             if (latitude < 47.0 || latitude > 55.0 || longitude < 5.0 || longitude > 15.0) {
-              print('⚠️ GPS coordinates seem incorrect: $latitude, $longitude');
-              print('📍 Ignoring invalid coordinates - no location available');
+              debugPrint('⚠️ GPS coordinates seem incorrect: $latitude, $longitude');
+              debugPrint('📍 Ignoring invalid coordinates - no location available');
               latitude = null;
               longitude = null;
             }
           } else {
-            print('📍 Location not available: ${result.message}');
+            debugPrint('📍 Location not available: ${result.message}');
           }
         } catch (locationError) {
-          print('⚠️ Location Error: $locationError');
+          debugPrint('⚠️ Location Error: $locationError');
         }
       }
 
@@ -139,9 +139,8 @@ class RestaurantProvider with ChangeNotifier {
           );
           _weatherRecommendation =
               weatherService.getWeatherBasedRecommendation(_currentWeather);
-          print('🌤️ Weather loaded: $_weatherRecommendation');
         } catch (weatherError) {
-          print('⚠️ Weather API Error: $weatherError');
+          debugPrint('⚠️ Weather API Error: $weatherError');
         }
       }
 
@@ -151,13 +150,10 @@ class RestaurantProvider with ChangeNotifier {
           longitude != null) {
         try {
           // Use Google Places API with weather-based search
-          print('🔍 Loading restaurants from Google Places API...');
-          print('📍 Location: $latitude, $longitude');
 
           // Get weather-based restaurant types
           final restaurantTypes =
               weatherService.getWeatherBasedRestaurantTypes(_currentWeather);
-          print('🌤️ Weather-based search types: $restaurantTypes');
 
           _suggestions = await placesService.searchRestaurants(
             latitude: latitude,
@@ -165,45 +161,44 @@ class RestaurantProvider with ChangeNotifier {
             type: restaurantTypes.first, // Use primary type for API call
           );
 
-          print('✅ Loaded ${_suggestions.length} restaurants from API');
 
           // Update quota after successful request
           await _updateQuotaStatus();
         } on ApiKeyException catch (e) {
-          print('🔑 API Key Error: ${e.message}');
+          debugPrint('🔑 API Key Error: ${e.message}');
           _error = 'API configuration error: ${e.message}';
           _loadFallbackRestaurants();
         } on QuotaExceededException catch (e) {
-          print('📊 Quota Error: ${e.message}');
+          debugPrint('📊 Quota Error: ${e.message}');
           _error = 'Daily quota exceeded. Using saved locations.';
           _hasApiQuota = false;
           _remainingQuota = 0;
           _loadFallbackRestaurants();
         } on NetworkException catch (e) {
-          print('🌐 Network Error: ${e.message}');
+          debugPrint('🌐 Network Error: ${e.message}');
           _error = 'Network error. Using cached locations.';
           _loadFallbackRestaurants();
         } catch (apiError) {
-          print('⚠️ Unexpected API Error, falling back to demo data: $apiError');
+          debugPrint('⚠️ Unexpected API Error, falling back to demo data: $apiError');
           _error = 'Service temporarily unavailable. Using saved locations.';
           _loadFallbackRestaurants();
         }
       } else {
         // No valid API or location available
         if (latitude == null || longitude == null) {
-          print('📍 No location available - showing empty restaurant list');
+          debugPrint('📍 No location available - showing empty restaurant list');
           _suggestions = [];
           _error = 'Location access required to show restaurant suggestions';
         } else {
           // Use fallback data when API is not available but location exists
-          print(
+          debugPrint(
               '📱 Using fallback restaurants (API key: ${hasValidApiKey ? "valid" : "invalid"}, Quota: $_hasApiQuota)');
           _loadFallbackRestaurants();
         }
       }
     } catch (e) {
       _error = e.toString();
-      print('❌ Error loading restaurants: $e');
+      debugPrint('❌ Error loading restaurants: $e');
       // Only use fallback if we have location data
       if (latitude != null && longitude != null) {
         _loadFallbackRestaurants();
@@ -230,7 +225,7 @@ class RestaurantProvider with ChangeNotifier {
     
     _suggestions = selectedFallbacks.map((data) => Restaurant.fromJson(data)).toList();
     
-    print('📱 Loaded ${_suggestions.length} fallback restaurants');
+    debugPrint('📱 Loaded ${_suggestions.length} fallback restaurants');
   }
 
   Future<void> _updateQuotaStatus() async {
@@ -240,7 +235,7 @@ class RestaurantProvider with ChangeNotifier {
       _hasApiQuota = _remainingQuota > 0;
       notifyListeners();
     } catch (e) {
-      print('Error updating quota status: $e');
+      debugPrint('Error updating quota status: $e');
       // Set safe fallback values
       _hasApiQuota = false;
       _remainingQuota = 0;
@@ -258,7 +253,7 @@ class RestaurantProvider with ChangeNotifier {
     try {
       return placesService.getPhotoUrl(photoReference);
     } catch (e) {
-      print('⚠️ Error getting photo URL: $e');
+      debugPrint('⚠️ Error getting photo URL: $e');
       return null;
     }
   }

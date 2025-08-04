@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
 import '../models/user.dart' as app;
 import '../models/group.dart';
 import '../models/event.dart';
@@ -264,9 +265,9 @@ class FirebaseService {
       );
       
       _isInitialized = true;
-      print('🔥 Firebase Service successfully initialized');
+      debugPrint('🔥 Firebase Service successfully initialized');
     } catch (e) {
-      print('❌ Firebase Service initialization failed: $e');
+      debugPrint('❌ Firebase Service initialization failed: $e');
       throw Exception('Firebase konnte nicht initialisiert werden: $e');
     }
   }

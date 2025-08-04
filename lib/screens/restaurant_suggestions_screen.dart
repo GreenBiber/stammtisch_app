@@ -814,6 +814,9 @@ class _RestaurantSuggestionsScreenState
   Future<void> _showLocationSettingsDialog() async {
     final locationService = LocationService();
     final permissionState = await locationService.getPermissionState();
+    
+    if (!mounted) return;
+    
     final l10n = context.l10n;
     
     await showDialog(

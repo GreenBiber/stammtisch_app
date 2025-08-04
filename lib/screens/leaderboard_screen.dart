@@ -238,7 +238,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   }
 
   Widget _buildPodiumPlace(UserPoints userPoints, int place, double height) {
-    final l10n = context.l10n;
     final colors = [Colors.amber, Colors.grey, Colors.orange];
     final icons = ['👑', '🥈', '🥉'];
     
@@ -316,7 +315,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   }
 
   Widget _buildStatsTab(Map<String, dynamic> groupStats, String groupName) {
-    final l10n = context.l10n;
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),

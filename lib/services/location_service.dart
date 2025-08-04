@@ -109,12 +109,12 @@ class LocationService {
 
       // Get current position
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 15),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
+        ),
       );
 
-      print('📍 GPS Position obtained: lat=${position.latitude}, lng=${position.longitude}');
-      print('📍 Accuracy: ${position.accuracy}m, Timestamp: ${position.timestamp}');
 
       final locationData = LocationData(
         latitude: position.latitude,

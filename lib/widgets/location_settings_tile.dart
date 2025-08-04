@@ -49,7 +49,6 @@ class _LocationSettingsTileState extends State<LocationSettingsTile> {
   }
 
   Future<void> _toggleLocationPermission() async {
-    final locationService = LocationService();
     final l10n = AppLocalizations.of(context)!;
 
     if (_permissionState == LocationPermissionState.notAsked ||

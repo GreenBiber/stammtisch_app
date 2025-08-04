@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -58,7 +59,7 @@ class WeatherService {
       return dotenv.env['WEATHER_API_KEY'] ?? '';
     } catch (e) {
       // dotenv not initialized or .env file not found
-      print('Warning: dotenv not properly initialized - $e');
+      debugPrint('Warning: dotenv not properly initialized - $e');
       return '';
     }
   }
@@ -70,7 +71,7 @@ class WeatherService {
     required double longitude,
   }) async {
     if (!hasValidApiKey) {
-      print('⚠️ OpenWeather API key not configured');
+      debugPrint('⚠️ OpenWeather API key not configured');
       return _getFallbackWeather();
     }
 
@@ -90,11 +91,11 @@ class WeatherService {
         final data = json.decode(response.body);
         return WeatherData.fromJson(data);
       } else {
-        print('⚠️ Weather API Error: ${response.statusCode}');
+        debugPrint('⚠️ Weather API Error: ${response.statusCode}');
         return _getFallbackWeather();
       }
     } catch (e) {
-      print('⚠️ Weather API Network Error: $e');
+      debugPrint('⚠️ Weather API Network Error: $e');
       return _getFallbackWeather();
     }
   }

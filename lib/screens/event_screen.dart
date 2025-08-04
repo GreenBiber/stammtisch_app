@@ -8,7 +8,6 @@ import '../widgets/xp_animation.dart';
 import '../widgets/user_profile_card.dart';
 import '../models/points.dart';
 import '../l10n/l10n.dart';
-import '../l10n/app_localizations.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
